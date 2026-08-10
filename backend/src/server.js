@@ -23,7 +23,8 @@ connectDB();
 // Cria a aplicação Express
 const app = express();
 
-
+// Necessário para o rate limit identificar o IP real do cliente atrás de proxy (Vercel, etc.)
+app.set("trust proxy", 1);
 
 // Configuração do CORS
 /*app.use(cors({
