@@ -1,8 +1,6 @@
 import express from "express";
-
 import DoacoesController from "../controllers/doacoesController.js";
-
-import { protect } from "../middlewares/authMiddleware.js";
+import { authorize, protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 

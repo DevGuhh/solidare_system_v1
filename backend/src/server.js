@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { config } from "dotenv";
 import { connectDB, disconnectDB } from "./config/db.js";
+import rateLimit from "express-rate-limit";
 
 // Importando Rotas
 import authRoutes from "./routes/authRoutes.js";
@@ -21,6 +22,8 @@ connectDB();
 
 // Cria a aplicação Express
 const app = express();
+
+
 
 // Configuração do CORS
 /*app.use(cors({
