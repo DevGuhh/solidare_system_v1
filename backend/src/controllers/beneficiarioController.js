@@ -265,17 +265,23 @@ class BeneficiarioController {
       // Garante que o status seja booleano.
       if (typeof ativo !== "boolean") {
         return res.status(400).json({
-          error: "Status deve ser true ou false",
+          error: "O campo ativa deve ser true ou false.",
         });
       }
 
-      // Atualiza apenas o campo ativo.
-      const beneficiarioAtualizado = await prisma.beneficiario.update({
-        where: { id },
-        data: { ativo },
-      });
+      const instituicaoAtualizada = await prisma.$transaction(async (tx) => {
+        const atualizada = await tx.instituicaoParceira.update({
+          where: { id },
+          data: { ativa },
+        });
 
-      return res.status(200).json(beneficiarioAtualizado);
+        await tx.beneficiario.updateMany({
+          where: { instituicaoId: id },
+          data: { ativo: ativa },
+        });
+
+        return atualizada;
+      });
     } catch (error) {
       if (error instanceof ZodError) {
         return res.status(400).json({

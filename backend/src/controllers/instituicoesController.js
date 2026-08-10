@@ -406,14 +406,12 @@ class InstituicaoController {
       const data = atualizarInstituicaoSchema.parse(req.body);
       const { ativa } = data;
 
-      // O endpoint PATCH /instituicoes/:id altera apenas a situação ativa/inativa.
       if (typeof ativa !== "boolean") {
         return res.status(400).json({
           error: "O campo ativa deve ser true ou false.",
         });
       }
 
-      // Mantém a instituição e o usuário vinculado com a mesma situação.
       const instituicaoAtualizada = await prisma.$transaction(async (tx) => {
         const atualizada = await tx.instituicaoParceira.update({
           where: { id },
