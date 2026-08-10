@@ -2,10 +2,10 @@ import rateLimit from "express-rate-limit";
 
 // Login: limite mais rígido
 export const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  limit: 5,
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
   message: {
-    error: "Muitas tentativas de login. Tente novamente em 15 minutos.",
+    error: "Muitas tentativas de login. Tente novamente mais tarde.",
   },
   standardHeaders: true,
   legacyHeaders: false,
