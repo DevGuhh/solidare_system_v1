@@ -1,6 +1,11 @@
 import { prisma } from "../config/db.js";
-import { ZodError } from "zod";
+import { string, ZodError } from "zod";
 import { criarBeneficiarioSchema } from "../validators/beneficiarioValidator.js";
+import {
+  registrarEventoHistorico,
+  montarAlteracoesBeneficiario,
+  descreverAlteracoes,
+} from "../services/historicoBeneficiarioService.js";
 
 // Schema usado para validar atualizações parciais do beneficiário.
 const atualizarBeneficiarioSchema = criarBeneficiarioSchema.partial();
@@ -47,6 +52,13 @@ class BeneficiarioController {
           ...data,
           instituicaoId,
         },
+      });
+
+      await registrarEventoHistorico({
+        beneficiarioId: novoBeneficiario.id,
+        tipo: "CADASTRO",
+        descricao: "Beneficiário cadastrado no sistema.",
+        usuarioId: req.user.id,
       });
 
       // Retorna sucesso.
@@ -208,11 +220,23 @@ class BeneficiarioController {
       // Valida os dados enviados.
       const data = atualizarBeneficiarioSchema.parse(req.body);
 
+      const alteracoes = montarAlteracoesBeneficiario(beneficiario, data);
+
       // Atualiza no banco.
       const update = await prisma.beneficiario.update({
         where: { id },
         data,
       });
+
+      if (alteracoes.length > 0) {
+        await registrarEventoHistorico({
+          beneficiarioId: id,
+          tipo: "ATUALIZAÇÃO",
+          descricao: descreverAlteracoes(alteracoes),
+          detalhes: { alteracoes },
+          usuarioId: req.user.id,
+        });
+      }
 
       return res.status(200).json(update);
     } catch (error) {
@@ -243,14 +267,16 @@ class BeneficiarioController {
     }
 
     try {
-      const beneficiario = await prisma.beneficiario.findUnique({
-        where: { id },
-      });
+      const where = { id };
 
       // Instituição só pode alterar status dos próprios beneficiários.
       if (req.user.role !== "ADMIN") {
         where.instituicaoId = req.user.instituicaoId;
       }
+
+      const beneficiario = await prisma.beneficiario.findFirst({
+        where,
+      });
 
       if (!beneficiario) {
         return res.status(404).json({
@@ -275,6 +301,28 @@ class BeneficiarioController {
         data: { ativo },
       });
 
+      // Registra a mudança de status no histórico, se ela realmente ocorreu.
+      if (beneficiario.ativo !== ativo) {
+        await registrarEventoHistorico({
+          beneficiarioId: id,
+          tipo: "ATUALIZACAO",
+          descricao: ativo
+            ? "Beneficiário reativado."
+            : "Beneficiário inativado.",
+          detalhes: {
+            alteracoes: [
+              {
+                campo: "ativo",
+                rotulo: "Status",
+                de: String(beneficiario.ativo),
+                para: String(ativo),
+              },
+            ],
+          },
+          usuarioId: req.user.id,
+        });
+      }
+
       return res.status(200).json(beneficiarioAtualizado);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -294,6 +342,60 @@ class BeneficiarioController {
 
       return res.status(500).json({
         error: "Erro interno do servidor",
+      });
+    }
+  }
+
+  async listarHistoricoDoBeneficiario(req, res) {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "ID inválido.",
+      });
+    }
+
+    try {
+      // Filtro base: aplica a mesma regra de acesso usada na ficha do beneficiário.
+      const where = { id };
+
+      if (req.user.role !== "ADMIN") {
+        where.instituicaoId = req.user.instituicaoId;
+      }
+
+      // Confirma que o beneficiário existe e que o usuário tem acesso a ele.
+      const beneficiario = await prisma.beneficiario.findFirst({
+        where,
+        select: { id: true },
+      });
+
+      if (!beneficiario) {
+        return res.status(404).json({
+          error: "Beneficiário não encontrado.",
+        });
+      }
+
+      // Busca os registros do histórico em ordem cronológica decrescente
+      // (mais recente primeiro).
+      const historico = await prisma.historicoBeneficiario.findMany({
+        where: { beneficiarioId: id },
+        orderBy: { criadoEm: "desc" },
+        include: {
+          usuario: {
+            select: { id: true, nome: true },
+          },
+        },
+      });
+
+      return res.status(200).json(historico);
+    } catch (error) {
+      console.error(
+        `GET /beneficiarios/${req.params.id}/historico error:`,
+        error,
+      );
+
+      return res.status(500).json({
+        error: "Erro ao buscar o histórico do beneficiário.",
       });
     }
   }

@@ -4,6 +4,13 @@ import { startOfMonth, endOfMonth } from "date-fns";
 import { z, ZodError } from "zod";
 import { gerarCodigoDoacao } from "../utils/generateCode.js";
 import { deflate } from "node:zlib";
+import { registrarEventoHistorico } from "../services/historicoBeneficiarioService.js";
+
+const ROTULOS_TIPO_BENEFICIO = {
+  CESTA: "cesta(s)",
+  GRANEL: "item(ns) a granel",
+  AMBOS: "item(ns) (cesta + granel)",
+};
 
 const atualizarDoacaoSchema = criarDoacaoSchema.partial();
 
@@ -127,6 +134,19 @@ class DoacoesController {
           observacoes: data.observacoes,
         },
         include: includeDoacao,
+      });
+
+      await registrarEventoHistorico({
+        beneficiarioId: doacao.beneficiarioId,
+        tipo: "DOAÇÃO",
+        descricao: `Doação recebida: ${doacao.quantidade} ${ROTULOS_TIPO_BENEFICIO[doacao.tipo] ?? "item(ns)"}.`,
+        detalhes: {
+          doacaoId: doacao.id,
+          codigo: doacao.codigo,
+          tipo: doacao.tipo,
+          quantidade: doacao.quantidade,
+        },
+        usuarioId: req.user.id,
       });
 
       return res.status(201).json(doacao);

@@ -22,6 +22,13 @@ router.get(
   authorize("ADMIN", "INSTITUICAO"),
   beneficiarioController.detalheDoBeneficiario,
 );
+router.get(
+  "/:id/historico",
+  protect,
+  authorize("ADMIN", "INSTITUICAO"),
+  beneficiarioController.listarHistoricoDoBeneficiario,
+);
+
 router.put(
   "/:id",
   protect,

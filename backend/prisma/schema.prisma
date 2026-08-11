@@ -21,6 +21,7 @@ model Usuario {
   resetTokenExpiresAt DateTime?
   doacoes             Doacao[]
   instituicao         InstituicaoParceira? @relation(fields: [instituicaoId], references: [id])
+  historicoRegistrado HistoricoBeneficiario[]
 
   @@index([resetTokenHash])
   @@map("usuarios")
@@ -81,10 +82,29 @@ model Beneficiario {
   instituicao            InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
   doacoes                Doacao[]
   qrcodes                QRCode[]
+  historico              HistoricoBeneficiario[]
 
   @@index([instituicaoId])
   @@map("beneficiarios")
 }
+
+model HistoricoBeneficiario {
+  id             Int                    @id @default(autoincrement())
+  beneficiarioId Int
+  tipo           TipoEventoHistorico
+  descricao      String
+  detalhes       Json?
+  usuarioId      Int?
+  criadoEm       DateTime               @default(now())
+
+  beneficiario   Beneficiario           @relation(fields: [beneficiarioId], references: [id])
+  usuario        Usuario?               @relation(fields: [usuarioId], references: [id])
+
+  @@index([beneficiarioId])
+  @@index([beneficiarioId, criadoEm])
+  @@map("historico_beneficiarios")
+}
+
 
 model Doacao {
   id             Int                 @id @default(autoincrement())
@@ -148,4 +168,10 @@ enum TipoBeneficio {
   CESTA
   GRANEL
   AMBOS
+}
+
+enum TipoEventoHistorico {
+  CADASTRO
+  ATUALIZACAO
+  DOACAO
 }
