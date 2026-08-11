@@ -22,6 +22,7 @@ model Usuario {
   doacoes             Doacao[]
   instituicao         InstituicaoParceira? @relation(fields: [instituicaoId], references: [id])
   historicoRegistrado HistoricoBeneficiario[]
+  movimentacoesSaldo MovimentacaoSaldo[]
 
   @@index([resetTokenHash])
   @@map("usuarios")
@@ -50,6 +51,7 @@ model InstituicaoParceira {
   beneficiarios Beneficiario[]
   doacoes       Doacao[]
   usuario       Usuario?
+  saldoCesta SaldoCesta?
 
   @@map("instituicoes_parceiras")
 }
@@ -120,9 +122,12 @@ model Doacao {
   atualizadoEm   DateTime            @updatedAt
   deletedAt      DateTime?
   usuarioId      Int
+  movimentacoesSaldo MovimentacaoSaldo[]
   beneficiario   Beneficiario        @relation(fields: [beneficiarioId], references: [id])
   instituicao    InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
   usuario        Usuario             @relation(fields: [usuarioId], references: [id])
+  
+
 
   @@index([beneficiarioId])
   @@index([instituicaoId])
@@ -146,6 +151,40 @@ model QRCode {
   @@index([ativo])
   @@map("qrcodes")
 }
+
+model SaldoCesta {
+  id            Int      @id @default(autoincrement())
+  instituicaoId Int      @unique
+  saldoAtual    Int      @default(0)
+  atualizadoEm  DateTime @updatedAt
+
+  instituicao   InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
+  movimentacoes MovimentacaoSaldo[]
+
+  @@map("saldos_cesta")
+}
+
+model MovimentacaoSaldo {
+  id             Int                    @id @default(autoincrement())
+  saldoCestaId   Int
+  tipo           TipoMovimentacaoSaldo
+  quantidade     Int
+  saldoAnterior  Int
+  saldoPosterior Int
+  doacaoId       Int?
+  usuarioId      Int
+  observacao     String?
+  criadoEm       DateTime               @default(now())
+
+  saldoCesta SaldoCesta @relation(fields: [saldoCestaId], references: [id])
+  doacao     Doacao?    @relation(fields: [doacaoId], references: [id])
+  usuario    Usuario    @relation(fields: [usuarioId], references: [id])
+
+  @@index([saldoCestaId, criadoEm])
+  @@index([doacaoId])
+  @@map("movimentacoes_saldo")
+}
+
 
 enum RoleUsuario {
   ADMIN
@@ -175,3 +214,10 @@ enum TipoEventoHistorico {
   ATUALIZACAO
   DOACAO
 }
+
+enum TipoMovimentacaoSaldo {
+  ENTRADA
+  SAIDA_DOACAO
+  ESTORNO_DOACAO
+}
+

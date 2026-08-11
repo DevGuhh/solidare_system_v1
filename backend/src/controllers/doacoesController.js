@@ -5,6 +5,13 @@ import { z, ZodError } from "zod";
 import { gerarCodigoDoacao } from "../utils/generateCode.js";
 import { deflate } from "node:zlib";
 import { registrarEventoHistorico } from "../services/historicoBeneficiarioService.js";
+import {
+  afetaSaldoCesta,
+  debitarSaldoParaDoacao,
+  devolverSaldoDeDoacao,
+  ajustarSaldoEdicaoDoacao,
+  SaldoInsuficienteError,
+} from "../services/saldoCestaService.js";
 
 const ROTULOS_TIPO_BENEFICIO = {
   CESTA: "cesta(s)",
@@ -76,7 +83,6 @@ class DoacoesController {
         deletedAt: null,
         ativo: true,
       };
-
       if (req.user.role !== "ADMIN") {
         whereBeneficiario.instituicaoId = req.user.instituicaoId;
       }
@@ -101,17 +107,13 @@ class DoacoesController {
       }
 
       const inicioMes = startOfMonth(new Date());
-
       const fimMes = endOfMonth(new Date());
 
       const doacaoExiste = await prisma.doacao.findFirst({
         where: {
           beneficiarioId: beneficiario.id,
           deletedAt: null,
-          dataDoacao: {
-            gte: inicioMes,
-            lte: fimMes,
-          },
+          dataDoacao: { gte: inicioMes, lte: fimMes },
         },
       });
 
@@ -123,17 +125,30 @@ class DoacoesController {
 
       const codigo = gerarCodigoDoacao();
 
-      const doacao = await prisma.doacao.create({
-        data: {
-          codigo,
-          beneficiarioId: beneficiario.id,
-          instituicaoId: beneficiario.instituicaoId,
-          usuarioId: req.user.id,
-          tipo: data.tipo,
-          quantidade: data.quantidade,
-          observacoes: data.observacoes,
-        },
-        include: includeDoacao,
+      const doacao = await prisma.$transaction(async (tx) => {
+        const novaDoacao = await tx.doacao.create({
+          data: {
+            codigo,
+            beneficiarioId: beneficiario.id,
+            instituicaoId: beneficiario.instituicaoId,
+            usuarioId: req.user.id,
+            tipo: data.tipo,
+            quantidade: data.quantidade,
+            observacoes: data.observacoes,
+          },
+          include: includeDoacao,
+        });
+
+        if (afetaSaldoCesta(data.tipo)) {
+          await debitarSaldoParaDoacao(tx, {
+            instituicaoId: beneficiario.instituicaoId,
+            quantidade: data.quantidade,
+            doacaoId: novaDoacao.id,
+            usuarioId: req.user.id,
+          });
+        }
+
+        return novaDoacao;
       });
 
       await registrarEventoHistorico({
@@ -151,6 +166,10 @@ class DoacoesController {
 
       return res.status(201).json(doacao);
     } catch (error) {
+      if (error instanceof SaldoInsuficienteError) {
+        return res.status(422).json({ error: error.message });
+      }
+
       if (error instanceof ZodError) {
         return res.status(400).json({
           error: "Payload inválido.",
@@ -162,10 +181,9 @@ class DoacoesController {
       }
 
       console.error("POST /doacoes - erro ao cadastrar:", error);
-
-      return res.status(500).json({
-        error: "Erro interno ao cadastrar doação.",
-      });
+      return res
+        .status(500)
+        .json({ error: "Erro interno ao cadastrar doação." });
     }
   }
   async listarDoacoes(req, res) {
@@ -247,24 +265,16 @@ class DoacoesController {
   }
   async atualizarUmaDoacao(req, res) {
     const id = obterIdValido(req.params.id);
-
-    if (!id) {
-      return res.status(400).json({
-        error: "ID inválido.",
-      });
-    }
+    if (!id) return res.status(400).json({ error: "ID inválido." });
 
     try {
       const whereDoacao = montarFiltroAcessoDoacao(req, id);
-
       const doacaoExistente = await prisma.doacao.findFirst({
         where: whereDoacao,
       });
 
       if (!doacaoExistente) {
-        return res.status(404).json({
-          error: "Doação não encontrada.",
-        });
+        return res.status(404).json({ error: "Doação não encontrada." });
       }
 
       const data = atualizarDoacaoSchema.parse(req.body);
@@ -277,17 +287,13 @@ class DoacoesController {
           deletedAt: null,
           ativo: true,
         };
-
         if (req.user.role !== "ADMIN") {
           whereBeneficiario.instituicaoId = req.user.instituicaoId;
         }
 
         const beneficiario = await prisma.beneficiario.findFirst({
           where: whereBeneficiario,
-          select: {
-            id: true,
-            instituicaoId: true,
-          },
+          select: { id: true, instituicaoId: true },
         });
 
         if (!beneficiario) {
@@ -301,20 +307,34 @@ class DoacoesController {
         instituicaoId = beneficiario.instituicaoId;
       }
 
-      const doacaoAtualizada = await prisma.doacao.update({
-        where: {
-          id,
-        },
+      const tipoFinal = data.tipo ?? doacaoExistente.tipo;
+      const quantidadeFinal = data.quantidade ?? doacaoExistente.quantidade;
 
-        data: {
-          ...data,
-          instituicaoId,
-        },
-        include: includeDoacao,
+      const doacaoAtualizada = await prisma.$transaction(async (tx) => {
+        await ajustarSaldoEdicaoDoacao(tx, {
+          instituicaoAntiga: doacaoExistente.instituicaoId,
+          tipoAntigo: doacaoExistente.tipo,
+          quantidadeAntiga: doacaoExistente.quantidade,
+          instituicaoNova: instituicaoId,
+          tipoNovo: tipoFinal,
+          quantidadeNova: quantidadeFinal,
+          doacaoId: id,
+          usuarioId: req.user.id,
+        });
+
+        return tx.doacao.update({
+          where: { id },
+          data: { ...data, instituicaoId },
+          include: includeDoacao,
+        });
       });
 
       return res.status(200).json(doacaoAtualizada);
     } catch (error) {
+      if (error instanceof SaldoInsuficienteError) {
+        return res.status(422).json({ error: error.message });
+      }
+
       if (error instanceof ZodError) {
         return res.status(400).json({
           error: "Payload inválido.",
@@ -329,10 +349,9 @@ class DoacoesController {
         `PUT /doacoes/${req.params.id} - erro ao atualizar:`,
         error,
       );
-
-      return res.status(500).json({
-        error: "Erro interno ao atualizar doação.",
-      });
+      return res
+        .status(500)
+        .json({ error: "Erro interno ao atualizar doação." });
     }
   }
   async alterarComprovanteDoacao(req, res) {
@@ -421,47 +440,43 @@ class DoacoesController {
   }
   async cancelarDoacao(req, res) {
     const id = obterIdValido(req.params.id);
-
-    if (!id) {
-      return res.status(400).json({
-        error: "ID inválido.",
-      });
-    }
+    if (!id) return res.status(400).json({ error: "ID inválido." });
 
     try {
       const where = montarFiltroAcessoDoacao(req, id);
 
       const doacao = await prisma.doacao.findFirst({
         where,
-        select: {
-          id: true,
-        },
+        select: { id: true, tipo: true, quantidade: true, instituicaoId: true },
       });
 
       if (!doacao) {
-        return res.status(404).json({
-          error: "Doação não encontrada.",
-        });
+        return res.status(404).json({ error: "Doação não encontrada." });
       }
 
-      await prisma.doacao.update({
-        where: {
-          id,
-        },
-        data: {
-          deletedAt: new Date(),
-        },
+      await prisma.$transaction(async (tx) => {
+        await tx.doacao.update({
+          where: { id },
+          data: { deletedAt: new Date() },
+        });
+
+        if (afetaSaldoCesta(doacao.tipo)) {
+          await devolverSaldoDeDoacao(tx, {
+            instituicaoId: doacao.instituicaoId,
+            quantidade: doacao.quantidade,
+            doacaoId: doacao.id,
+            usuarioId: req.user.id,
+            observacao: "Devolução por cancelamento de doação",
+          });
+        }
       });
 
-      return res.status(200).json({
-        mensagem: "Doação cancelada com sucesso.",
-      });
+      return res
+        .status(200)
+        .json({ mensagem: "Doação cancelada com sucesso." });
     } catch (error) {
       console.error(`DELETE /doacoes/${req.params.id} - erro:`, error);
-
-      return res.status(500).json({
-        error: "Erro ao cancelar a doação.",
-      });
+      return res.status(500).json({ error: "Erro ao cancelar a doação." });
     }
   }
 }

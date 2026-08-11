@@ -13,6 +13,8 @@ import instituicoesRoutes from "./routes/instituicoesRoutes.js";
 import beneficariosRoutes from "./routes/beneficariosRoutes.js";
 import doacoesRoutes from "./routes/doacoesRoutes.js";
 import qrcodeRoutes from "./routes/qrcodeRoutes.js";
+import saldoCestaRoutes from "./routes/saldoCestaRoutes.js";
+
 
 // Carrega as variáveis de ambiente
 config();
@@ -64,6 +66,7 @@ app.use("/instituicoes", instituicoesRoutes);
 app.use("/beneficiarios", beneficariosRoutes);
 app.use("/doacoes", doacoesRoutes);
 app.use("/qrcodes", qrcodeRoutes);
+app.use("/saldo-cestas", saldoCestaRoutes);
 
 // Porta do servidor
 const PORT = process.env.PORT || 3000;
