@@ -153,7 +153,7 @@ class DoacoesController {
 
       await registrarEventoHistorico({
         beneficiarioId: doacao.beneficiarioId,
-        tipo: "DOAÇÃO",
+        tipo: "DOACAO",
         descricao: `Doação recebida: ${doacao.quantidade} ${ROTULOS_TIPO_BENEFICIO[doacao.tipo] ?? "item(ns)"}.`,
         detalhes: {
           doacaoId: doacao.id,

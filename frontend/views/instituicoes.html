@@ -233,6 +233,133 @@
     </div>
 </div>
 
+
+
+<!-- =====================================================
+     MODAL - SALDO DE CESTAS
+====================================================== -->
+<div
+    id="modalSaldoCestas"
+    class="modal modal-saldo-cestas"
+    hidden
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tituloSaldoCestas"
+>
+    <div class="modal-content saldo-cestas-card">
+        <header class="saldo-cestas-header">
+            <div class="saldo-cestas-titulo">
+                <div class="saldo-cestas-icone" aria-hidden="true">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div>
+                    <span class="saldo-cestas-eyebrow">ESTOQUE</span>
+                    <h2 id="tituloSaldoCestas">Saldo de cestas</h2>
+                    <p id="nomeInstituicaoSaldoCestas">Instituição</p>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                id="btnFecharSaldoCestas"
+                class="saldo-cestas-fechar"
+                aria-label="Fechar saldo de cestas"
+                title="Fechar"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+
+        <div class="saldo-cestas-body">
+            <section class="saldo-cestas-resumo">
+                <div class="saldo-cestas-resumo-icone" aria-hidden="true">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+                <div>
+                    <span>Saldo disponível</span>
+                    <strong><span id="valorSaldoCestas">—</span> cestas</strong>
+                    <small id="atualizacaoSaldoCestas">Carregando saldo...</small>
+                </div>
+                <button type="button" id="btnAtualizarSaldoCestas" class="btn btn-info">
+                    <i class="fa-solid fa-rotate"></i>
+                    Atualizar
+                </button>
+            </section>
+
+            <section class="saldo-cestas-grid">
+                <form id="formEntradaSaldoCestas" class="saldo-cestas-entrada" autocomplete="off">
+                    <div class="saldo-cestas-section-title">
+                        <div class="saldo-cestas-section-icon">
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </div>
+                        <div>
+                            <h3>Registrar entrada</h3>
+                            <p>Adicione novas cestas ao estoque da instituição.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantidadeEntradaSaldoCestas">Quantidade <span class="required">*</span></label>
+                        <input
+                            type="number"
+                            id="quantidadeEntradaSaldoCestas"
+                            min="1"
+                            step="1"
+                            inputmode="numeric"
+                            placeholder="Ex.: 50"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observacaoEntradaSaldoCestas">Observação</label>
+                        <textarea
+                            id="observacaoEntradaSaldoCestas"
+                            maxlength="500"
+                            rows="4"
+                            placeholder="Ex.: Entrada recebida do estoque central..."
+                        ></textarea>
+                        <small class="form-help">Máximo de 500 caracteres.</small>
+                    </div>
+
+                    <button type="submit" id="btnRegistrarEntradaSaldoCestas" class="btn btn-primary saldo-cestas-btn-entrada">
+                        <i class="fa-solid fa-plus"></i>
+                        Registrar entrada
+                    </button>
+                </form>
+
+                <section class="saldo-cestas-historico-bloco">
+                    <div class="saldo-cestas-historico-topo">
+                        <div>
+                            <span class="saldo-cestas-eyebrow">MOVIMENTAÇÕES</span>
+                            <h3>Histórico do saldo</h3>
+                        </div>
+
+                        <select id="filtroHistoricoSaldoCestas" aria-label="Filtrar movimentações de saldo">
+                            <option value="">Todas</option>
+                            <option value="ENTRADA">Entradas</option>
+                            <option value="SAIDA_DOACAO">Saídas por doação</option>
+                            <option value="ESTORNO_DOACAO">Estornos</option>
+                        </select>
+                    </div>
+
+                    <div id="historicoSaldoCestas" class="saldo-cestas-historico">
+                        <div class="saldo-historico-estado">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <span>Carregando movimentações...</span>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </div>
+
+        <footer class="saldo-cestas-footer">
+            <button type="button" id="btnCancelarSaldoCestas" class="btn btn-secondary">Fechar</button>
+        </footer>
+    </div>
+</div>
+
     <!-- =====================================================
          MODAL DE CONFIRMAÇÃO - PADRÃO SOLIDARE
     ====================================================== -->

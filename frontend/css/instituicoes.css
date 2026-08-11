@@ -2708,3 +2708,438 @@ body.modal-aberto {
         gap: 5px;
     }
 }
+
+/* =====================================================
+   INSTITUIÇÕES - SALDO DE CESTAS
+===================================================== */
+
+.instituicoes-table .btnSaldoInstituicao {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    display: inline-grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #dfe3e8;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #667085;
+    cursor: pointer;
+}
+
+.instituicoes-table .btnSaldoInstituicao:hover {
+    border-color: #b9dfcc;
+    background: #effaf4;
+    color: #18794e;
+}
+
+#modalSaldoCestas.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9750;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(3px);
+}
+
+#modalSaldoCestas[hidden] {
+    display: none !important;
+}
+
+#modalSaldoCestas.modal.ativo:not([hidden]) {
+    display: flex;
+}
+
+.saldo-cestas-card {
+    width: min(100%, 980px);
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.30);
+}
+
+.saldo-cestas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eceff3;
+    background: linear-gradient(135deg, #ffffff, #f7fff9);
+}
+
+.saldo-cestas-titulo {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.saldo-cestas-icone {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 13px;
+    background: #e9f7ef;
+    color: #18794e;
+}
+
+.saldo-cestas-eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    color: #18794e;
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.saldo-cestas-header h2,
+.saldo-cestas-historico-topo h3,
+.saldo-cestas-section-title h3 {
+    margin: 0;
+    color: #1f2937;
+}
+
+.saldo-cestas-header h2 {
+    font-size: 1.2rem;
+}
+
+.saldo-cestas-header p,
+.saldo-cestas-section-title p {
+    margin: 4px 0 0;
+    color: #98a2b3;
+    font-size: 0.76rem;
+}
+
+.saldo-cestas-fechar {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #98a2b3;
+    cursor: pointer;
+}
+
+.saldo-cestas-fechar:hover {
+    background: #e9f7ef;
+    color: #18794e;
+}
+
+.saldo-cestas-body {
+    min-height: 0;
+    padding: 22px 24px;
+    overflow-y: auto;
+}
+
+.saldo-cestas-resumo {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 17px;
+    border: 1px solid #c8e7d7;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #effaf4, #ffffff);
+}
+
+.saldo-cestas-resumo-icone {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: #dff3e8;
+    color: #18794e;
+}
+
+.saldo-cestas-resumo > div:nth-child(2) {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.saldo-cestas-resumo span {
+    color: #667085;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.saldo-cestas-resumo strong {
+    color: #18794e;
+    font-size: 1.55rem;
+    line-height: 1.15;
+}
+
+.saldo-cestas-resumo strong span {
+    color: inherit;
+    font-size: inherit;
+}
+
+.saldo-cestas-resumo small {
+    margin-top: 2px;
+    color: #98a2b3;
+    font-size: 0.68rem;
+}
+
+.saldo-cestas-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.4fr);
+    gap: 18px;
+}
+
+.saldo-cestas-entrada,
+.saldo-cestas-historico-bloco {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid #eceff3;
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.saldo-cestas-section-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.saldo-cestas-section-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: #e9f7ef;
+    color: #18794e;
+}
+
+.saldo-cestas-btn-entrada {
+    width: 100%;
+}
+
+.saldo-cestas-historico-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.saldo-cestas-historico-topo select {
+    min-height: 36px;
+    padding: 0 30px 0 10px;
+    border: 1px solid #dfe3e8;
+    border-radius: 8px;
+    outline: none;
+    background: #ffffff;
+    color: #475467;
+    font: inherit;
+    font-size: 0.74rem;
+}
+
+.saldo-cestas-historico {
+    max-height: 390px;
+    overflow-y: auto;
+    padding-right: 3px;
+}
+
+.saldo-historico-estado {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #98a2b3;
+    text-align: center;
+    font-size: 0.76rem;
+}
+
+.saldo-historico-estado i {
+    font-size: 1.2rem;
+}
+
+.saldo-historico-estado strong {
+    color: #475467;
+}
+
+.saldo-mov-item {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 11px;
+    margin-bottom: 10px;
+    padding: 13px;
+    border: 1px solid #e4e7ec;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.saldo-mov-item:last-child {
+    margin-bottom: 0;
+}
+
+.saldo-mov-entrada { border-left: 3px solid #22a06b; }
+.saldo-mov-saida { border-left: 3px solid #c43d56; }
+.saldo-mov-estorno { border-left: 3px solid #6941c6; }
+
+.saldo-mov-icone {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: #f2f4f7;
+    color: #667085;
+}
+
+.saldo-mov-entrada .saldo-mov-icone {
+    background: #e9f7ef;
+    color: #18794e;
+}
+
+.saldo-mov-saida .saldo-mov-icone {
+    background: #fdecef;
+    color: #a23549;
+}
+
+.saldo-mov-estorno .saldo-mov-icone {
+    background: #f0ecff;
+    color: #6941c6;
+}
+
+.saldo-mov-conteudo {
+    min-width: 0;
+}
+
+.saldo-mov-topo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.saldo-mov-topo > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.saldo-mov-topo strong {
+    color: #344054;
+    font-size: 0.78rem;
+}
+
+.saldo-mov-topo span,
+.saldo-mov-doacao {
+    color: #98a2b3;
+    font-size: 0.67rem;
+}
+
+.saldo-mov-quantidade {
+    flex-shrink: 0;
+    padding: 4px 7px;
+    border-radius: 999px;
+    background: #f2f4f7;
+    color: #475467 !important;
+    font-weight: 800;
+}
+
+.saldo-mov-resumo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 9px;
+    padding: 8px 9px;
+    border-radius: 8px;
+    background: #fafbfc;
+    color: #667085;
+    font-size: 0.68rem;
+}
+
+.saldo-mov-resumo strong {
+    color: #344054;
+}
+
+.saldo-mov-resumo i {
+    color: #b2bac5;
+    font-size: 0.62rem;
+}
+
+.saldo-mov-conteudo p {
+    margin: 8px 0 0;
+    color: #667085;
+    font-size: 0.7rem;
+    line-height: 1.4;
+}
+
+.saldo-mov-doacao {
+    display: inline-block;
+    margin-top: 7px;
+}
+
+.saldo-cestas-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 24px;
+    border-top: 1px solid #eceff3;
+    background: #fafbfc;
+}
+
+@media (max-width: 800px) {
+    .saldo-cestas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .saldo-cestas-resumo {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .saldo-cestas-resumo .btn {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+}
+
+@media (max-width: 520px) {
+    #modalSaldoCestas.modal {
+        padding: 10px;
+    }
+
+    .saldo-cestas-header,
+    .saldo-cestas-body,
+    .saldo-cestas-footer {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .saldo-cestas-historico-topo,
+    .saldo-mov-topo,
+    .saldo-mov-resumo {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .saldo-cestas-historico-topo select {
+        width: 100%;
+    }
+}

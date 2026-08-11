@@ -9,6 +9,10 @@ import {
 
 import { mostrarSucesso, mostrarErro } from "./utils/toast.js";
 import { mostrarLoading, esconderLoading } from "./utils/loading.js";
+import {
+    abrirSaldoInstituicao,
+    configurarSaldoInstituicoes
+} from "./instituicoes/instituicoesSaldo.js";
 
 const estado = {
     lista: [],
@@ -325,6 +329,7 @@ function criarLinha(i) {
             </td>
             <td class="coluna-acoes">
                 <div class="acoes-instituicao">
+                    <button type="button" class="btnSaldoInstituicao" data-id="${id}" data-nome="${escapar(i.nome)}" title="Saldo de cestas" aria-label="Consultar saldo de cestas"><i class="fa-solid fa-boxes-stacked"></i></button>
                     <button type="button" class="btnEditarInstituicao" data-id="${id}" title="Editar instituição" aria-label="Editar instituição"><i class="fa-solid fa-pen"></i></button>
                 </div>
             </td>
@@ -724,6 +729,8 @@ function configurarEventos() {
     }, op);
 
     el.tabela.addEventListener("click", (e) => {
+        const saldo = e.target.closest(".btnSaldoInstituicao");
+        if (saldo) return abrirSaldoInstituicao(saldo.dataset.id, saldo.dataset.nome);
         const editar = e.target.closest(".btnEditarInstituicao");
         if (editar) return editarInstituicao(editar.dataset.id);
         const status = e.target.closest(".btnStatusInstituicao, .btnAlternarInstituicao");
@@ -805,6 +812,7 @@ export async function inicializarInstituicoes() {
         document.body.classList.remove("modal-aberto");
 
         configurarEventos();
+        configurarSaldoInstituicoes();
         atualizarBarraSelecao();
         await carregarInstituicoes();
     } catch (erro) {

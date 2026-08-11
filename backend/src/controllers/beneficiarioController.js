@@ -231,7 +231,7 @@ class BeneficiarioController {
       if (alteracoes.length > 0) {
         await registrarEventoHistorico({
           beneficiarioId: id,
-          tipo: "ATUALIZAÇÃO",
+          tipo: "ATUALIZACAO",
           descricao: descreverAlteracoes(alteracoes),
           detalhes: { alteracoes },
           usuarioId: req.user.id,
