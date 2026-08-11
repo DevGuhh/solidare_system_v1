@@ -1343,6 +1343,53 @@
 </div>
 
 
+<!-- ==================================================
+     HISTÓRICO DO BENEFICIÁRIO
+================================================== -->
+<div
+    id="modalHistoricoBeneficiario"
+    class="modal modal-historico-beneficiario"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tituloHistoricoBeneficiario"
+    aria-hidden="true"
+    hidden
+>
+    <div class="historico-beneficiario-card">
+        <header class="historico-beneficiario-header">
+            <div class="historico-beneficiario-titulo">
+                <div class="historico-beneficiario-icone" aria-hidden="true">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+
+                <div>
+                    <span class="historico-beneficiario-eyebrow">Atendimentos</span>
+                    <h2 id="tituloHistoricoBeneficiario">Histórico do beneficiário</h2>
+                    <p id="nomeHistoricoBeneficiario"></p>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                id="btnFecharHistoricoBeneficiario"
+                class="historico-beneficiario-fechar"
+                aria-label="Fechar histórico"
+                title="Fechar"
+            >
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </header>
+
+        <div id="listaHistoricoBeneficiario" class="historico-beneficiario-lista">
+            <div class="historico-carregando">
+                <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                <span>Carregando histórico...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script
     type="module"
     src="../js/beneficiarios/beneficiarios.js"

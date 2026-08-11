@@ -206,3 +206,28 @@ export async function alterarStatusBeneficiarioAPI(
     );
 
 }
+
+// =====================================================
+// LISTAR HISTÓRICO DO BENEFICIÁRIO
+// =====================================================
+
+export async function listarHistoricoBeneficiarioAPI(id) {
+
+    const idValidado =
+        validarId(id);
+
+    return await fetch(
+        `${API_URL}/beneficiarios/${idValidado}/historico`,
+        {
+            method: "GET",
+
+            headers:
+                obterHeaders(),
+
+            cache:
+                "no-store"
+        }
+    );
+
+}
+

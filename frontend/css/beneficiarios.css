@@ -2260,3 +2260,261 @@
     text-transform: inherit;
     white-space: nowrap;
 }
+
+/* =====================================================
+   BENEFICIÁRIOS - BOTÃO DE HISTÓRICO
+===================================================== */
+
+.beneficiario-acoes .btnHistoricoBeneficiario {
+    width: 35px;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2px;
+    border: 1px solid #dfe3e8;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #667085;
+    cursor: pointer;
+    transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.beneficiario-acoes .btnHistoricoBeneficiario:hover {
+    border-color: #d7c7ee;
+    background: #f6f1ff;
+    color: #6941c6;
+    transform: translateY(-1px);
+}
+
+/* =====================================================
+   BENEFICIÁRIOS - MODAL DE HISTÓRICO
+===================================================== */
+
+#modalHistoricoBeneficiario.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9700;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(3px);
+}
+
+#modalHistoricoBeneficiario[hidden] {
+    display: none !important;
+}
+
+#modalHistoricoBeneficiario.modal.ativo:not([hidden]) {
+    display: flex;
+}
+
+.historico-beneficiario-card {
+    width: min(100%, 760px);
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.30);
+}
+
+.historico-beneficiario-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eceff3;
+    background: linear-gradient(135deg, #ffffff, #fff8f9);
+}
+
+.historico-beneficiario-titulo {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.historico-beneficiario-icone {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 13px;
+    background: #f0ecff;
+    color: #6941c6;
+}
+
+.historico-beneficiario-eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    color: #850013;
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.historico-beneficiario-header h2 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.2rem;
+}
+
+.historico-beneficiario-header p {
+    margin: 4px 0 0;
+    color: #98a2b3;
+    font-size: 0.76rem;
+}
+
+.historico-beneficiario-fechar {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #98a2b3;
+    cursor: pointer;
+}
+
+.historico-beneficiario-fechar:hover {
+    background: #f7e8eb;
+    color: #850013;
+}
+
+.historico-beneficiario-lista {
+    min-height: 260px;
+    padding: 22px 24px;
+    overflow-y: auto;
+}
+
+.historico-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 14px;
+    padding-bottom: 22px;
+}
+
+.historico-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: 42px;
+    bottom: 0;
+    left: 20px;
+    width: 2px;
+    background: #eceff3;
+}
+
+.historico-marcador {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    z-index: 1;
+    border-radius: 12px;
+    background: #f2f4f7;
+    color: #667085;
+}
+
+.historico-cadastro .historico-marcador { background: #e9f7ef; color: #18794e; }
+.historico-atualizacao .historico-marcador { background: #e8f1ff; color: #1d5da8; }
+.historico-doacao .historico-marcador { background: #fff2e3; color: #a15c00; }
+
+.historico-conteudo {
+    min-width: 0;
+    padding: 2px 0 0;
+}
+
+.historico-item-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.historico-tipo {
+    color: #344054;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.historico-item time {
+    color: #98a2b3;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.historico-conteudo > p {
+    margin: 7px 0 0;
+    color: #475467;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.historico-usuario {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: #98a2b3;
+    font-size: 0.7rem;
+}
+
+.historico-alteracoes {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.historico-alteracoes li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    padding: 7px 9px;
+    border-radius: 8px;
+    background: #fafbfc;
+    color: #667085;
+    font-size: 0.7rem;
+}
+
+.historico-alteracoes strong { color: #344054; }
+.historico-alteracoes i { color: #98a2b3; font-size: 0.6rem; }
+
+.historico-carregando,
+.historico-vazio {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    color: #98a2b3;
+}
+
+.historico-carregando { flex-direction: row; }
+.historico-vazio > i { font-size: 1.4rem; color: #6941c6; }
+.historico-vazio strong { color: #344054; font-size: 0.9rem; }
+.historico-vazio span { max-width: 360px; font-size: 0.76rem; line-height: 1.5; }
+.historico-erro > i { color: #b4233a; }
+
+@media (max-width: 620px) {
+    #modalHistoricoBeneficiario.modal { padding: 10px; }
+    .historico-beneficiario-card { max-height: calc(100vh - 20px); border-radius: 15px; }
+    .historico-beneficiario-header, .historico-beneficiario-lista { padding-left: 18px; padding-right: 18px; }
+    .historico-item-topo { align-items: flex-start; flex-direction: column; gap: 3px; }
+}
+

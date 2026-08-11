@@ -52,6 +52,12 @@ import {
     confirmarAcao
 } from "../utils/confirm.js";
 
+import {
+    abrirHistoricoBeneficiario,
+    fecharHistoricoBeneficiario,
+    configurarHistoricoBeneficiario
+} from "./beneficiariosHistorico.js";
+
 
 // =====================================================
 // CONFIGURAÇÕES
@@ -2596,6 +2602,22 @@ function tratarCliqueDaTabela(event) {
 
     }
     
+    const botaoHistorico =
+        event.target.closest(
+            ".btnHistoricoBeneficiario"
+        );
+
+    if (botaoHistorico) {
+
+        abrirHistoricoBeneficiario(
+            botaoHistorico.dataset.id,
+            botaoHistorico.dataset.nome || ""
+        );
+
+        return;
+
+    }
+
     const botaoEditar =
         event.target.closest(
             ".btnEditar"
@@ -2653,13 +2675,14 @@ function tratarCliqueForaModal(event) {
 
 function tratarTeclaEscape(event) {
 
-    if (
-        event.key === "Escape" &&
-        elementos.modal
-    ) {
+    if (event.key !== "Escape") {
+        return;
+    }
 
+    fecharHistoricoBeneficiario();
+
+    if (elementos.modal) {
         fecharModalBeneficiario();
-
     }
 
 }
@@ -2979,6 +3002,8 @@ export async function inicializarBeneficiarios() {
         configurarEventos();
 
         configurarMascaras();
+
+        configurarHistoricoBeneficiario();
 
         atualizarBotoesFiltro();
 

@@ -430,6 +430,20 @@ export function renderizarTabela(
 
                         <button
                             type="button"
+                            class="btnHistoricoBeneficiario"
+                            data-id="${id}"
+                            data-nome="${nomeSeguro}"
+                            title="Ver histórico do beneficiário"
+                            aria-label="Ver histórico de ${nomeSeguro}"
+                        >
+                            <i
+                                class="fa-solid fa-clock-rotate-left"
+                                aria-hidden="true"
+                            ></i>
+                        </button>
+
+                        <button
+                            type="button"
                             class="btnEditar"
                             data-id="${id}"
                             title="Editar beneficiário"
