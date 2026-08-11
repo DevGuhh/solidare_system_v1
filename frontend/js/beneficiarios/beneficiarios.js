@@ -9,7 +9,10 @@ import {
 import {
     aplicarMascaraCPF,
     aplicarMascaraCEP,
-    aplicarMascaraTelefone
+    aplicarMascaraTelefone,
+    formatarCPF,
+    formatarCEP,
+    formatarTelefone
 } from "../utils/masks.js";
 
 import {
@@ -17,7 +20,6 @@ import {
     buscarBeneficiario,
     cadastrarBeneficiarioAPI,
     editarBeneficiarioAPI,
-    excluirBeneficiarioAPI,
     alterarStatusBeneficiarioAPI
 } from "../api/beneficiariosApi.js";
 
@@ -413,11 +415,6 @@ function capturarElementosDaTela() {
         btnInativarSelecionados:
             document.getElementById(
                 "btnInativarSelecionadosBeneficiarios"
-            ),
-
-        btnExcluirSelecionados:
-            document.getElementById(
-                "btnExcluirSelecionadosBeneficiarios"
             )
 
     };
@@ -557,7 +554,6 @@ function validarElementosObrigatorios() {
         elementos.btnLimparSelecao,
         elementos.btnAtivarSelecionados,
         elementos.btnInativarSelecionados,
-        elementos.btnExcluirSelecionados,
 
         // ===========================
         // CAMPOS DO FORMULÁRIO
@@ -1404,9 +1400,6 @@ function atualizarBarraSelecao() {
     elementos.btnInativarSelecionados.disabled =
         !possuiSelecionados;
 
-    elementos.btnExcluirSelecionados.disabled =
-        !possuiSelecionados;
-
 }
 
 
@@ -1646,171 +1639,6 @@ async function alterarStatusSelecionados(
     }
 
 }
-
-// =====================================================
-// EXCLUIR BENEFICIÁRIOS SELECIONADOS
-// =====================================================
-
-async function excluirSelecionados() {
-
-    const quantidade =
-        beneficiariosSelecionados.size;
-
-    if (quantidade === 0) {
-        return;
-    }
-
-    const textoRegistro =
-        quantidade === 1
-            ? "beneficiário selecionado"
-            : "beneficiários selecionados";
-
-    const confirmou =
-        await confirmarAcao(
-            `Deseja realmente excluir ${quantidade} ${textoRegistro}?`
-        );
-
-    if (!confirmou) {
-        return;
-    }
-
-    mostrarLoading();
-
-    try {
-
-        const ids =
-            Array.from(
-                beneficiariosSelecionados
-            );
-
-        let quantidadeExcluida =
-            0;
-
-        const erros =
-            [];
-
-        for (const id of ids) {
-
-            try {
-
-                const resposta =
-                    await excluirBeneficiarioAPI(
-                        id
-                    );
-
-                const resultado =
-                    await lerRespostaJson(
-                        resposta
-                    );
-
-                if (!resposta.ok) {
-
-                    throw new Error(
-                        resultado.error ||
-                        resultado.erro ||
-                        resultado.mensagem ||
-                        `Não foi possível excluir o beneficiário #${id}.`
-                    );
-
-                }
-
-                quantidadeExcluida++;
-
-            } catch (erro) {
-
-                console.error(
-                    `Erro ao excluir beneficiário #${id}:`,
-                    erro
-                );
-
-                erros.push({
-                    id,
-                    mensagem:
-                        erro.message
-                });
-
-            }
-
-        }
-
-        /*
-         * Remove da seleção somente os registros
-         * que foram excluídos com sucesso.
-         */
-        if (quantidadeExcluida > 0) {
-
-            const idsComErro =
-                new Set(
-                    erros.map(
-                        (item) => item.id
-                    )
-                );
-
-            beneficiariosSelecionados =
-                new Set(
-                    ids.filter(
-                        (id) =>
-                            idsComErro.has(id)
-                    )
-                );
-
-            await carregarBeneficiarios();
-
-        }
-
-        if (erros.length === 0) {
-
-            const mensagemSucesso =
-                quantidadeExcluida === 1
-                    ? "Beneficiário excluído com sucesso!"
-                    : `${quantidadeExcluida} beneficiários excluídos com sucesso!`;
-
-            mostrarSucesso(
-                mensagemSucesso
-            );
-
-            beneficiariosSelecionados.clear();
-
-            atualizarBarraSelecao();
-
-            return;
-
-        }
-
-        if (quantidadeExcluida > 0) {
-
-            mostrarErro(
-                `${quantidadeExcluida} registro(s) foram excluídos, mas ${erros.length} não puderam ser removidos.`
-            );
-
-            return;
-
-        }
-
-        mostrarErro(
-            "Nenhum dos beneficiários selecionados pôde ser excluído."
-        );
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao excluir beneficiários selecionados:",
-            erro
-        );
-
-        mostrarErro(
-            erro.message ||
-            "Não foi possível excluir os beneficiários selecionados."
-        );
-
-    } finally {
-
-        esconderLoading();
-
-    }
-
-}
-
 
 // =====================================================
 // APLICAR PESQUISA, FILTRO E PAGINAÇÃO
@@ -2371,7 +2199,7 @@ async function editarBeneficiario(id) {
             beneficiario.nomeCompleto ?? "";
 
         campos.cpf.value =
-            beneficiario.cpf ?? "";
+            formatarCPF(beneficiario.cpf ?? "");
 
         campos.dataNascimento.value =
             beneficiario.dataNascimento
@@ -2380,7 +2208,7 @@ async function editarBeneficiario(id) {
                 : "";
 
         campos.cep.value =
-            beneficiario.cep ?? "";
+            formatarCEP(beneficiario.cep ?? "");
 
         campos.logradouro.value =
             beneficiario.logradouro ?? "";
@@ -2401,10 +2229,10 @@ async function editarBeneficiario(id) {
             beneficiario.uf ?? "";
 
         campos.telefonePrincipal.value =
-            beneficiario.telefonePrincipal ?? "";
+            formatarTelefone(beneficiario.telefonePrincipal ?? "");
 
         campos.telefoneSecundario.value =
-            beneficiario.telefoneSecundario ?? "";
+            formatarTelefone(beneficiario.telefoneSecundario ?? "");
 
         campos.email.value =
             beneficiario.email ?? "";
@@ -2488,75 +2316,6 @@ async function editarBeneficiario(id) {
         mostrarErro(
             erro.message ||
             "Não foi possível carregar o beneficiário."
-        );
-
-    } finally {
-
-        esconderLoading();
-
-    }
-
-}
-
-
-// =====================================================
-// EXCLUIR BENEFICIÁRIO
-// =====================================================
-
-async function excluirBeneficiario(id) {
-
-    const confirmou =
-        await confirmarAcao(
-            "Deseja realmente excluir este beneficiário?"
-        );
-
-    if (!confirmou) {
-        return;
-    }
-
-    mostrarLoading();
-
-    try {
-
-        const resposta =
-            await excluirBeneficiarioAPI(
-                id
-            );
-
-        const resultado =
-            await lerRespostaJson(
-                resposta
-            );
-
-        if (!resposta.ok) {
-
-            throw new Error(
-                resultado.error ||
-                resultado.erro ||
-                resultado.mensagem ||
-                "Erro ao excluir beneficiário."
-            );
-
-        }
-
-        mostrarSucesso(
-            "Beneficiário excluído com sucesso!"
-        );
-
-        beneficiariosSelecionados.clear();
-
-        await carregarBeneficiarios();
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao excluir beneficiário:",
-            erro
-        );
-
-        mostrarErro(
-            erro.message ||
-            "Não foi possível excluir o beneficiário."
         );
 
     } finally {
@@ -2853,21 +2612,6 @@ function tratarCliqueDaTabela(event) {
     }
 
 
-    const botaoExcluir =
-        event.target.closest(
-            ".btnExcluir"
-        );
-
-    if (botaoExcluir) {
-
-        excluirBeneficiario(
-            botaoExcluir.dataset.id
-        );
-
-        return;
-
-    }
-
 
     const botaoStatus =
         event.target.closest(
@@ -3157,11 +2901,6 @@ function configurarEventos() {
         opcoes
     );
 
-    elementos.btnExcluirSelecionados.addEventListener(
-        "click",
-        excluirSelecionados,
-        opcoes
-    );
 
 }
 

@@ -2166,3 +2166,97 @@
     }
 
 }
+
+/* =====================================================
+   BENEFICIÁRIOS - ALINHAMENTO DAS COLUNAS
+   Padrão visual da tabela de Instituições
+===================================================== */
+
+/* Centraliza cabeçalhos e dados */
+.beneficiarios-table th,
+.beneficiarios-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Checkbox */
+.beneficiarios-table .coluna-checkbox {
+    text-align: center;
+}
+
+/* Nome continua alinhado à esquerda */
+.beneficiarios-table th:nth-child(3),
+.beneficiarios-table td:nth-child(3) {
+    text-align: left;
+}
+
+/* Centraliza o conteúdo interno das demais colunas */
+.beneficiarios-table td:not(:nth-child(3)) > * {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Nome/avatar */
+.beneficiario-identificacao {
+    justify-content: flex-start;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Instituição */
+.beneficiario-instituicao {
+    justify-content: center;
+}
+
+/* Ações */
+.beneficiario-acoes,
+.coluna-acoes {
+    text-align: center;
+}
+
+/* Centraliza Telefone */
+.beneficiarios-table th:nth-child(5),
+.beneficiarios-table td:nth-child(5) {
+    text-align: center;
+}
+
+.beneficiarios-table td:nth-child(5) .beneficiario-contato,
+.beneficiarios-table td:nth-child(5) .telefone-beneficiario,
+.beneficiarios-table td:nth-child(5) > div,
+.beneficiarios-table td:nth-child(5) > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+/* =====================================================
+   BENEFICIÁRIOS - CABEÇALHO ESTÁTICO DE AÇÕES
+   Mesmo padrão visual da tabela de Instituições
+===================================================== */
+
+.beneficiarios-table .coluna-acoes {
+    text-align: center;
+}
+
+.beneficiarios-table .coluna-acoes .beneficiarios-cabecalho-estatico,
+.beneficiarios-table th.coluna-acoes > span,
+.beneficiarios-table th.coluna-acoes > div {
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 2px;
+    padding: 7px 9px;
+    border: 1px solid #dfe3e8;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #667085;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    white-space: nowrap;
+}

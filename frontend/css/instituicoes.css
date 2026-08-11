@@ -2172,7 +2172,33 @@
         width: 100%;
     }
 
-}\n\n/* =====================================================\n   INSTITUIÇÕES - AJUSTES ESPECÍFICOS\n===================================================== */\n.instituicoes-filtros { flex-wrap: wrap; }\n.filtro-status-indicador.pendente, .legenda-indicador.pendente { background:#f59e0b; }\n.instituicoes-table { min-width: 1280px; }\n.instituicoes-table .instituicao-celula { display:flex; align-items:center; gap:12px; min-width:230px; }\n.instituicoes-table .instituicao-avatar { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; flex:0 0 auto; background:#f7e7ea; color:#8b0015; font-weight:800; }\n.instituicoes-table .instituicao-principal { display:flex; flex-direction:column; gap:3px; min-width:0; }\n.instituicoes-table .instituicao-principal strong { color:#1f2937; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px; }\n.instituicoes-table .instituicao-principal small, .instituicoes-table .contato-secundario { color:#8b95a5; font-size:12px; }\n.instituicoes-table .contato-celula { display:flex; flex-direction:column; gap:4px; min-width:190px; }\n.instituicoes-table .status-aprovacao { display:inline-flex; align-items:center; gap:6px; border:0; border-radius:999px; padding:6px 10px; font-weight:700; cursor:pointer; }\n.instituicoes-table .status-aprovacao.ok { background:#d1fae5; color:#065f46; }\n.instituicoes-table .status-aprovacao.pendente { background:#fff3cd; color:#664d03; }\n.instituicoes-table .btnStatusInstituicao { min-width:84px; }\n.instituicoes-table .acoes-instituicao { display:flex; align-items:center; gap:7px; justify-content:flex-end; }\n.instituicoes-table .acao-aprovacao { color:#b7791f; }\n.instituicoes-table .acao-ativar { color:#198754; }\n.instituicoes-table .acao-inativar { color:#dc3545; }\n.modal-credenciais-instituicao { max-width:560px; }\n.credenciais-box { margin:0; }\n.credenciais-box > p { margin:0 0 18px; color:#6b7280; line-height:1.5; }\n@media (max-width: 760px) { .instituicoes-filtros { width:100%; } .instituicoes-filtro { flex:1 1 135px; } }\n
+}
+
+/* =====================================================
+   INSTITUIÇÕES - AJUSTES ESPECÍFICOS
+===================================================== */
+.instituicoes-filtros { flex-wrap: wrap; }
+.filtro-status-indicador.pendente, .legenda-indicador.pendente { background:#f59e0b; }
+.instituicoes-table { min-width: 1280px; }
+.instituicoes-table .instituicao-celula { display:flex; align-items:center; gap:12px; min-width:230px; }
+.instituicoes-table .instituicao-avatar { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; flex:0 0 auto; background:#f7e7ea; color:#8b0015; font-weight:800; }
+.instituicoes-table .instituicao-principal { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.instituicoes-table .instituicao-principal strong { color:#1f2937; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px; }
+.instituicoes-table .instituicao-principal small, .instituicoes-table .contato-secundario { color:#8b95a5; font-size:12px; }
+.instituicoes-table .contato-celula { display:flex; flex-direction:column; gap:4px; min-width:190px; }
+.instituicoes-table .status-aprovacao { display:inline-flex; align-items:center; gap:6px; border:0; border-radius:999px; padding:6px 10px; font-weight:700; cursor:pointer; }
+.instituicoes-table .status-aprovacao.ok { background:#d1fae5; color:#065f46; }
+.instituicoes-table .status-aprovacao.pendente { background:#fff3cd; color:#664d03; }
+.instituicoes-table .btnStatusInstituicao { min-width:84px; }
+.instituicoes-table .acoes-instituicao { display:flex; align-items:center; gap:7px; justify-content:flex-end; }
+.instituicoes-table .acao-aprovacao { color:#b7791f; }
+.instituicoes-table .acao-ativar { color:#198754; }
+.instituicoes-table .acao-inativar { color:#dc3545; }
+.modal-credenciais-instituicao { max-width:560px; }
+.credenciais-box { margin:0; }
+.credenciais-box > p { margin:0 0 18px; color:#6b7280; line-height:1.5; }
+@media (max-width: 760px) { .instituicoes-filtros { width:100%; } .instituicoes-filtro { flex:1 1 135px; } }
+
 
 /* =====================================================
    INSTITUIÇÕES - CORREÇÕES DE CABEÇALHO E AÇÕES
@@ -2459,15 +2485,15 @@ body.modal-aberto {
 }
 
 .instituicoes-table .tipo-ong {
-    background: #f7e7ea !important;
-    border-color: #efcbd2 !important;
-    color: #8b0015 !important;
+    background: #f0ecff !important;
+    border-color: transparent !important;
+    color: #6941c6 !important;
 }
 
 .instituicoes-table .tipo-igreja {
-    background: #eff6ff !important;
-    border-color: #bfdbfe !important;
-    color: #1e40af !important;
+    background: #e8f1ff !important;
+    border-color: transparent !important;
+    color: #1d5da8 !important;
 }
 
 .instituicoes-table .tipo-associacao {
@@ -2477,9 +2503,9 @@ body.modal-aberto {
 }
 
 .instituicoes-table .tipo-outro {
-    background: #fff7ed !important;
-    border-color: #fed7aa !important;
-    color: #9a3412 !important;
+    background: #fff2e3 !important;
+    border-color: transparent !important;
+    color: #a15c00 !important;
 }
 
 /* =====================================================

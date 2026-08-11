@@ -179,28 +179,6 @@ export async function editarBeneficiarioAPI(
 
 
 // =====================================================
-// EXCLUIR BENEFICIÁRIO
-// =====================================================
-
-export async function excluirBeneficiarioAPI(id) {
-
-    const idValidado =
-        validarId(id);
-
-    return await fetch(
-        `${API_URL}/beneficiarios/${idValidado}`,
-        {
-            method: "DELETE",
-
-            headers:
-                obterHeaders()
-        }
-    );
-
-}
-
-
-// =====================================================
 // ALTERAR STATUS DO BENEFICIÁRIO
 // =====================================================
 

@@ -441,18 +441,6 @@ export function renderizarTabela(
                             ></i>
                         </button>
 
-                        <button
-                            type="button"
-                            class="btnExcluir"
-                            data-id="${id}"
-                            title="Excluir beneficiário"
-                            aria-label="Excluir ${nomeSeguro}"
-                        >
-                            <i
-                                class="fa-solid fa-trash"
-                                aria-hidden="true"
-                            ></i>
-                        </button>
 
                     </td>
 

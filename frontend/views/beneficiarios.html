@@ -261,17 +261,6 @@
             </button>
 
 
-            <button
-                type="button"
-                id="btnExcluirSelecionadosBeneficiarios"
-                class="btn-selecao btn-selecao-perigo"
-                disabled
-            >
-                <i class="fa-solid fa-trash"></i>
-
-                Excluir
-            </button>
-
 
             <button
                 type="button"
@@ -492,7 +481,9 @@
                             scope="col"
                             class="coluna-acoes"
                         >
-                            Ações
+                            <span class="beneficiarios-cabecalho-estatico">
+                                Ações
+                            </span>
                         </th>
 
                     </tr>
@@ -835,6 +826,7 @@
                                 id="cpf"
                                 placeholder="000.000.000-00"
                                 inputmode="numeric"
+                                maxlength="14"
                                 autocomplete="off"
                                 required
                             >
@@ -941,6 +933,7 @@
                                 id="cep"
                                 placeholder="00000-000"
                                 inputmode="numeric"
+                                maxlength="9"
                                 autocomplete="postal-code"
                             >
 
@@ -1135,6 +1128,7 @@
                                 id="telefonePrincipal"
                                 placeholder="(00) 00000-0000"
                                 inputmode="tel"
+                                maxlength="15"
                                 autocomplete="tel"
                                 required
                             >
@@ -1153,6 +1147,7 @@
                                 id="telefoneSecundario"
                                 placeholder="(00) 00000-0000"
                                 inputmode="tel"
+                                maxlength="15"
                             >
 
                         </div>
