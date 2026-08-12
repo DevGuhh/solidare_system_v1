@@ -1,112 +1,67 @@
 // ======================================================
-// TOAST DO SISTEMA
+// NOTIFICAÇÕES DO SISTEMA - COMPATIBILIDADE
+// ======================================================
+//
+// Mantém as funções já usadas em todo o frontend:
+//   mostrarSucesso()
+//   mostrarErro()
+//   mostrarAviso()
+//   mostrarInfo()
+//
+// Agora elas exibem o feedback central no mesmo padrão
+// visual do quadrado de carregamento.
 // ======================================================
 
-// Cria um toast personalizado.
-//
-// Tipos:
-// success
-// error
-// warning
-// info
+import { toast } from "../components/toast.js";
 
-function criarToast(mensagem, tipo) {
-
-    const toast = document.createElement("div");
-
-    toast.className = `toast toast-${tipo}`;
-
-    // Ícone conforme o tipo
-
-    let icone = "";
-
-    switch (tipo) {
-
-        case "success":
-            icone = "✅";
-            break;
-
-        case "error":
-            icone = "❌";
-            break;
-
-        case "warning":
-            icone = "⚠️";
-            break;
-
-        default:
-            icone = "ℹ️";
-
-    }
-
-    toast.innerHTML = `
-
-        <div class="toast-conteudo">
-
-            <span class="toast-icone">
-
-                ${icone}
-
-            </span>
-
-            <span class="toast-texto">
-
-                ${mensagem}
-
-            </span>
-
-        </div>
-
-        <div class="toast-barra"></div>
-
-    `;
-
-    document.body.appendChild(toast);
-
-    // Pequeno atraso para ativar a animação
-
-    setTimeout(() => {
-
-        toast.classList.add("mostrar");
-
-    }, 50);
-
-    // Tempo do toast
-
-    setTimeout(() => {
-
-        toast.classList.remove("mostrar");
-
-        setTimeout(() => {
-
-            toast.remove();
-
-        }, 300);
-
-    }, 4000);
-
+export function mostrarSucesso(
+    mensagem,
+    duracao = 2600
+) {
+    return toast.sucesso(
+        mensagem,
+        {
+            titulo: "Operação concluída",
+            duracao,
+        }
+    );
 }
 
-export function mostrarSucesso(mensagem) {
-
-    criarToast(mensagem, "success");
-
+export function mostrarErro(
+    mensagem,
+    duracao = 4200
+) {
+    return toast.erro(
+        mensagem,
+        {
+            titulo: "Não foi possível concluir",
+            duracao,
+        }
+    );
 }
 
-export function mostrarErro(mensagem) {
-
-    criarToast(mensagem, "error");
-
+export function mostrarAviso(
+    mensagem,
+    duracao = 3500
+) {
+    return toast.aviso(
+        mensagem,
+        {
+            titulo: "Atenção",
+            duracao,
+        }
+    );
 }
 
-export function mostrarAviso(mensagem) {
-
-    criarToast(mensagem, "warning");
-
-}
-
-export function mostrarInfo(mensagem) {
-
-    criarToast(mensagem, "info");
-
+export function mostrarInfo(
+    mensagem,
+    duracao = 3000
+) {
+    return toast.informacao(
+        mensagem,
+        {
+            titulo: "Informação",
+            duracao,
+        }
+    );
 }

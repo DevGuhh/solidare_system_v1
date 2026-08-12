@@ -1,9 +1,9 @@
 // =====================================================
-// TOAST SOLIDARE
-// Sistema reutilizável de notificações
+// FEEDBACK CENTRAL SOLIDARE
+// Substitui os antigos balões flutuantes
 // =====================================================
 
-const TEMPO_PADRAO = 4000;
+const TEMPO_PADRAO = 2600;
 
 const TIPOS_VALIDOS = [
     "sucesso",
@@ -12,174 +12,107 @@ const TIPOS_VALIDOS = [
     "informacao"
 ];
 
+let feedbackAtual = null;
+let temporizadorAtual = null;
+
 
 // =====================================================
 // ESCAPAR HTML
 // =====================================================
 
 function escaparHtml(valor) {
-
-    return String(valor)
+    return String(valor ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
-
 }
 
 
 // =====================================================
-// OBTER OU CRIAR CONTAINER
-// =====================================================
-
-function obterContainer() {
-
-    let container =
-        document.querySelector(
-            ".toast-solidare-container"
-        );
-
-    if (container) {
-        return container;
-    }
-
-    container =
-        document.createElement("div");
-
-    container.className =
-        "toast-solidare-container";
-
-    container.setAttribute(
-        "aria-live",
-        "polite"
-    );
-
-    container.setAttribute(
-        "aria-atomic",
-        "false"
-    );
-
-    document.body.appendChild(
-        container
-    );
-
-    return container;
-
-}
-
-
-// =====================================================
-// CONFIGURAÇÕES POR TIPO
+// CONFIGURAÇÃO POR TIPO
 // =====================================================
 
 function obterConfiguracao(tipo) {
-
     const configuracoes = {
-
         sucesso: {
-            titulo: "Sucesso",
-            icone: "fa-solid fa-circle-check"
+            titulo: "Operação concluída",
+            icone: "fa-solid fa-check",
         },
 
         erro: {
-            titulo: "Erro",
-            icone: "fa-solid fa-circle-xmark"
+            titulo: "Não foi possível concluir",
+            icone: "fa-solid fa-xmark",
         },
 
         aviso: {
             titulo: "Atenção",
-            icone: "fa-solid fa-triangle-exclamation"
+            icone: "fa-solid fa-exclamation",
         },
 
         informacao: {
             titulo: "Informação",
-            icone: "fa-solid fa-circle-info"
-        }
-
+            icone: "fa-solid fa-info",
+        },
     };
 
-    return (
-        configuracoes[tipo] ||
-        configuracoes.informacao
-    );
-
+    return configuracoes[tipo] || configuracoes.informacao;
 }
 
 
 // =====================================================
-// REMOVER TOAST
+// REMOVER FEEDBACK ATUAL
 // =====================================================
 
-function removerToast(elemento) {
-
-    if (!elemento) {
+function removerFeedback({ imediato = false } = {}) {
+    if (!feedbackAtual) {
         return;
     }
 
-    if (
-        elemento.classList.contains(
-            "toast-solidare-saindo"
-        )
-    ) {
-        return;
+    if (temporizadorAtual) {
+        clearTimeout(temporizadorAtual);
+        temporizadorAtual = null;
     }
 
-    elemento.classList.add(
-        "toast-solidare-saindo"
+    const elemento = feedbackAtual;
+    feedbackAtual = null;
+
+    document.body.classList.remove(
+        "feedback-solidare-bloqueado"
     );
 
+    if (imediato) {
+        elemento.remove();
+        return;
+    }
+
     elemento.classList.remove(
-        "toast-solidare-visivel"
+        "feedback-solidare-visivel"
+    );
+
+    elemento.classList.add(
+        "feedback-solidare-saindo"
     );
 
     setTimeout(() => {
-
         elemento.remove();
-
-        const container =
-            document.querySelector(
-                ".toast-solidare-container"
-            );
-
-        if (
-            container &&
-            container.children.length === 0
-        ) {
-
-            container.remove();
-
-        }
-
-    }, 250);
-
+    }, 220);
 }
 
 
 // =====================================================
-// CRIAR TOAST
+// CRIAR FEEDBACK
 // =====================================================
 
-function criarToast({
-
+function criarFeedback({
     mensagem,
-
     tipo = "informacao",
-
     titulo,
-
-    duracao = TEMPO_PADRAO
-
+    duracao = TEMPO_PADRAO,
 } = {}) {
-
     if (!mensagem) {
-
-        console.warn(
-            "Não foi possível exibir o toast: mensagem não informada."
-        );
-
         return null;
-
     }
 
     const tipoNormalizado =
@@ -198,187 +131,118 @@ function criarToast({
             ? Math.max(0, Number(duracao))
             : TEMPO_PADRAO;
 
-    const container =
-        obterContainer();
+    /*
+     * Apenas uma mensagem central por vez.
+     * Evita empilhamento de balões/notificações.
+     */
+    removerFeedback({
+        imediato: true,
+    });
 
-    const toast =
-        document.createElement("article");
+    const overlay =
+        document.createElement("div");
 
-    toast.className =
-        `toast-solidare ${tipoNormalizado}`;
+    overlay.className =
+        `feedback-solidare-overlay ${tipoNormalizado}`;
 
-    toast.setAttribute(
+    overlay.setAttribute(
         "role",
         tipoNormalizado === "erro"
             ? "alert"
             : "status"
     );
 
-    toast.innerHTML = `
+    overlay.setAttribute(
+        "aria-live",
+        tipoNormalizado === "erro"
+            ? "assertive"
+            : "polite"
+    );
 
-        <div class="toast-solidare-icone">
+    overlay.setAttribute(
+        "aria-modal",
+        "true"
+    );
 
-            <i
-                class="${configuracao.icone}"
+    overlay.innerHTML = `
+        <div class="feedback-solidare-caixa">
+
+            <div
+                class="feedback-solidare-icone"
                 aria-hidden="true"
-            ></i>
+            >
+                <div class="feedback-solidare-anel"></div>
 
-        </div>
+                <div class="feedback-solidare-simbolo">
+                    <i class="${configuracao.icone}"></i>
+                </div>
+            </div>
 
-        <div class="toast-solidare-conteudo">
-
-            <h3 class="toast-solidare-titulo">
+            <h2 class="feedback-solidare-titulo">
                 ${escaparHtml(tituloFinal)}
-            </h3>
+            </h2>
 
-            <p class="toast-solidare-mensagem">
+            <p class="feedback-solidare-mensagem">
                 ${escaparHtml(mensagem)}
             </p>
 
-        </div>
-
-        <button
-            type="button"
-            class="toast-solidare-fechar"
-            aria-label="Fechar notificação"
-            title="Fechar"
-        >
-            <i
-                class="fa-solid fa-xmark"
+            <div
+                class="feedback-solidare-progresso"
                 aria-hidden="true"
-            ></i>
-        </button>
+            >
+                <span></span>
+            </div>
 
-        <div
-            class="toast-solidare-progresso"
-            aria-hidden="true"
-        ></div>
-
+        </div>
     `;
 
-    const botaoFechar =
-        toast.querySelector(
-            ".toast-solidare-fechar"
+    document.body.appendChild(
+        overlay
+    );
+
+    document.body.classList.add(
+        "feedback-solidare-bloqueado"
+    );
+
+    feedbackAtual = overlay;
+
+    const barra =
+        overlay.querySelector(
+            ".feedback-solidare-progresso span"
         );
 
-    const barraProgresso =
-        toast.querySelector(
-            ".toast-solidare-progresso"
-        );
-
-    let temporizador = null;
-    let tempoRestante = duracaoFinal;
-    let inicioTemporizador = null;
-
-    function iniciarTemporizador() {
-
-        if (duracaoFinal === 0) {
-            return;
-        }
-
-        inicioTemporizador =
-            Date.now();
-
-        barraProgresso.style.animationDuration =
-            `${tempoRestante}ms`;
-
-        temporizador = setTimeout(
-            () => removerToast(toast),
-            tempoRestante
-        );
-
+    if (barra && duracaoFinal > 0) {
+        barra.style.animationDuration =
+            `${duracaoFinal}ms`;
     }
-
-    function pausarTemporizador() {
-
-        if (
-            duracaoFinal === 0 ||
-            !temporizador
-        ) {
-            return;
-        }
-
-        clearTimeout(
-            temporizador
-        );
-
-        temporizador = null;
-
-        const tempoDecorrido =
-            Date.now() - inicioTemporizador;
-
-        tempoRestante =
-            Math.max(
-                0,
-                tempoRestante - tempoDecorrido
-            );
-
-        barraProgresso.style.animationPlayState =
-            "paused";
-
-    }
-
-    function retomarTemporizador() {
-
-        if (
-            duracaoFinal === 0 ||
-            tempoRestante <= 0
-        ) {
-            return;
-        }
-
-        barraProgresso.style.animationPlayState =
-            "running";
-
-        inicioTemporizador =
-            Date.now();
-
-        temporizador = setTimeout(
-            () => removerToast(toast),
-            tempoRestante
-        );
-
-    }
-
-    botaoFechar.addEventListener(
-        "click",
-        () => removerToast(toast)
-    );
-
-    toast.addEventListener(
-        "mouseenter",
-        pausarTemporizador
-    );
-
-    toast.addEventListener(
-        "mouseleave",
-        retomarTemporizador
-    );
-
-    container.appendChild(
-        toast
-    );
 
     requestAnimationFrame(() => {
-
-        toast.classList.add(
-            "toast-solidare-visivel"
+        overlay.classList.add(
+            "feedback-solidare-visivel"
         );
-
-        iniciarTemporizador();
-
     });
 
-    return {
+    if (duracaoFinal > 0) {
+        temporizadorAtual =
+            setTimeout(() => {
+                removerFeedback();
+            }, duracaoFinal);
+    }
 
-        elemento: toast,
-
-        fechar() {
-            removerToast(toast);
+    /*
+     * Permite fechar com clique no fundo,
+     * sem transformar o componente em um modal pesado.
+     */
+    overlay.addEventListener(
+        "click",
+        (evento) => {
+            if (evento.target === overlay) {
+                removerFeedback();
+            }
         }
+    );
 
-    };
-
+    return overlay;
 }
 
 
@@ -387,63 +251,45 @@ function criarToast({
 // =====================================================
 
 export const toast = {
-
-    sucesso(
-        mensagem,
-        opcoes = {}
-    ) {
-
-        return criarToast({
-            ...opcoes,
-            mensagem,
-            tipo: "sucesso"
-        });
-
-    },
-
-    erro(
-        mensagem,
-        opcoes = {}
-    ) {
-
-        return criarToast({
-            ...opcoes,
-            mensagem,
-            tipo: "erro"
-        });
-
-    },
-
-    aviso(
-        mensagem,
-        opcoes = {}
-    ) {
-
-        return criarToast({
-            ...opcoes,
-            mensagem,
-            tipo: "aviso"
-        });
-
-    },
-
-    informacao(
-        mensagem,
-        opcoes = {}
-    ) {
-
-        return criarToast({
-            ...opcoes,
-            mensagem,
-            tipo: "informacao"
-        });
-
-    },
-
     mostrar(opcoes = {}) {
+        return criarFeedback(opcoes);
+    },
 
-        return criarToast(opcoes);
+    sucesso(mensagem, opcoes = {}) {
+        return criarFeedback({
+            ...opcoes,
+            mensagem,
+            tipo: "sucesso",
+        });
+    },
 
-    }
+    erro(mensagem, opcoes = {}) {
+        return criarFeedback({
+            ...opcoes,
+            mensagem,
+            tipo: "erro",
+        });
+    },
 
+    aviso(mensagem, opcoes = {}) {
+        return criarFeedback({
+            ...opcoes,
+            mensagem,
+            tipo: "aviso",
+        });
+    },
+
+    informacao(mensagem, opcoes = {}) {
+        return criarFeedback({
+            ...opcoes,
+            mensagem,
+            tipo: "informacao",
+        });
+    },
+
+    fechar() {
+        removerFeedback();
+    },
 };
+
+export default toast;
