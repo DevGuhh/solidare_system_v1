@@ -611,12 +611,83 @@ async function alterarSituacao(id, ativa, confirmar = true) {
 }
 
 async function alternarSituacao(id, ativaAtual) {
+    const instituicao =
+        estado.lista.find(
+            (item) =>
+                Number(item.id) === Number(id)
+        );
+
+    const novaSituacao =
+        !ativaAtual;
+
+    const acao =
+        novaSituacao
+            ? "ativar"
+            : "inativar";
+
+    /*
+     * A confirmação precisa aparecer ANTES do loading.
+     * Caso contrário, o overlay de carregamento fica acima
+     * do modal e impede o usuário de confirmar ou cancelar.
+     */
+    const confirmado =
+        await confirmarAcaoInstituicao({
+            titulo:
+                novaSituacao
+                    ? "Ativar instituição"
+                    : "Inativar instituição",
+
+            mensagem:
+                `Deseja realmente ${acao} ${
+                    instituicao?.nome ||
+                    "esta instituição"
+                }?`,
+
+            textoConfirmar:
+                novaSituacao
+                    ? "Ativar"
+                    : "Inativar"
+        });
+
+    if (!confirmado) {
+        return;
+    }
+
     mostrarLoading();
+
     try {
-        await alterarSituacao(id, !ativaAtual, true);
+        /*
+         * A confirmação já ocorreu acima, portanto passamos
+         * false para impedir a abertura de um segundo modal.
+         */
+        await alterarSituacao(
+            id,
+            novaSituacao,
+            false
+        );
+
         await carregarInstituicoes();
-        mostrarSucesso(`Instituição ${!ativaAtual ? "ativada" : "inativada"} com sucesso.`);
-    } catch (erro) { mostrarErro(erro.message); } finally { esconderLoading(); }
+
+        mostrarSucesso(
+            novaSituacao
+                ? "Instituição ativada com sucesso."
+                : "Instituição inativada com sucesso."
+        );
+
+    } catch (erro) {
+        console.error(
+            "Erro ao alterar situação da instituição:",
+            erro
+        );
+
+        mostrarErro(
+            erro.message ||
+            "Não foi possível alterar a situação da instituição."
+        );
+
+    } finally {
+        esconderLoading();
+    }
 }
 
 async function alternarAprovacao(id, atual) {
