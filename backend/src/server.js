@@ -13,6 +13,7 @@ import instituicoesRoutes from "./routes/instituicoesRoutes.js";
 import beneficariosRoutes from "./routes/beneficariosRoutes.js";
 import doacoesRoutes from "./routes/doacoesRoutes.js";
 import saldoCestaRoutes from "./routes/saldoCestaRoutes.js";
+import ocrRoutes from "./routes/orcRoutes.js";
 
 
 // Carrega as variáveis de ambiente
@@ -65,6 +66,7 @@ app.use("/instituicoes", instituicoesRoutes);
 app.use("/beneficiarios", beneficariosRoutes);
 app.use("/doacoes", doacoesRoutes);
 app.use("/saldo-cestas", saldoCestaRoutes);
+app.use("/ocr", ocrRoutes);
 
 // Porta do servidor
 const PORT = process.env.PORT || 3000;

@@ -20,9 +20,9 @@ model Usuario {
   resetTokenHash      String?
   resetTokenExpiresAt DateTime?
   doacoes             Doacao[]
-  instituicao         InstituicaoParceira?    @relation(fields: [instituicaoId], references: [id])
   historicoRegistrado HistoricoBeneficiario[]
   movimentacoesSaldo  MovimentacaoSaldo[]
+  instituicao         InstituicaoParceira?    @relation(fields: [instituicaoId], references: [id])
 
   @@index([resetTokenHash])
   @@map("usuarios")
@@ -35,23 +35,23 @@ model InstituicaoParceira {
   responsavel   String
   telefone      String
   endereco      String
-  cep           String?
-  logradouro    String?
-  numero        String?
-  complemento   String?
-  bairro        String?
   cidade        String
-  uf            String?
   statusOk      StatusInstituicao @default(PENDENTE)
   ativa         Boolean           @default(true)
   criadoEm      DateTime          @default(now())
   atualizadoEm  DateTime          @updatedAt
   email         String            @unique
   deletedAt     DateTime?
+  cep           String?
+  logradouro    String?
+  numero        String?
+  complemento   String?
+  bairro        String?
+  uf            String?
   beneficiarios Beneficiario[]
   doacoes       Doacao[]
-  usuario       Usuario?
   saldoCesta    SaldoCesta?
+  usuario       Usuario?
 
   @@map("instituicoes_parceiras")
 }
@@ -84,6 +84,7 @@ model Beneficiario {
   instituicao            InstituicaoParceira     @relation(fields: [instituicaoId], references: [id])
   doacoes                Doacao[]
   historico              HistoricoBeneficiario[]
+  qrcodes                qrcodes[]
 
   @@index([instituicaoId])
   @@map("beneficiarios")
@@ -97,9 +98,8 @@ model HistoricoBeneficiario {
   detalhes       Json?
   usuarioId      Int?
   criadoEm       DateTime            @default(now())
-
-  beneficiario Beneficiario @relation(fields: [beneficiarioId], references: [id])
-  usuario      Usuario?     @relation(fields: [usuarioId], references: [id])
+  beneficiario   Beneficiario        @relation(fields: [beneficiarioId], references: [id])
+  usuario        Usuario?            @relation(fields: [usuarioId], references: [id])
 
   @@index([beneficiarioId])
   @@index([beneficiarioId, criadoEm])
@@ -120,10 +120,10 @@ model Doacao {
   atualizadoEm       DateTime            @updatedAt
   deletedAt          DateTime?
   usuarioId          Int
-  movimentacoesSaldo MovimentacaoSaldo[]
   beneficiario       Beneficiario        @relation(fields: [beneficiarioId], references: [id])
   instituicao        InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
   usuario            Usuario             @relation(fields: [usuarioId], references: [id])
+  movimentacoesSaldo MovimentacaoSaldo[]
 
   @@index([beneficiarioId])
   @@index([instituicaoId])
@@ -134,13 +134,12 @@ model Doacao {
 }
 
 model SaldoCesta {
-  id            Int      @id @default(autoincrement())
-  instituicaoId Int      @unique
-  saldoAtual    Int      @default(0)
-  atualizadoEm  DateTime @updatedAt
-
-  instituicao   InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
+  id            Int                 @id @default(autoincrement())
+  instituicaoId Int                 @unique
+  saldoAtual    Int                 @default(0)
+  atualizadoEm  DateTime            @updatedAt
   movimentacoes MovimentacaoSaldo[]
+  instituicao   InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
 
   @@map("saldos_cesta")
 }
@@ -156,14 +155,26 @@ model MovimentacaoSaldo {
   usuarioId      Int
   observacao     String?
   criadoEm       DateTime              @default(now())
-
-  saldoCesta SaldoCesta @relation(fields: [saldoCestaId], references: [id])
-  doacao     Doacao?    @relation(fields: [doacaoId], references: [id])
-  usuario    Usuario    @relation(fields: [usuarioId], references: [id])
+  doacao         Doacao?               @relation(fields: [doacaoId], references: [id])
+  saldoCesta     SaldoCesta            @relation(fields: [saldoCestaId], references: [id])
+  usuario        Usuario               @relation(fields: [usuarioId], references: [id])
 
   @@index([saldoCestaId, criadoEm])
   @@index([doacaoId])
   @@map("movimentacoes_saldo")
+}
+
+model qrcodes {
+  id             Int          @id @default(autoincrement())
+  codigo         String       @unique
+  beneficiarioId Int
+  ativo          Boolean      @default(true)
+  criadoEm       DateTime     @default(now())
+  atualizadoEm   DateTime
+  beneficiarios  Beneficiario @relation(fields: [beneficiarioId], references: [id])
+
+  @@index([ativo])
+  @@index([beneficiarioId])
 }
 
 enum RoleUsuario {

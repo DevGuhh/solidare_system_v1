@@ -1,7 +1,5 @@
 import express from "express";
-
 import authController from "../controllers/authController.js";
-
 import {
   loginLimiter,
   passwordResetLimiter,
