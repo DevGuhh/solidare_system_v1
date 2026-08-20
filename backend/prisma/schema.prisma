@@ -63,14 +63,14 @@ model Beneficiario {
   nomeCompleto           String
   cpf                    String        @unique
   dataNascimento         DateTime
-  logradouro             String
-  numero                 String
+  logradouro             String?
+  numero                 String?
   complemento            String?
   cep                    String?
-  regiao                 String
-  cidade                 String
-  uf                     String
-  telefonePrincipal      String
+  regiao                 String?
+  cidade                 String?
+  uf                     String?
+  telefonePrincipal      String?
   telefoneSecundario     String?
   email                  String?
   instituicaoId          Int

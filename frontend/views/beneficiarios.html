@@ -950,10 +950,6 @@
 
                                 Cidade
 
-                                <span class="required">
-                                    *
-                                </span>
-
                             </label>
 
                             <input
@@ -961,7 +957,6 @@
                                 id="cidade"
                                 placeholder="Digite a cidade"
                                 autocomplete="address-level2"
-                                required
                             >
 
                         </div>
@@ -973,10 +968,6 @@
 
                                 Logradouro
 
-                                <span class="required">
-                                    *
-                                </span>
-
                             </label>
 
                             <input
@@ -984,7 +975,6 @@
                                 id="logradouro"
                                 placeholder="Rua, avenida ou estrada"
                                 autocomplete="street-address"
-                                required
                             >
 
                         </div>
@@ -996,10 +986,6 @@
 
                                 Número
 
-                                <span class="required">
-                                    *
-                                </span>
-
                             </label>
 
                             <input
@@ -1007,7 +993,6 @@
                                 id="numero"
                                 placeholder="Ex.: 125"
                                 maxlength="10"
-                                required
                             >
 
                         </div>
@@ -1035,17 +1020,12 @@
 
                                 Região
 
-                                <span class="required">
-                                    *
-                                </span>
-
                             </label>
 
                             <input
                                 type="text"
                                 id="regiao"
                                 placeholder="Bairro ou região"
-                                required
                             >
 
                         </div>
@@ -1057,20 +1037,41 @@
 
                                 UF
 
-                                <span class="required">
-                                    *
-                                </span>
-
                             </label>
 
-                            <input
-                                type="text"
+                            <select
                                 id="uf"
-                                placeholder="SP"
-                                maxlength="2"
                                 autocomplete="address-level1"
-                                required
                             >
+                                <option value="">Selecione a UF</option>
+                                <option value="AC">AC</option>
+                                <option value="AL">AL</option>
+                                <option value="AP">AP</option>
+                                <option value="AM">AM</option>
+                                <option value="BA">BA</option>
+                                <option value="CE">CE</option>
+                                <option value="DF">DF</option>
+                                <option value="ES">ES</option>
+                                <option value="GO">GO</option>
+                                <option value="MA">MA</option>
+                                <option value="MT">MT</option>
+                                <option value="MS">MS</option>
+                                <option value="MG">MG</option>
+                                <option value="PA">PA</option>
+                                <option value="PB">PB</option>
+                                <option value="PR">PR</option>
+                                <option value="PE">PE</option>
+                                <option value="PI">PI</option>
+                                <option value="RJ">RJ</option>
+                                <option value="RN">RN</option>
+                                <option value="RS">RS</option>
+                                <option value="RO">RO</option>
+                                <option value="RR">RR</option>
+                                <option value="SC">SC</option>
+                                <option value="SP">SP</option>
+                                <option value="SE">SE</option>
+                                <option value="TO">TO</option>
+                            </select>
 
                         </div>
 
@@ -1117,10 +1118,6 @@
 
                                 Telefone principal
 
-                                <span class="required">
-                                    *
-                                </span>
-
                             </label>
 
                             <input
@@ -1130,7 +1127,6 @@
                                 inputmode="tel"
                                 maxlength="15"
                                 autocomplete="tel"
-                                required
                             >
 
                         </div>

@@ -19,19 +19,21 @@ export const criarBeneficiarioSchema = z.object({
     // z.coerce.date() tenta converter string em Date.
     dataNascimento: z.coerce.date(),
 
-    // Endereço: rua, avenida, travessa etc.
+    // Endereço opcional. Quando informado, respeita os limites abaixo.
     logradouro: z
         .string()
         .trim()
-        .min(3, "Logradouro deve ter no mínimo 3 caracteres.")
-        .max(150, "Logradouro deve ter no máximo 150 caracteres."),
+        .max(150, "Logradouro deve ter no máximo 150 caracteres.")
+        .optional()
+        .or(z.literal("")),
 
-    // Número da residência.
+    // Número da residência opcional.
     numero: z
         .string()
         .trim()
-        .min(1, "Número é obrigatório.")
-        .max(10, "Número deve ter no máximo 10 caracteres."),
+        .max(10, "Número deve ter no máximo 10 caracteres.")
+        .optional()
+        .or(z.literal("")),
 
     // Complemento é opcional.
     // Também aceita string vazia "", pois formulários HTML costumam enviar campo vazio.
@@ -49,32 +51,35 @@ export const criarBeneficiarioSchema = z.object({
         .optional()
         .or(z.literal("")),
 
-    // Região/bairro/localidade.
+    // Região/bairro/localidade opcional.
     regiao: z
         .string()
         .trim()
-        .min(2, "Região deve ter no mínimo 2 caracteres.")
-        .max(100, "Região deve ter no máximo 100 caracteres."),
+        .max(100, "Região deve ter no máximo 100 caracteres.")
+        .optional()
+        .or(z.literal("")),
 
-    // Cidade obrigatória.
+    // Cidade opcional.
     cidade: z
         .string()
         .trim()
-        .min(2, "Cidade deve ter no mínimo 2 caracteres.")
-        .max(100, "Cidade deve ter no máximo 100 caracteres."),
+        .max(100, "Cidade deve ter no máximo 100 caracteres.")
+        .optional()
+        .or(z.literal("")),
 
-    // UF obrigatória, limitada aos estados brasileiros.
+    // UF opcional. Quando preenchida, aceita apenas siglas brasileiras.
     uf: z.enum([
         "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
         "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
         "RS", "RO", "RR", "SC", "SP", "SE", "TO"
-    ]),
+    ]).optional().or(z.literal("")),
 
-    // Telefone principal obrigatório.
-    // Aceita DDD + número, com 10 ou 11 dígitos.
+    // Telefone principal opcional. Se informado, aceita DDD + número.
     telefonePrincipal: z
         .string()
-        .regex(/^\d{10,11}$/, "Telefone principal deve conter 10 ou 11 números."),
+        .regex(/^\d{10,11}$/, "Telefone principal deve conter 10 ou 11 números.")
+        .optional()
+        .or(z.literal("")),
 
     // Telefone secundário opcional.
     telefoneSecundario: z

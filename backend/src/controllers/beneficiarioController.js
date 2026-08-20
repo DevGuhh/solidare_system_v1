@@ -220,6 +220,29 @@ class BeneficiarioController {
       // Valida os dados enviados.
       const data = atualizarBeneficiarioSchema.parse(req.body);
 
+      // CPF e data de nascimento são imutáveis após o cadastro.
+      // Mesmo uma chamada manual à API não pode alterar esses campos.
+      if (data.cpf !== undefined && data.cpf !== beneficiario.cpf) {
+        return res.status(400).json({
+          error: "O CPF não pode ser alterado após o cadastro.",
+        });
+      }
+
+      if (data.dataNascimento !== undefined) {
+        const dataAtual = new Date(beneficiario.dataNascimento).getTime();
+        const dataRecebida = new Date(data.dataNascimento).getTime();
+
+        if (dataAtual !== dataRecebida) {
+          return res.status(400).json({
+            error: "A data de nascimento não pode ser alterada após o cadastro.",
+          });
+        }
+      }
+
+      // Remove os campos imutáveis do objeto enviado ao Prisma.
+      delete data.cpf;
+      delete data.dataNascimento;
+
       const alteracoes = montarAlteracoesBeneficiario(beneficiario, data);
 
       // Atualiza no banco.

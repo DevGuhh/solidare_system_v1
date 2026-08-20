@@ -1874,6 +1874,10 @@ async function abrirModalNovoBeneficiario() {
         elementos.formulario
     );
 
+    // No cadastro, CPF e data de nascimento permanecem editáveis.
+    campos.cpf.disabled = false;
+    campos.dataNascimento.disabled = false;
+
     if (
         usuarioLogado.role ===
         "ADMIN"
@@ -1948,6 +1952,9 @@ function fecharModalBeneficiario() {
 
     beneficiarioEditandoId =
         null;
+
+    campos.cpf.disabled = false;
+    campos.dataNascimento.disabled = false;
 
 }
 
@@ -2105,6 +2112,12 @@ async function salvarBeneficiario(event) {
             beneficiarioEditandoId !==
             null;
 
+        // CPF e data de nascimento não são enviados em atualizações.
+        if (editando) {
+            delete dados.cpf;
+            delete dados.dataNascimento;
+        }
+
         const resposta =
             editando
                 ? await editarBeneficiarioAPI(
@@ -2212,6 +2225,10 @@ async function editarBeneficiario(id) {
                 ? beneficiario.dataNascimento
                     .substring(0, 10)
                 : "";
+
+        // Campos imutáveis na edição.
+        campos.cpf.disabled = true;
+        campos.dataNascimento.disabled = true;
 
         campos.cep.value =
             formatarCEP(beneficiario.cep ?? "");
