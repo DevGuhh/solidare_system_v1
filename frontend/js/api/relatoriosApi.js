@@ -8,7 +8,9 @@ import { API_URL } from "../config.js";
  * Monta os cabeçalhos padrão das requisições autenticadas.
  */
 function obterHeaders() {
-    const token = localStorage.getItem("token");
+    const token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token");
 
     return {
         "Content-Type": "application/json",
@@ -30,8 +32,15 @@ export function listarBeneficiariosRelatorio() {
  * Lista as instituições utilizadas no filtro de relatórios.
  */
 export function listarInstituicoesRelatorio() {
-    return fetch(`${API_URL}/instituicoes`, {
+    const parametros = new URLSearchParams({
+        page: "1",
+        limit: "100",
+        sort: "nome:asc"
+    });
+
+    return fetch(`${API_URL}/instituicoes?${parametros.toString()}`, {
         method: "GET",
-        headers: obterHeaders()
+        headers: obterHeaders(),
+        cache: "no-store"
     });
 }

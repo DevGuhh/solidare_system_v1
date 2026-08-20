@@ -227,6 +227,7 @@ function extrairLista(dados, propriedades = []) {
     }
 
     const propriedadesPadrao = [
+        "dados",
         "data",
         "resultados",
         "registros",
