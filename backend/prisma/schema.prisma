@@ -7,18 +7,19 @@ datasource db {
 }
 
 model Usuario {
-  id                  Int                     @id @default(autoincrement())
+  id                  Int         @id @default(autoincrement())
   nome                String
-  email               String                  @unique
+  email               String      @unique
   senhaHash           String
-  role                RoleUsuario             @default(INSTITUICAO)
-  ativo               Boolean                 @default(true)
-  criadoEm            DateTime                @default(now())
-  atualizadoEm        DateTime                @updatedAt
-  instituicaoId       Int?                    @unique
-  senhaProvisoria     Boolean                 @default(false)
+  role                RoleUsuario @default(INSTITUICAO)
+  ativo               Boolean     @default(true)
+  criadoEm            DateTime    @default(now())
+  atualizadoEm        DateTime    @updatedAt
+  instituicaoId       Int?        @unique
+  senhaProvisoria     Boolean     @default(false)
   resetTokenHash      String?
   resetTokenExpiresAt DateTime?
+
   doacoes             Doacao[]
   historicoRegistrado HistoricoBeneficiario[]
   movimentacoesSaldo  MovimentacaoSaldo[]
@@ -29,25 +30,26 @@ model Usuario {
 }
 
 model InstituicaoParceira {
-  id            Int               @id @default(autoincrement())
-  nome          String
-  tipo          TipoInstituicao   @default(OUTRO)
-  responsavel   String
-  telefone      String
-  endereco      String
-  cidade        String
-  statusOk      StatusInstituicao @default(PENDENTE)
-  ativa         Boolean           @default(true)
-  criadoEm      DateTime          @default(now())
-  atualizadoEm  DateTime          @updatedAt
-  email         String            @unique
-  deletedAt     DateTime?
-  cep           String?
-  logradouro    String?
-  numero        String?
-  complemento   String?
-  bairro        String?
-  uf            String?
+  id           Int               @id @default(autoincrement())
+  nome         String
+  tipo         TipoInstituicao   @default(OUTRO)
+  responsavel  String
+  telefone     String
+  endereco     String
+  cidade       String
+  statusOk     StatusInstituicao @default(PENDENTE)
+  ativa        Boolean           @default(true)
+  criadoEm     DateTime          @default(now())
+  atualizadoEm DateTime          @updatedAt
+  email        String            @unique
+  deletedAt    DateTime?
+  cep          String?
+  logradouro   String?
+  numero       String?
+  complemento  String?
+  bairro       String?
+  uf           String?
+
   beneficiarios Beneficiario[]
   doacoes       Doacao[]
   saldoCesta    SaldoCesta?
@@ -57,9 +59,9 @@ model InstituicaoParceira {
 }
 
 model Beneficiario {
-  id                     Int                     @id @default(autoincrement())
+  id                     Int           @id @default(autoincrement())
   nomeCompleto           String
-  cpf                    String                  @unique
+  cpf                    String        @unique
   dataNascimento         DateTime
   logradouro             String
   numero                 String
@@ -72,19 +74,20 @@ model Beneficiario {
   telefoneSecundario     String?
   email                  String?
   instituicaoId          Int
-  tipoBeneficio          TipoBeneficio           @default(CESTA)
+  tipoBeneficio          TipoBeneficio @default(CESTA)
   situacaoSocioeconomica String?
-  dataCadastro           DateTime                @default(now())
+  dataCadastro           DateTime      @default(now())
   observacoes            String?
-  ativo                  Boolean                 @default(true)
-  criadoEm               DateTime                @default(now())
-  atualizadoEm           DateTime                @updatedAt
+  ativo                  Boolean       @default(true)
+  criadoEm               DateTime      @default(now())
+  atualizadoEm           DateTime      @updatedAt
   deletedAt              DateTime?
-  composicaoFamiliar     Int                     @default(1)
-  instituicao            InstituicaoParceira     @relation(fields: [instituicaoId], references: [id])
-  doacoes                Doacao[]
-  historico              HistoricoBeneficiario[]
-  qrcodes                qrcodes[]
+  composicaoFamiliar     Int           @default(1)
+
+  instituicao InstituicaoParceira     @relation(fields: [instituicaoId], references: [id])
+  doacoes     Doacao[]
+  historico   HistoricoBeneficiario[]
+  qrcodes     QRCode[]
 
   @@index([instituicaoId])
   @@map("beneficiarios")
@@ -98,8 +101,9 @@ model HistoricoBeneficiario {
   detalhes       Json?
   usuarioId      Int?
   criadoEm       DateTime            @default(now())
-  beneficiario   Beneficiario        @relation(fields: [beneficiarioId], references: [id])
-  usuario        Usuario?            @relation(fields: [usuarioId], references: [id])
+
+  beneficiario Beneficiario @relation(fields: [beneficiarioId], references: [id])
+  usuario      Usuario?     @relation(fields: [usuarioId], references: [id])
 
   @@index([beneficiarioId])
   @@index([beneficiarioId, criadoEm])
@@ -107,19 +111,20 @@ model HistoricoBeneficiario {
 }
 
 model Doacao {
-  id                 Int                 @id @default(autoincrement())
-  codigo             String              @unique
-  beneficiarioId     Int
-  instituicaoId      Int
-  tipo               TipoBeneficio
-  quantidade         Int
-  observacoes        String?
-  comprovante        Boolean             @default(false)
-  dataDoacao         DateTime            @default(now())
-  criadoEm           DateTime            @default(now())
-  atualizadoEm       DateTime            @updatedAt
-  deletedAt          DateTime?
-  usuarioId          Int
+  id             Int           @id @default(autoincrement())
+  codigo         String        @unique
+  beneficiarioId Int
+  instituicaoId  Int
+  tipo           TipoBeneficio
+  quantidade     Int
+  observacoes    String?
+  comprovante    Boolean       @default(false)
+  dataDoacao     DateTime      @default(now())
+  criadoEm       DateTime      @default(now())
+  atualizadoEm   DateTime      @updatedAt
+  deletedAt      DateTime?
+  usuarioId      Int
+
   beneficiario       Beneficiario        @relation(fields: [beneficiarioId], references: [id])
   instituicao        InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
   usuario            Usuario             @relation(fields: [usuarioId], references: [id])
@@ -134,10 +139,11 @@ model Doacao {
 }
 
 model SaldoCesta {
-  id            Int                 @id @default(autoincrement())
-  instituicaoId Int                 @unique
-  saldoAtual    Int                 @default(0)
-  atualizadoEm  DateTime            @updatedAt
+  id            Int      @id @default(autoincrement())
+  instituicaoId Int      @unique
+  saldoAtual    Int      @default(0)
+  atualizadoEm  DateTime @updatedAt
+
   movimentacoes MovimentacaoSaldo[]
   instituicao   InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
 
@@ -155,26 +161,29 @@ model MovimentacaoSaldo {
   usuarioId      Int
   observacao     String?
   criadoEm       DateTime              @default(now())
-  doacao         Doacao?               @relation(fields: [doacaoId], references: [id])
-  saldoCesta     SaldoCesta            @relation(fields: [saldoCestaId], references: [id])
-  usuario        Usuario               @relation(fields: [usuarioId], references: [id])
+
+  doacao     Doacao?    @relation(fields: [doacaoId], references: [id])
+  saldoCesta SaldoCesta @relation(fields: [saldoCestaId], references: [id])
+  usuario    Usuario    @relation(fields: [usuarioId], references: [id])
 
   @@index([saldoCestaId, criadoEm])
   @@index([doacaoId])
   @@map("movimentacoes_saldo")
 }
 
-model qrcodes {
-  id             Int          @id @default(autoincrement())
-  codigo         String       @unique
+model QRCode {
+  id             Int      @id @default(autoincrement())
+  codigo         String   @unique
   beneficiarioId Int
-  ativo          Boolean      @default(true)
-  criadoEm       DateTime     @default(now())
-  atualizadoEm   DateTime
-  beneficiarios  Beneficiario @relation(fields: [beneficiarioId], references: [id])
+  ativo          Boolean  @default(true)
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  beneficiario Beneficiario @relation(fields: [beneficiarioId], references: [id])
 
   @@index([ativo])
   @@index([beneficiarioId])
+  @@map("qrcodes")
 }
 
 enum RoleUsuario {

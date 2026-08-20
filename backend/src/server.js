@@ -1,38 +1,49 @@
 import dns from "node:dns";
 dns.setDefaultResultOrder("ipv4first");
+
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { config } from "dotenv";
-import { connectDB, disconnectDB } from "./config/db.js";
 import rateLimit from "express-rate-limit";
+import { connectDB, disconnectDB } from "./config/db.js";
 
-// Importando Rotas
+// ===============================
+// IMPORTAÇÃO DAS ROTAS
+// ===============================
+
 import authRoutes from "./routes/authRoutes.js";
 import instituicoesRoutes from "./routes/instituicoesRoutes.js";
-import beneficariosRoutes from "./routes/beneficariosRoutes.js";
+import beneficariosRoutes from "./routes/beneficiariosRoutes.js";
 import doacoesRoutes from "./routes/doacoesRoutes.js";
+import qrcodeRoutes from "./routes/qrcodeRoutes.js";
 import saldoCestaRoutes from "./routes/saldoCestaRoutes.js";
 import ocrRoutes from "./routes/orcRoutes.js";
 
+// ===============================
+// VARIÁVEIS DE AMBIENTE
+// ===============================
 
-// Carrega as variáveis de ambiente
 config();
 
-// Conecta ao banco
+// ===============================
+// CONEXÃO COM O BANCO
+// ===============================
+
 connectDB();
 
-// Cria a aplicação Express
+// ===============================
+// EXPRESS
+// ===============================
+
 const app = express();
 
-// Necessário para o rate limit identificar o IP real do cliente atrás de proxy (Vercel, etc.)
 app.set("trust proxy", 1);
 
-// Configuração do CORS
-/*app.use(cors({
-    origin: "http://127.0.0.1:5500",
-    credentials: true
-}));*/
+// ===============================
+// CORS
+// ===============================
+
 const allowedOrigins = [
   "https://solidare-login-v4.vercel.app",
   "https://solidare-system-v1.vercel.app",
@@ -50,35 +61,67 @@ app.use(
       }
     },
     credentials: true,
-  }),
+  })
 );
 
-// Permite ler cookies
+// ===============================
+// MIDDLEWARES
+// ===============================
+
 app.use(cookieParser());
 
-// Permite receber JSON e formulários
 app.use(express.json());
+
 app.use(express.urlencoded({ extended: true }));
 
-// Rotas
+// ===============================
+// RATE LIMIT
+// ===============================
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(limiter);
+
+// ===============================
+// ROTAS
+// ===============================
+
 app.use("/auth", authRoutes);
+
 app.use("/instituicoes", instituicoesRoutes);
+
 app.use("/beneficiarios", beneficariosRoutes);
+
 app.use("/doacoes", doacoesRoutes);
+
+app.use("/qrcodes", qrcodeRoutes);
+
 app.use("/saldo-cestas", saldoCestaRoutes);
+
 app.use("/ocr", ocrRoutes);
 
-// Porta do servidor
+// ===============================
+// PORTA
+// ===============================
+
 const PORT = process.env.PORT || 3000;
 
-// Inicia o servidor
+// ===============================
+// INICIA O SERVIDOR
+// ===============================
+
 const server = app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
 
-/* ==========================================================================
-   TRATAMENTO DE ERROS
-   ========================================================================== */
+// ===============================
+// TRATAMENTO DE ERROS
+// ===============================
 
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Rejection:", err);
