@@ -2271,8 +2271,7 @@ async function editarBeneficiario(id) {
         }
 
         campos.tipoBeneficio.value =
-            beneficiario.tipoBeneficio ??
-            "CESTA";
+            beneficiario.tipoBeneficio ?? "";
 
         campos.situacaoSocioeconomica.value =
             beneficiario.situacaoSocioeconomica ??

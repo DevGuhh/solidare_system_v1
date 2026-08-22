@@ -1,25 +1,31 @@
 import express from "express";
 import qrcodeController from "../controllers/qrcodeController.js";
-import { protect } from "../middlewares/authMiddleware.js";
+import { authorize, protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// Listar todos os QR Codes
-router.get("/", protect, qrcodeController.listarQRCodes);
+router.use(protect);
+router.use(authorize("ADMIN", "INSTITUICAO"));
+
+// Listar QR Codes visíveis ao usuário autenticado
+router.get("/", qrcodeController.listarQRCodes);
 
 // Criar um novo QR Code
-router.post("/", protect, qrcodeController.criarQRCode);
+router.post("/", qrcodeController.criarQRCode);
 
-// Validar um QR Code
-router.get("/:codigo/validar", protect, qrcodeController.validarQRCode);
+// Validar o QR Code e consultar a situação da cesta do mês
+router.get("/:codigo/validar", qrcodeController.validarQRCode);
+
+// Confirmar a entrega de 1 cesta usando o QR Code
+router.post("/:codigo/confirmar-entrega", qrcodeController.confirmarEntrega);
 
 // Gerar imagem do QR Code
-router.get("/:codigo/imagem", protect, qrcodeController.gerarImagemQRCode);
+router.get("/:codigo/imagem", qrcodeController.gerarImagemQRCode);
 
 // Buscar QR Code pelo código
-router.get("/:codigo", protect, qrcodeController.buscarQRCode);
+router.get("/:codigo", qrcodeController.buscarQRCode);
 
 // Desativar QR Code
-router.patch("/:id", protect, qrcodeController.desativarQRCode);
+router.patch("/:id", qrcodeController.desativarQRCode);
 
 export default router;

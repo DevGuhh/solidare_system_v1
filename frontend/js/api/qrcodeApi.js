@@ -107,6 +107,27 @@ export async function validarQRCode(codigo) {
 }
 
 // =====================================================
+// CONFIRMAR ENTREGA DE CESTA PELO QR CODE
+// =====================================================
+
+export async function confirmarEntregaQRCode(codigo) {
+  const codigoNormalizado = String(codigo ?? "").trim().toUpperCase();
+
+  if (!codigoNormalizado) {
+    throw new Error("Código do QR Code é obrigatório.");
+  }
+
+  return fetch(
+    `${API_URL}/qrcodes/${encodeURIComponent(codigoNormalizado)}/confirmar-entrega`,
+    {
+      method: "POST",
+      headers: obterHeaders(),
+      body: JSON.stringify({}),
+    },
+  );
+}
+
+// =====================================================
 // DESATIVAR QR CODE
 // =====================================================
 

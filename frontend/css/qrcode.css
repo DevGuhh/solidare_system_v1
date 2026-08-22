@@ -352,9 +352,20 @@
     display: none;
   }
 
+  /* Permite visualizar todo o modal mesmo quando o conteúdo é maior que a tela. */
+  @supports not (height: 100dvh) {
+    .qrcode-modal {
+      max-height: calc(100vh - 40px);
+    }
+  }
+
   .qrcode-modal {
     width: 100%;
     max-width: 520px;
+    max-height: calc(100dvh - 40px);
+
+    display: flex;
+    flex-direction: column;
 
     background: #ffffff;
 
@@ -427,6 +438,11 @@
     flex-direction: column;
 
     gap: 20px;
+
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
 
     padding: 24px;
   }
@@ -741,3 +757,74 @@
   .qrcode-resultado-dados { display: grid; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid currentColor; border-top-color: rgba(100,116,139,.25); }
   .qrcode-resultado-dados span { display: block; font-size: 14px; }
   @media (max-width: 640px) { .qrcode-acoes-cabecalho { width: 100%; } .botao-validar-qrcode, .botao-gerar-qrcode { flex: 1; } .qrcode-validacao-campo { flex-direction: column; } .qrcode-validacao-campo button { width: 100%; } }
+/* ========================================================================== 
+   ETAPA 1 - CONFIRMAÇÃO DE ENTREGA POR QR CODE
+   ========================================================================== */
+.qrcode-resultado-validacao.bloqueado {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+
+.qrcode-confirmacao-entrega {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(100, 116, 139, 0.25);
+}
+
+.qrcode-confirmacao-entrega p {
+  margin: 0 0 12px;
+  color: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.qrcode-botao-confirmar-entrega {
+  width: 100%;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 18px;
+  background: #166534;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.qrcode-botao-confirmar-entrega:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.qrcode-botao-confirmar-entrega:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+
+/* =====================================================
+   AJUSTE DE ALTURA - MODAL DE VALIDAÇÃO DO QR CODE
+   ===================================================== */
+@media (max-height: 760px) {
+  .qrcode-modal-overlay {
+    padding: 12px;
+  }
+
+  .qrcode-modal {
+    max-height: calc(100dvh - 24px);
+  }
+
+  .qrcode-modal-cabecalho {
+    padding: 18px 20px;
+  }
+
+  .qrcode-modal-corpo {
+    padding: 18px 20px;
+    gap: 16px;
+  }
+}
