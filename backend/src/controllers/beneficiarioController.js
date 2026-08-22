@@ -369,6 +369,151 @@ class BeneficiarioController {
     }
   }
 
+  async obterCarteirinha(req, res) {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    try {
+      const where = { id, deletedAt: null };
+      if (req.user.role !== "ADMIN") {
+        where.instituicaoId = req.user.instituicaoId;
+      }
+
+      const beneficiario = await prisma.beneficiario.findFirst({
+        where,
+        select: {
+          id: true,
+          nomeCompleto: true,
+          cpf: true,
+          dataNascimento: true,
+          tipoBeneficio: true,
+          ativo: true,
+          fotoPerfil: true,
+          instituicao: {
+            select: { id: true, nome: true },
+          },
+          qrcodes: {
+            where: { ativo: true },
+            orderBy: { criadoEm: "desc" },
+            take: 1,
+            select: { id: true, codigo: true, criadoEm: true },
+          },
+        },
+      });
+
+      if (!beneficiario) {
+        return res.status(404).json({ error: "Beneficiário não encontrado." });
+      }
+
+      const { fotoPerfil, qrcodes, ...dados } = beneficiario;
+
+      return res.status(200).json({
+        ...dados,
+        possuiFoto: Boolean(fotoPerfil?.length),
+        qrCode: qrcodes?.[0] ?? null,
+      });
+    } catch (error) {
+      console.error(`GET /beneficiarios/${req.params.id}/carteirinha error:`, error);
+      return res.status(500).json({ error: "Erro ao carregar a carteirinha." });
+    }
+  }
+
+  async obterFotoPerfil(req, res) {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    try {
+      const where = { id, deletedAt: null };
+      if (req.user.role !== "ADMIN") {
+        where.instituicaoId = req.user.instituicaoId;
+      }
+
+      const beneficiario = await prisma.beneficiario.findFirst({
+        where,
+        select: { fotoPerfil: true, fotoPerfilMimeType: true },
+      });
+
+      if (!beneficiario) {
+        return res.status(404).json({ error: "Beneficiário não encontrado." });
+      }
+
+      if (!beneficiario.fotoPerfil) {
+        return res.status(404).json({ error: "Beneficiário ainda não possui foto cadastral." });
+      }
+
+      res.setHeader("Content-Type", beneficiario.fotoPerfilMimeType || "image/jpeg");
+      res.setHeader("Cache-Control", "private, no-store");
+      return res.status(200).send(Buffer.from(beneficiario.fotoPerfil));
+    } catch (error) {
+      console.error(`GET /beneficiarios/${req.params.id}/foto error:`, error);
+      return res.status(500).json({ error: "Erro ao carregar a foto do beneficiário." });
+    }
+  }
+
+  async salvarFotoPerfil(req, res) {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: "ID inválido." });
+    }
+
+    try {
+      const where = { id, deletedAt: null };
+      if (req.user.role !== "ADMIN") {
+        where.instituicaoId = req.user.instituicaoId;
+      }
+
+      const beneficiario = await prisma.beneficiario.findFirst({
+        where,
+        select: { id: true },
+      });
+
+      if (!beneficiario) {
+        return res.status(404).json({ error: "Beneficiário não encontrado." });
+      }
+
+      const fotoBase64 = String(req.body?.fotoBase64 ?? "");
+      const match = fotoBase64.match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
+
+      if (!match) {
+        return res.status(400).json({ error: "Envie uma foto JPEG, PNG ou WEBP válida." });
+      }
+
+      const mimeType = match[1];
+      const arquivo = Buffer.from(match[2], "base64");
+
+      if (!arquivo.length || arquivo.length > 3 * 1024 * 1024) {
+        return res.status(413).json({ error: "A foto deve ter no máximo 3 MB." });
+      }
+
+      await prisma.beneficiario.update({
+        where: { id },
+        data: {
+          fotoPerfil: arquivo,
+          fotoPerfilMimeType: mimeType,
+        },
+      });
+
+      await registrarEventoHistorico({
+        beneficiarioId: id,
+        tipo: "ATUALIZACAO",
+        descricao: "Foto cadastral do beneficiário atualizada.",
+        usuarioId: req.user.id,
+      });
+
+      return res.status(200).json({ message: "Foto cadastral atualizada com sucesso." });
+    } catch (error) {
+      console.error(`PUT /beneficiarios/${req.params.id}/foto error:`, error);
+      return res.status(500).json({ error: "Erro ao salvar a foto do beneficiário." });
+    }
+  }
+
   async listarHistoricoDoBeneficiario(req, res) {
     const id = Number(req.params.id);
 

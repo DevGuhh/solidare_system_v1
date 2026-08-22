@@ -430,6 +430,20 @@ export function renderizarTabela(
 
                         <button
                             type="button"
+                            class="btnCarteirinhaBeneficiario"
+                            data-id="${id}"
+                            data-nome="${nomeSeguro}"
+                            title="Gerar carteirinha do beneficiário"
+                            aria-label="Gerar carteirinha de ${nomeSeguro}"
+                        >
+                            <i
+                                class="fa-solid fa-id-card"
+                                aria-hidden="true"
+                            ></i>
+                        </button>
+
+                        <button
+                            type="button"
                             class="btnHistoricoBeneficiario"
                             data-id="${id}"
                             data-nome="${nomeSeguro}"

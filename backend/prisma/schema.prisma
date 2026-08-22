@@ -83,6 +83,8 @@ model Beneficiario {
   atualizadoEm           DateTime      @updatedAt
   deletedAt              DateTime?
   composicaoFamiliar     Int           @default(1)
+  fotoPerfil             Bytes?
+  fotoPerfilMimeType     String?
 
   instituicao InstituicaoParceira     @relation(fields: [instituicaoId], references: [id])
   doacoes     Doacao[]

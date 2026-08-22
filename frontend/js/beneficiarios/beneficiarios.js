@@ -20,8 +20,13 @@ import {
     buscarBeneficiario,
     cadastrarBeneficiarioAPI,
     editarBeneficiarioAPI,
-    alterarStatusBeneficiarioAPI
+    alterarStatusBeneficiarioAPI,
+    buscarCarteirinhaBeneficiarioAPI,
+    obterFotoBeneficiarioAPI,
+    salvarFotoBeneficiarioAPI
 } from "../api/beneficiariosApi.js";
+
+import { obterImagemQRCode } from "../api/qrcodeApi.js";
 
 import {
     renderizarTabela
@@ -74,6 +79,8 @@ import { API_URL } from "../config.js";
 let usuarioLogado = null;
 
 let beneficiarioEditandoId = null;
+
+let cameraCarteirinhaStream = null;
 
 let listaBeneficiarios = [];
 
@@ -2598,6 +2605,355 @@ function selecionarFiltroStatus(event) {
 
 
 // =====================================================
+// CARTEIRINHA DO BENEFICIÁRIO
+// =====================================================
+
+function mascararCPFCartao(cpf) {
+    const numeros = String(cpf ?? "").replace(/\D/g, "");
+    if (numeros.length !== 11) return "-";
+    return `***.${numeros.slice(3, 6)}.${numeros.slice(6, 9)}-**`;
+}
+
+function rotuloBeneficioCarteirinha(tipo) {
+    const rotulos = {
+        CESTA: "Cesta básica",
+        GRANEL: "Granel",
+        AMBOS: "Cesta + granel"
+    };
+    return rotulos[String(tipo ?? "").toUpperCase()] || "Não informado";
+}
+
+function blobParaDataURL(blob) {
+    return new Promise((resolve, reject) => {
+        const leitor = new FileReader();
+        leitor.onload = () => resolve(String(leitor.result || ""));
+        leitor.onerror = () => reject(new Error("Não foi possível carregar a imagem."));
+        leitor.readAsDataURL(blob);
+    });
+}
+
+async function arquivoFotoPerfilParaBase64(arquivo) {
+    if (!arquivo || !arquivo.type.startsWith("image/")) {
+        throw new Error("Selecione uma imagem válida.");
+    }
+
+    const url = URL.createObjectURL(arquivo);
+    try {
+        const imagem = await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error("Não foi possível processar a foto."));
+            img.src = url;
+        });
+
+        const tamanhoOrigem = Math.min(imagem.naturalWidth, imagem.naturalHeight);
+        const origemX = Math.max(0, (imagem.naturalWidth - tamanhoOrigem) / 2);
+        const origemY = Math.max(0, (imagem.naturalHeight - tamanhoOrigem) / 2);
+        const canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 640;
+        const contexto = canvas.getContext("2d");
+        contexto.drawImage(
+            imagem,
+            origemX,
+            origemY,
+            tamanhoOrigem,
+            tamanhoOrigem,
+            0,
+            0,
+            640,
+            640
+        );
+        return canvas.toDataURL("image/jpeg", 0.82);
+    } finally {
+        URL.revokeObjectURL(url);
+    }
+}
+
+function encerrarCameraCarteirinha(modal = document.getElementById("modalCarteirinhaBeneficiario")) {
+    if (cameraCarteirinhaStream) {
+        cameraCarteirinhaStream.getTracks().forEach((track) => track.stop());
+        cameraCarteirinhaStream = null;
+    }
+
+    const video = modal?.querySelector("[data-camera-carteirinha-video]");
+    const area = modal?.querySelector("[data-camera-carteirinha]");
+
+    if (video) {
+        video.pause();
+        video.srcObject = null;
+    }
+
+    if (area) area.hidden = true;
+}
+
+async function abrirCameraCarteirinha(modal) {
+    if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error("Este navegador não permite acesso direto à câmera.");
+    }
+
+    encerrarCameraCarteirinha(modal);
+
+    const area = modal?.querySelector("[data-camera-carteirinha]");
+    const video = modal?.querySelector("[data-camera-carteirinha-video]");
+
+    if (!area || !video) {
+        throw new Error("A área da câmera não foi encontrada.");
+    }
+
+    area.hidden = false;
+
+    try {
+        cameraCarteirinhaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: "user" },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        });
+    } catch {
+        cameraCarteirinhaStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+        });
+    }
+
+    video.srcObject = cameraCarteirinhaStream;
+    await video.play();
+}
+
+function capturarFotoCarteirinha(modal) {
+    const video = modal?.querySelector("[data-camera-carteirinha-video]");
+
+    if (!video || !video.videoWidth || !video.videoHeight) {
+        throw new Error("A câmera ainda não está pronta para capturar a foto.");
+    }
+
+    const lado = Math.min(video.videoWidth, video.videoHeight);
+    const origemX = Math.max(0, (video.videoWidth - lado) / 2);
+    const origemY = Math.max(0, (video.videoHeight - lado) / 2);
+    const canvas = document.createElement("canvas");
+    canvas.width = 640;
+    canvas.height = 640;
+
+    const contexto = canvas.getContext("2d");
+    contexto.drawImage(
+        video,
+        origemX,
+        origemY,
+        lado,
+        lado,
+        0,
+        0,
+        640,
+        640
+    );
+
+    return canvas.toDataURL("image/jpeg", 0.82);
+}
+
+async function salvarFotoCarteirinhaCapturada(id, fotoBase64, modal) {
+    mostrarLoading();
+
+    try {
+        const respostaSalvar = await salvarFotoBeneficiarioAPI(id, fotoBase64);
+        const retorno = await lerRespostaJson(respostaSalvar);
+
+        if (!respostaSalvar.ok) {
+            throw new Error(retorno.error || "Não foi possível salvar a foto.");
+        }
+
+        encerrarCameraCarteirinha(modal);
+        mostrarSucesso("Foto cadastral atualizada com sucesso!");
+        modal.hidden = true;
+        document.body.style.overflow = "";
+        await abrirCarteirinhaBeneficiario(id);
+    } finally {
+        esconderLoading();
+    }
+}
+
+function garantirModalCarteirinha() {
+    let modal = document.getElementById("modalCarteirinhaBeneficiario");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = "modalCarteirinhaBeneficiario";
+    modal.className = "carteirinha-modal-overlay";
+    modal.hidden = true;
+    document.body.appendChild(modal);
+    return modal;
+}
+
+function imprimirCarteirinhaAtual() {
+    const cartao = document.querySelector("#modalCarteirinhaBeneficiario .carteirinha-cartao");
+    if (!cartao) return;
+
+    const janela = window.open("", "_blank", "width=760,height=620");
+    if (!janela) {
+        mostrarErro("Permita pop-ups para imprimir a carteirinha.");
+        return;
+    }
+
+    janela.document.write(`<!doctype html>
+        <html lang="pt-BR"><head><meta charset="utf-8"><title>Carteirinha do beneficiário</title>
+        <style>
+          *{box-sizing:border-box} body{margin:0;padding:28px;font-family:Arial,sans-serif;background:#fff;display:flex;justify-content:center}
+          .carteirinha-cartao{width:680px;min-height:390px;border-radius:24px;overflow:hidden;border:1px solid #dedede;box-shadow:none;background:#fff;color:#1f2937}
+          .carteirinha-faixa{background:#980019;color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
+          .carteirinha-faixa strong{font-size:22px}.carteirinha-faixa span{font-size:12px;text-transform:uppercase;letter-spacing:1px}
+          .carteirinha-corpo{display:grid;grid-template-columns:150px 1fr 170px;gap:22px;padding:24px;align-items:center}
+          .carteirinha-foto{width:145px;height:175px;border-radius:18px;object-fit:cover;background:#f3f4f6;border:1px solid #e5e7eb}
+          .carteirinha-foto-placeholder{width:145px;height:175px;border-radius:18px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:54px;color:#9ca3af}
+          .carteirinha-dados h2{margin:0 0 14px;font-size:23px}.carteirinha-dados p{margin:7px 0;font-size:14px}.carteirinha-dados b{color:#980019}
+          .carteirinha-qr{text-align:center}.carteirinha-qr img{width:155px;height:155px;object-fit:contain}.carteirinha-qr small{display:block;margin-top:4px;font-family:monospace;font-size:10px}
+          .carteirinha-rodape{border-top:1px solid #eee;padding:10px 24px;text-align:center;font-size:11px;color:#6b7280}
+          @media print{body{padding:0}.carteirinha-cartao{width:100%;page-break-inside:avoid}}
+        </style></head><body>${cartao.outerHTML}<script>window.onload=()=>{window.print();};<\/script></body></html>`);
+    janela.document.close();
+}
+
+async function abrirCarteirinhaBeneficiario(id) {
+    mostrarLoading();
+
+    try {
+        const resposta = await buscarCarteirinhaBeneficiarioAPI(id);
+        const dados = await lerRespostaJson(resposta);
+        if (!resposta.ok) throw new Error(dados.error || "Não foi possível carregar a carteirinha.");
+
+        let fotoDataURL = "";
+        if (dados.possuiFoto) {
+            const respostaFoto = await obterFotoBeneficiarioAPI(id);
+            if (respostaFoto.ok) fotoDataURL = await blobParaDataURL(await respostaFoto.blob());
+        }
+
+        let qrDataURL = "";
+        if (dados.qrCode?.codigo) {
+            const respostaQR = await obterImagemQRCode(dados.qrCode.codigo);
+            if (respostaQR.ok) qrDataURL = await blobParaDataURL(await respostaQR.blob());
+        }
+
+        const modal = garantirModalCarteirinha();
+        const foto = fotoDataURL
+            ? `<img class="carteirinha-foto" src="${fotoDataURL}" alt="Foto de ${escaparHtml(dados.nomeCompleto)}">`
+            : `<div class="carteirinha-foto-placeholder"><i class="fa-solid fa-user"></i></div>`;
+        const qr = qrDataURL
+            ? `<img src="${qrDataURL}" alt="QR Code"><small>${escaparHtml(dados.qrCode.codigo)}</small>`
+            : `<div class="carteirinha-sem-qr"><i class="fa-solid fa-qrcode"></i><span>QR Code não gerado</span></div>`;
+
+        modal.innerHTML = `
+          <div class="carteirinha-modal" role="dialog" aria-modal="true" aria-label="Carteirinha do beneficiário">
+            <div class="carteirinha-modal-topo">
+              <div><span>BENEFICIÁRIO</span><h2>Carteirinha</h2></div>
+              <button type="button" data-fechar-carteirinha aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="carteirinha-cartao">
+              <div class="carteirinha-faixa"><strong>Instituto Solidare</strong><span>Carteirinha do beneficiário</span></div>
+              <div class="carteirinha-corpo">
+                <div>${foto}</div>
+                <div class="carteirinha-dados">
+                  <h2>${escaparHtml(dados.nomeCompleto || "Beneficiário")}</h2>
+                  <p><b>CPF:</b> ${escaparHtml(mascararCPFCartao(dados.cpf))}</p>
+                  <p><b>Instituição:</b> ${escaparHtml(dados.instituicao?.nome || "-")}</p>
+                  <p><b>Benefício:</b> ${escaparHtml(rotuloBeneficioCarteirinha(dados.tipoBeneficio))}</p>
+                  <p><b>Código:</b> #${Number(dados.id)}</p>
+                  <p><b>Status:</b> ${dados.ativo ? "Ativo" : "Inativo"}</p>
+                </div>
+                <div class="carteirinha-qr">${qr}</div>
+              </div>
+              <div class="carteirinha-rodape">Apresente esta carteirinha para identificação e leitura do QR Code.</div>
+            </div>
+            ${!dados.qrCode ? `<div class="carteirinha-aviso"><i class="fa-solid fa-circle-exclamation"></i> Gere primeiro um QR Code ativo para este beneficiário.</div>` : ""}
+            <div class="carteirinha-camera-area" data-camera-carteirinha hidden>
+              <video class="carteirinha-camera-video" data-camera-carteirinha-video autoplay playsinline muted></video>
+              <div class="carteirinha-camera-acoes">
+                <button type="button" class="btn-carteirinha-capturar" data-capturar-foto-carteirinha><i class="fa-solid fa-camera-retro"></i> Capturar foto</button>
+                <button type="button" class="btn-carteirinha-cancelar-camera" data-cancelar-camera-carteirinha>Cancelar</button>
+              </div>
+            </div>
+            <div class="carteirinha-acoes-modal">
+              <input type="file" accept="image/jpeg,image/png,image/webp" data-foto-carteirinha hidden>
+              <button type="button" class="btn-carteirinha-foto btn-carteirinha-camera" data-abrir-camera-carteirinha><i class="fa-solid fa-camera"></i> Abrir câmera</button>
+              <button type="button" class="btn-carteirinha-foto" data-selecionar-foto-carteirinha><i class="fa-solid fa-image"></i> Selecionar arquivo</button>
+              <button type="button" class="btn-carteirinha-imprimir" data-imprimir-carteirinha ${!dados.qrCode ? "disabled" : ""}><i class="fa-solid fa-print"></i> Imprimir carteirinha</button>
+            </div>
+          </div>`;
+
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+
+        modal.querySelector("[data-fechar-carteirinha]")?.addEventListener("click", () => {
+            encerrarCameraCarteirinha(modal);
+            modal.hidden = true;
+            document.body.style.overflow = "";
+        });
+        modal.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                encerrarCameraCarteirinha(modal);
+                modal.hidden = true;
+                document.body.style.overflow = "";
+            }
+        }, { once: true });
+        modal.querySelector("[data-imprimir-carteirinha]")?.addEventListener("click", imprimirCarteirinhaAtual);
+
+        modal.querySelector("[data-abrir-camera-carteirinha]")?.addEventListener("click", async () => {
+            try {
+                await abrirCameraCarteirinha(modal);
+            } catch (erro) {
+                console.error("Erro ao abrir câmera da carteirinha:", erro);
+                mostrarErro((erro.message || "Não foi possível abrir a câmera.") + " Você ainda pode selecionar um arquivo.");
+            }
+        });
+
+        modal.querySelector("[data-cancelar-camera-carteirinha]")?.addEventListener("click", () => {
+            encerrarCameraCarteirinha(modal);
+        });
+
+        modal.querySelector("[data-capturar-foto-carteirinha]")?.addEventListener("click", async () => {
+            try {
+                const fotoBase64 = capturarFotoCarteirinha(modal);
+                await salvarFotoCarteirinhaCapturada(id, fotoBase64, modal);
+            } catch (erro) {
+                console.error("Erro ao capturar foto da carteirinha:", erro);
+                mostrarErro(erro.message || "Não foi possível capturar a foto.");
+            }
+        });
+
+        modal.querySelector("[data-selecionar-foto-carteirinha]")?.addEventListener("click", () => {
+            encerrarCameraCarteirinha(modal);
+            modal.querySelector("[data-foto-carteirinha]")?.click();
+        });
+
+        modal.querySelector("[data-foto-carteirinha]")?.addEventListener("change", async (event) => {
+            const arquivo = event.target.files?.[0];
+            if (!arquivo) return;
+            try {
+                mostrarLoading();
+                const fotoBase64 = await arquivoFotoPerfilParaBase64(arquivo);
+                const respostaSalvar = await salvarFotoBeneficiarioAPI(id, fotoBase64);
+                const retorno = await lerRespostaJson(respostaSalvar);
+                if (!respostaSalvar.ok) throw new Error(retorno.error || "Não foi possível salvar a foto.");
+                encerrarCameraCarteirinha(modal);
+                mostrarSucesso("Foto cadastral atualizada com sucesso!");
+                modal.hidden = true;
+                document.body.style.overflow = "";
+                await abrirCarteirinhaBeneficiario(id);
+            } catch (erro) {
+                mostrarErro(erro.message || "Erro ao atualizar a foto cadastral.");
+            } finally {
+                esconderLoading();
+            }
+        });
+    } catch (erro) {
+        console.error("Erro ao abrir carteirinha:", erro);
+        mostrarErro(erro.message || "Não foi possível abrir a carteirinha.");
+    } finally {
+        esconderLoading();
+    }
+}
+
+// =====================================================
 // TRATAR CLIQUES DA TABELA
 // =====================================================
 
@@ -2618,6 +2974,21 @@ function tratarCliqueDaTabela(event) {
 
     }
     
+    const botaoCarteirinha =
+        event.target.closest(
+            ".btnCarteirinhaBeneficiario"
+        );
+
+    if (botaoCarteirinha) {
+
+        abrirCarteirinhaBeneficiario(
+            botaoCarteirinha.dataset.id
+        );
+
+        return;
+
+    }
+
     const botaoHistorico =
         event.target.closest(
             ".btnHistoricoBeneficiario"

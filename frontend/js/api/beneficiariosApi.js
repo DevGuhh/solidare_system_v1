@@ -231,3 +231,35 @@ export async function listarHistoricoBeneficiarioAPI(id) {
 
 }
 
+
+
+// =====================================================
+// CARTEIRINHA DO BENEFICIÁRIO
+// =====================================================
+
+export async function buscarCarteirinhaBeneficiarioAPI(id) {
+    const idValidado = validarId(id);
+    return await fetch(`${API_URL}/beneficiarios/${idValidado}/carteirinha`, {
+        method: "GET",
+        headers: obterHeaders(),
+        cache: "no-store"
+    });
+}
+
+export async function obterFotoBeneficiarioAPI(id) {
+    const idValidado = validarId(id);
+    return await fetch(`${API_URL}/beneficiarios/${idValidado}/foto`, {
+        method: "GET",
+        headers: obterHeaders(),
+        cache: "no-store"
+    });
+}
+
+export async function salvarFotoBeneficiarioAPI(id, fotoBase64) {
+    const idValidado = validarId(id);
+    return await fetch(`${API_URL}/beneficiarios/${idValidado}/foto`, {
+        method: "PUT",
+        headers: obterHeaders(),
+        body: JSON.stringify({ fotoBase64 })
+    });
+}

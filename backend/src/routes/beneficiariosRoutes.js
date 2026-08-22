@@ -28,6 +28,24 @@ router.get(
   authorize("ADMIN", "INSTITUICAO"),
   beneficiarioController.listarHistoricoDoBeneficiario,
 );
+router.get(
+  "/:id/carteirinha",
+  protect,
+  authorize("ADMIN", "INSTITUICAO"),
+  beneficiarioController.obterCarteirinha,
+);
+router.get(
+  "/:id/foto",
+  protect,
+  authorize("ADMIN", "INSTITUICAO"),
+  beneficiarioController.obterFotoPerfil,
+);
+router.put(
+  "/:id/foto",
+  protect,
+  authorize("ADMIN", "INSTITUICAO"),
+  beneficiarioController.salvarFotoPerfil,
+);
 
 router.put(
   "/:id",

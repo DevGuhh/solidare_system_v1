@@ -2518,3 +2518,248 @@
     .historico-item-topo { align-items: flex-start; flex-direction: column; gap: 3px; }
 }
 
+
+/* =====================================================
+   CARTEIRINHA DO BENEFICIÁRIO
+   ===================================================== */
+.carteirinha-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, .58);
+    backdrop-filter: blur(2px);
+}
+
+.carteirinha-modal-overlay[hidden] { display: none !important; }
+
+.carteirinha-modal {
+    width: min(760px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+}
+
+.carteirinha-modal-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eaecf0;
+}
+
+.carteirinha-modal-topo span {
+    display: block;
+    color: #a3001b;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .09em;
+}
+
+.carteirinha-modal-topo h2 { margin: 3px 0 0; color: #1d2939; }
+
+.carteirinha-modal-topo button {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+}
+
+.carteirinha-cartao {
+    margin: 24px;
+    overflow: hidden;
+    border: 1px solid #e4e7ec;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .08);
+}
+
+.carteirinha-faixa {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+    background: linear-gradient(135deg, #980019, #b30625);
+    color: #fff;
+}
+
+.carteirinha-faixa strong { font-size: 1.25rem; }
+.carteirinha-faixa span { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+
+.carteirinha-corpo {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr) 155px;
+    gap: 20px;
+    align-items: center;
+    padding: 22px;
+}
+
+.carteirinha-foto,
+.carteirinha-foto-placeholder {
+    width: 132px;
+    height: 160px;
+    border-radius: 16px;
+    border: 1px solid #e4e7ec;
+    background: #f2f4f7;
+}
+
+.carteirinha-foto { display: block; object-fit: cover; }
+.carteirinha-foto-placeholder { display: flex; align-items: center; justify-content: center; color: #98a2b3; font-size: 3rem; }
+
+.carteirinha-dados { min-width: 0; }
+.carteirinha-dados h2 { margin: 0 0 12px; color: #1d2939; font-size: 1.25rem; line-height: 1.2; }
+.carteirinha-dados p { margin: 6px 0; color: #475467; font-size: .8rem; }
+.carteirinha-dados b { color: #980019; }
+
+.carteirinha-qr { text-align: center; color: #667085; }
+.carteirinha-qr > img { display: block; width: 150px; height: 150px; margin: auto; object-fit: contain; }
+.carteirinha-qr small { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: monospace; font-size: .62rem; }
+
+.carteirinha-sem-qr {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px dashed #d0d5dd;
+    border-radius: 14px;
+    background: #f9fafb;
+}
+.carteirinha-sem-qr i { font-size: 2rem; }
+.carteirinha-sem-qr span { font-size: .72rem; }
+
+.carteirinha-rodape {
+    padding: 10px 22px;
+    border-top: 1px solid #f0f1f3;
+    color: #667085;
+    font-size: .68rem;
+    text-align: center;
+}
+
+.carteirinha-aviso {
+    margin: 0 24px 16px;
+    padding: 12px 14px;
+    border: 1px solid #fec84b;
+    border-radius: 10px;
+    background: #fffaeb;
+    color: #93370d;
+    font-size: .78rem;
+}
+
+.carteirinha-acoes-modal {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 24px 24px;
+}
+
+.btn-carteirinha-foto,
+.btn-carteirinha-imprimir {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-carteirinha-foto { border: 1px solid #d0d5dd; background: #fff; color: #344054; }
+.btn-carteirinha-imprimir { border: 0; background: #a3001b; color: #fff; }
+.btn-carteirinha-imprimir:disabled { opacity: .5; cursor: not-allowed; }
+
+.btnCarteirinhaBeneficiario {
+    color: #7f1d1d;
+}
+
+@media (max-width: 720px) {
+    .carteirinha-modal-overlay { padding: 8px; }
+    .carteirinha-modal { max-height: calc(100vh - 16px); }
+    .carteirinha-cartao { margin: 16px; }
+    .carteirinha-corpo { grid-template-columns: 110px 1fr; }
+    .carteirinha-foto, .carteirinha-foto-placeholder { width: 110px; height: 132px; }
+    .carteirinha-qr { grid-column: 1 / -1; }
+    .carteirinha-qr > img { width: 140px; height: 140px; }
+    .carteirinha-faixa { align-items: flex-start; flex-direction: column; gap: 4px; }
+    .carteirinha-acoes-modal { flex-direction: column; }
+}
+
+
+/* =====================================================
+   CÂMERA DA FOTO CADASTRAL / CARTEIRINHA
+   ===================================================== */
+.carteirinha-camera-area {
+    margin: 0 24px 16px;
+    padding: 12px;
+    border-radius: 16px;
+    background: #101828;
+}
+
+.carteirinha-camera-area[hidden] {
+    display: none !important;
+}
+
+.carteirinha-camera-video {
+    display: block;
+    width: 100%;
+    max-height: 360px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #000;
+}
+
+.carteirinha-camera-acoes {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-carteirinha-capturar,
+.btn-carteirinha-cancelar-camera {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-carteirinha-capturar {
+    border: 0;
+    background: #15703d;
+    color: #fff;
+}
+
+.btn-carteirinha-cancelar-camera {
+    border: 1px solid #d0d5dd;
+    background: #fff;
+    color: #344054;
+}
+
+.btn-carteirinha-camera {
+    border-color: rgba(21, 112, 61, .35);
+    color: #15703d;
+}
+
+@media (max-width: 720px) {
+    .carteirinha-camera-area {
+        margin: 0 16px 14px;
+    }
+
+    .carteirinha-camera-video {
+        max-height: 280px;
+    }
+
+    .carteirinha-camera-acoes {
+        grid-template-columns: 1fr;
+    }
+}
