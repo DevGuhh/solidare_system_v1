@@ -110,7 +110,7 @@ export async function validarQRCode(codigo) {
 // CONFIRMAR ENTREGA DE CESTA PELO QR CODE
 // =====================================================
 
-export async function confirmarEntregaQRCode(codigo) {
+export async function confirmarEntregaQRCode(codigo, fotoBase64) {
   const codigoNormalizado = String(codigo ?? "").trim().toUpperCase();
 
   if (!codigoNormalizado) {
@@ -122,7 +122,7 @@ export async function confirmarEntregaQRCode(codigo) {
     {
       method: "POST",
       headers: obterHeaders(),
-      body: JSON.stringify({}),
+      body: JSON.stringify({ fotoBase64 }),
     },
   );
 }

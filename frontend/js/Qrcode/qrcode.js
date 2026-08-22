@@ -20,6 +20,8 @@
         let qrCodeVisualizado = null;
         let leitorQRCode = null;
         let leituraEmAndamento = false;
+    let fotoComprovanteAtual = null;
+    let cameraComprovanteStream = null;
 
         const btnGerar = document.getElementById("btnGerarQRCode");
         const modal = document.getElementById("modalQRCode");
@@ -564,8 +566,166 @@
             return rotulos[String(tipo ?? "").toUpperCase()] || tipo || "-";
         }
 
+        function encerrarCameraComprovante() {
+            if (cameraComprovanteStream) {
+                cameraComprovanteStream.getTracks().forEach((track) => track.stop());
+                cameraComprovanteStream = null;
+            }
+
+            const areaCamera = resultadoValidacaoQRCode?.querySelector("[data-camera-comprovante]");
+            const video = resultadoValidacaoQRCode?.querySelector("[data-camera-video]");
+
+            if (video) {
+                video.pause();
+                video.srcObject = null;
+            }
+
+            if (areaCamera) {
+                areaCamera.hidden = true;
+            }
+        }
+
+        async function abrirCameraComprovante() {
+            if (!navigator.mediaDevices?.getUserMedia) {
+                throw new Error("Este navegador não permite acesso direto à câmera.");
+            }
+
+            encerrarCameraComprovante();
+
+            const areaCamera = resultadoValidacaoQRCode?.querySelector("[data-camera-comprovante]");
+            const video = resultadoValidacaoQRCode?.querySelector("[data-camera-video]");
+
+            if (!areaCamera || !video) {
+                throw new Error("A área da câmera não foi encontrada.");
+            }
+
+            areaCamera.hidden = false;
+
+            try {
+                cameraComprovanteStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: "environment" },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+            } catch (erro) {
+                cameraComprovanteStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+            }
+
+            video.srcObject = cameraComprovanteStream;
+            await video.play();
+        }
+
+        function capturarFotoCamera() {
+            const video = resultadoValidacaoQRCode?.querySelector("[data-camera-video]");
+
+            if (!video || !video.videoWidth || !video.videoHeight) {
+                throw new Error("A câmera ainda não está pronta para capturar a foto.");
+            }
+
+            const limite = 960;
+            const escala = Math.min(1, limite / Math.max(video.videoWidth, video.videoHeight));
+            const largura = Math.max(1, Math.round(video.videoWidth * escala));
+            const altura = Math.max(1, Math.round(video.videoHeight * escala));
+
+            const canvas = document.createElement("canvas");
+            canvas.width = largura;
+            canvas.height = altura;
+
+            const contexto = canvas.getContext("2d");
+            contexto.drawImage(video, 0, 0, largura, altura);
+
+            fotoComprovanteAtual = canvas.toDataURL("image/jpeg", 0.72);
+            encerrarCameraComprovante();
+            atualizarEstadoFotoComprovante();
+        }
+
+        function limparFotoComprovante() {
+            encerrarCameraComprovante();
+            fotoComprovanteAtual = null;
+        }
+
+        function atualizarEstadoFotoComprovante() {
+            const preview = resultadoValidacaoQRCode?.querySelector("[data-foto-preview]");
+            const texto = resultadoValidacaoQRCode?.querySelector("[data-foto-status]");
+            const botaoConfirmar = resultadoValidacaoQRCode?.querySelector("[data-confirmar-entrega]");
+            const botaoRefazer = resultadoValidacaoQRCode?.querySelector("[data-refazer-foto]");
+
+            if (preview) {
+                if (fotoComprovanteAtual) {
+                    preview.src = fotoComprovanteAtual;
+                    preview.hidden = false;
+                } else {
+                    preview.removeAttribute("src");
+                    preview.hidden = true;
+                }
+            }
+
+            if (texto) {
+                texto.textContent = fotoComprovanteAtual
+                    ? "Foto registrada. Você pode confirmar a entrega."
+                    : "A foto do beneficiário é obrigatória para confirmar a entrega.";
+            }
+
+            if (botaoConfirmar) {
+                botaoConfirmar.disabled = !fotoComprovanteAtual;
+            }
+
+            if (botaoRefazer) {
+                botaoRefazer.hidden = !fotoComprovanteAtual;
+            }
+        }
+
+        function converterFotoParaDataUrl(arquivo) {
+            return new Promise((resolve, reject) => {
+                if (!arquivo?.type?.startsWith("image/")) {
+                    reject(new Error("Selecione uma imagem válida."));
+                    return;
+                }
+
+                const leitor = new FileReader();
+                leitor.onerror = () => reject(new Error("Não foi possível ler a foto."));
+                leitor.onload = () => {
+                    const imagem = new Image();
+                    imagem.onerror = () => reject(new Error("A foto selecionada é inválida."));
+                    imagem.onload = () => {
+                        const limite = 960;
+                        const escala = Math.min(1, limite / Math.max(imagem.width, imagem.height));
+                        const largura = Math.max(1, Math.round(imagem.width * escala));
+                        const altura = Math.max(1, Math.round(imagem.height * escala));
+                        const canvas = document.createElement("canvas");
+                        canvas.width = largura;
+                        canvas.height = altura;
+                        const contexto = canvas.getContext("2d");
+                        contexto.drawImage(imagem, 0, 0, largura, altura);
+                        resolve(canvas.toDataURL("image/jpeg", 0.72));
+                    };
+                    imagem.src = leitor.result;
+                };
+                leitor.readAsDataURL(arquivo);
+            });
+        }
+
+        function exibirAreaLeituraQRCode(exibir) {
+            const leitor = document.getElementById("leitorQRCode");
+            const separador = modalValidarQRCode?.querySelector(".qrcode-separador");
+            const validacaoManual = modalValidarQRCode?.querySelector(".qrcode-validacao-manual");
+
+            [leitor, separador, validacaoManual].forEach((elemento) => {
+                if (!elemento) return;
+                elemento.hidden = !exibir;
+                elemento.style.display = exibir ? "" : "none";
+            });
+        }
+
         function renderizarResultadoValidacao(dados) {
             if (!resultadoValidacaoQRCode) return;
+            limparFotoComprovante();
 
             const valido = dados?.valido === true;
             const qr = dados?.data;
@@ -618,8 +778,44 @@
                     </div>
                     ${liberada ? `
                         <div class="qrcode-confirmacao-entrega">
-                            <p>Ao confirmar, será registrada <b>1 cesta</b> para este beneficiário e o saldo da instituição será atualizado.</p>
-                            <button type="button" class="qrcode-botao-confirmar-entrega" data-confirmar-entrega="${escaparHtml(qr.codigo || "")}">
+                            <p>Antes de confirmar, registre uma <b>foto do beneficiário</b> como comprovante da entrega. A foto será excluída automaticamente após 60 dias.</p>
+                            <div class="qrcode-comprovante-foto">
+                                <input type="file" accept="image/jpeg,image/png,image/webp" data-foto-comprovante hidden>
+
+                                <div class="qrcode-foto-acoes">
+                                    <button type="button" class="qrcode-botao-foto qrcode-botao-camera" data-abrir-camera>
+                                        <i class="fa-solid fa-camera" aria-hidden="true"></i>
+                                        Abrir câmera
+                                    </button>
+                                    <button type="button" class="qrcode-botao-foto qrcode-botao-arquivo" data-selecionar-foto>
+                                        <i class="fa-solid fa-image" aria-hidden="true"></i>
+                                        Selecionar arquivo
+                                    </button>
+                                </div>
+
+                                <div class="qrcode-camera-comprovante" data-camera-comprovante hidden>
+                                    <video class="qrcode-camera-video" data-camera-video autoplay playsinline muted></video>
+                                    <div class="qrcode-camera-acoes">
+                                        <button type="button" class="qrcode-botao-capturar" data-capturar-foto>
+                                            <i class="fa-solid fa-camera-retro" aria-hidden="true"></i>
+                                            Capturar foto
+                                        </button>
+                                        <button type="button" class="qrcode-botao-cancelar-camera" data-fechar-camera>
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <img class="qrcode-foto-preview" data-foto-preview alt="Pré-visualização do comprovante" hidden>
+
+                                <button type="button" class="qrcode-botao-refazer-foto" data-refazer-foto hidden>
+                                    <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                                    Tirar outra foto
+                                </button>
+
+                                <span class="qrcode-foto-status" data-foto-status>A foto do beneficiário é obrigatória para confirmar a entrega.</span>
+                            </div>
+                            <button type="button" class="qrcode-botao-confirmar-entrega" data-confirmar-entrega="${escaparHtml(qr.codigo || "")}" disabled>
                                 <i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i>
                                 Confirmar entrega da cesta
                             </button>
@@ -632,6 +828,11 @@
         async function confirmarEntrega(codigoQRCode) {
             const codigo = extrairCodigoQRCode(codigoQRCode);
             if (!codigo) return;
+
+            if (!fotoComprovanteAtual) {
+                alert("Tire ou selecione a foto do beneficiário antes de confirmar a entrega.");
+                return;
+            }
 
             const confirmou = window.confirm(
                 "Confirmar a entrega de 1 cesta para este beneficiário?\n\n" +
@@ -647,7 +848,7 @@
             }
 
             try {
-                const resposta = await confirmarEntregaQRCode(codigo);
+                const resposta = await confirmarEntregaQRCode(codigo, fotoComprovanteAtual);
                 const dados = await resposta.json().catch(() => ({}));
 
                 if (!resposta.ok) {
@@ -684,9 +885,18 @@
                     throw new Error(dados.message || "Erro ao validar QR Code.");
                 }
 
+                const resultadoValido = resposta.ok && dados.valido === true;
+
+                if (resultadoValido) {
+                    await pararLeitorQRCode();
+                    exibirAreaLeituraQRCode(false);
+                } else {
+                    exibirAreaLeituraQRCode(true);
+                }
+
                 renderizarResultadoValidacao({
                     ...dados,
-                    valido: resposta.ok ? dados.valido === true : false
+                    valido: resultadoValido
                 });
             } catch (erro) {
                 console.error("Erro ao validar QR Code:", erro);
@@ -749,6 +959,7 @@
 
             modalValidarQRCode.hidden = false;
             document.body.style.overflow = "hidden";
+            exibirAreaLeituraQRCode(true);
             if (resultadoValidacaoQRCode) resultadoValidacaoQRCode.hidden = true;
             if (codigoValidacaoQRCode) codigoValidacaoQRCode.value = "";
 
@@ -757,6 +968,8 @@
 
         async function fecharValidacaoQRCode() {
             await pararLeitorQRCode();
+            limparFotoComprovante();
+            exibirAreaLeituraQRCode(true);
             if (modalValidarQRCode) modalValidarQRCode.hidden = true;
             if (resultadoValidacaoQRCode) resultadoValidacaoQRCode.hidden = true;
             document.body.style.overflow = "";
@@ -850,10 +1063,78 @@
             if (event.target === modalValidarQRCode) fecharValidacaoQRCode();
         });
 
-        resultadoValidacaoQRCode?.addEventListener("click", (event) => {
+        resultadoValidacaoQRCode?.addEventListener("click", async (event) => {
+            const botaoAbrirCamera = event.target.closest("[data-abrir-camera]");
+            if (botaoAbrirCamera) {
+                try {
+                    await abrirCameraComprovante();
+                } catch (erro) {
+                    console.error("Erro ao abrir câmera do comprovante:", erro);
+                    alert(
+                        (erro.message || "Não foi possível abrir a câmera.") +
+                        "\n\nVocê ainda pode usar a opção Selecionar arquivo."
+                    );
+                }
+                return;
+            }
+
+            const botaoCapturar = event.target.closest("[data-capturar-foto]");
+            if (botaoCapturar) {
+                try {
+                    capturarFotoCamera();
+                } catch (erro) {
+                    alert(erro.message || "Não foi possível capturar a foto.");
+                }
+                return;
+            }
+
+            const botaoFecharCamera = event.target.closest("[data-fechar-camera]");
+            if (botaoFecharCamera) {
+                encerrarCameraComprovante();
+                return;
+            }
+
+            const botaoRefazer = event.target.closest("[data-refazer-foto]");
+            if (botaoRefazer) {
+                fotoComprovanteAtual = null;
+                atualizarEstadoFotoComprovante();
+                try {
+                    await abrirCameraComprovante();
+                } catch (erro) {
+                    console.error("Erro ao reabrir câmera:", erro);
+                    alert(erro.message || "Não foi possível abrir a câmera.");
+                }
+                return;
+            }
+
+            const botaoFoto = event.target.closest("[data-selecionar-foto]");
+            if (botaoFoto) {
+                encerrarCameraComprovante();
+                resultadoValidacaoQRCode.querySelector("[data-foto-comprovante]")?.click();
+                return;
+            }
+
             const botao = event.target.closest("[data-confirmar-entrega]");
             if (!botao) return;
             confirmarEntrega(botao.dataset.confirmarEntrega);
+        });
+
+        resultadoValidacaoQRCode?.addEventListener("change", async (event) => {
+            const input = event.target.closest("[data-foto-comprovante]");
+            if (!input) return;
+
+            const arquivo = input.files?.[0];
+            if (!arquivo) return;
+
+            try {
+                fotoComprovanteAtual = await converterFotoParaDataUrl(arquivo);
+                atualizarEstadoFotoComprovante();
+            } catch (erro) {
+                fotoComprovanteAtual = null;
+                input.value = "";
+                atualizarEstadoFotoComprovante();
+                alert(erro.message || "Não foi possível preparar a foto.");
+            }
         });
 
         btnGerar.addEventListener("click", abrirModal);

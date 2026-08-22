@@ -129,6 +129,7 @@ model Doacao {
   instituicao        InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
   usuario            Usuario             @relation(fields: [usuarioId], references: [id])
   movimentacoesSaldo MovimentacaoSaldo[]
+  comprovanteEntrega ComprovanteEntrega?
 
   @@index([beneficiarioId])
   @@index([instituicaoId])
@@ -136,6 +137,22 @@ model Doacao {
   @@index([dataDoacao])
   @@index([instituicaoId, dataDoacao])
   @@map("doacoes")
+}
+
+
+model ComprovanteEntrega {
+  id        Int      @id @default(autoincrement())
+  doacaoId  Int      @unique
+  foto      Bytes
+  mimeType  String
+  tamanho   Int
+  criadoEm  DateTime @default(now())
+  expiraEm  DateTime
+
+  doacao Doacao @relation(fields: [doacaoId], references: [id], onDelete: Cascade)
+
+  @@index([expiraEm])
+  @@map("comprovantes_entrega")
 }
 
 model SaldoCesta {

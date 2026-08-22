@@ -1,13 +1,71 @@
 import { prisma } from "../config/db.js";
 import crypto from "node:crypto";
 import QRCode from "qrcode";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { startOfMonth, endOfMonth, addDays } from "date-fns";
 import { gerarCodigoDoacao } from "../utils/generateCode.js";
 import {
   debitarSaldoParaDoacao,
   SaldoInsuficienteError,
 } from "../services/saldoCestaService.js";
 import { registrarEventoHistorico } from "../services/historicoBeneficiarioService.js";
+
+
+const MIME_TYPES_FOTO_PERMITIDOS = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+const TAMANHO_MAXIMO_FOTO_BYTES = 3 * 1024 * 1024;
+
+class FotoComprovanteError extends Error {}
+
+function prepararFotoComprovante(fotoBase64) {
+  const valor = String(fotoBase64 ?? "").trim();
+
+  if (!valor) {
+    throw new FotoComprovanteError(
+      "A foto do beneficiário é obrigatória para confirmar a entrega.",
+    );
+  }
+
+  const correspondencia = valor.match(
+    /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/i,
+  );
+
+  if (!correspondencia) {
+    throw new FotoComprovanteError(
+      "Formato de foto inválido. Use JPEG, PNG ou WEBP.",
+    );
+  }
+
+  const mimeType = correspondencia[1].toLowerCase();
+  if (!MIME_TYPES_FOTO_PERMITIDOS.has(mimeType)) {
+    throw new FotoComprovanteError("Formato de foto não permitido.");
+  }
+
+  const foto = Buffer.from(correspondencia[2].replace(/\s/g, ""), "base64");
+
+  if (!foto.length) {
+    throw new FotoComprovanteError("A foto enviada está vazia.");
+  }
+
+  if (foto.length > TAMANHO_MAXIMO_FOTO_BYTES) {
+    throw new FotoComprovanteError(
+      "A foto é muito grande. O tamanho máximo permitido é 3 MB.",
+    );
+  }
+
+  const assinaturaValida =
+    (mimeType === "image/jpeg" && foto[0] === 0xff && foto[1] === 0xd8 && foto[2] === 0xff) ||
+    (mimeType === "image/png" && foto.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) ||
+    (mimeType === "image/webp" && foto.subarray(0, 4).toString("ascii") === "RIFF" && foto.subarray(8, 12).toString("ascii") === "WEBP");
+
+  if (!assinaturaValida) {
+    throw new FotoComprovanteError("O arquivo enviado não corresponde a uma imagem válida.");
+  }
+
+  return { foto, mimeType, tamanho: foto.length };
+}
 
 function gerarCodigoQRCode() {
   const parte = crypto.randomBytes(6).toString("hex").toUpperCase();
@@ -460,6 +518,9 @@ class QrCodeController {
         });
       }
 
+      const fotoComprovante = prepararFotoComprovante(req.body?.fotoBase64);
+      const expiraEm = addDays(new Date(), 60);
+
       const qrCode = await prisma.qRCode.findUnique({
         where: { codigo },
         include: {
@@ -544,7 +605,7 @@ class QrCodeController {
             tipo: "CESTA",
             quantidade: 1,
             observacoes: `Entrega confirmada por leitura do QR Code ${qrCode.codigo}.`,
-            comprovante: false,
+            comprovante: true,
           },
           include: {
             beneficiario: {
@@ -577,6 +638,16 @@ class QrCodeController {
           observacao: `Baixa automática pela entrega via QR Code ${qrCode.codigo}`,
         });
 
+        await tx.comprovanteEntrega.create({
+          data: {
+            doacaoId: novaDoacao.id,
+            foto: fotoComprovante.foto,
+            mimeType: fotoComprovante.mimeType,
+            tamanho: fotoComprovante.tamanho,
+            expiraEm,
+          },
+        });
+
         return novaDoacao;
       });
 
@@ -590,6 +661,8 @@ class QrCodeController {
           qrCode: qrCode.codigo,
           tipo: "CESTA",
           quantidade: 1,
+          comprovanteFotografico: true,
+          comprovanteExpiraEm: expiraEm.toISOString(),
         },
         usuarioId: req.user.id,
       });
@@ -599,6 +672,10 @@ class QrCodeController {
         message: "Entrega da cesta confirmada com sucesso.",
         data: {
           doacao,
+          comprovante: {
+            registrado: true,
+            expiraEm,
+          },
           entrega: {
             liberada: false,
             motivoBloqueio: "JA_RECEBEU_NO_MES",
@@ -607,6 +684,14 @@ class QrCodeController {
         },
       });
     } catch (erro) {
+      if (erro instanceof FotoComprovanteError) {
+        return res.status(400).json({
+          ok: false,
+          motivo: "FOTO_OBRIGATORIA",
+          message: erro.message,
+        });
+      }
+
       if (erro instanceof SaldoInsuficienteError) {
         return res.status(422).json({
           ok: false,

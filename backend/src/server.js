@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import { config } from "dotenv";
 import rateLimit from "express-rate-limit";
 import { connectDB, disconnectDB } from "./config/db.js";
+import { iniciarLimpezaAutomaticaComprovantes } from "./services/limpezaComprovantesService.js";
 
 // ===============================
 // IMPORTAÇÃO DAS ROTAS
@@ -70,9 +71,9 @@ app.use(
 
 app.use(cookieParser());
 
-app.use(express.json());
+app.use(express.json({ limit: "8mb" }));
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "8mb" }));
 
 // ===============================
 // RATE LIMIT
@@ -117,6 +118,7 @@ const PORT = process.env.PORT || 3000;
 
 const server = app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+  iniciarLimpezaAutomaticaComprovantes();
 });
 
 // ===============================
