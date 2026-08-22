@@ -121,20 +121,15 @@ class BeneficiarioController {
       // Busca beneficiários no banco.
       const beneficiarios = await prisma.beneficiario.findMany({
         where,
-        include: {
-          instituicao: {
-            select: {
-              id: true,
-              nome: true,
-            },
-          },
-        },
-        orderBy: {
-          nomeCompleto: "asc",
-        },
+        omit: { fotoPerfil: true },
+        include: { instituicao: { select: { id: true, nome: true } } },
+        orderBy: { nomeCompleto: "asc" },
       });
 
-      return res.status(200).json(beneficiarios);
+      return res.status(200).json(beneficiarios.map((beneficiario) => ({
+        ...beneficiario,
+        possuiFoto: Boolean(beneficiario.fotoPerfilMimeType),
+      })));
     } catch (error) {
       console.error("GET /beneficiarios error:", error);
 

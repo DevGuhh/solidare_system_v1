@@ -79,6 +79,8 @@ import { API_URL } from "../config.js";
 let usuarioLogado = null;
 
 let beneficiarioEditandoId = null;
+let fotoCadastroBeneficiarioBase64 = null;
+let streamCameraCadastroBeneficiario = null;
 
 let cameraCarteirinhaStream = null;
 
@@ -1686,6 +1688,8 @@ function aplicarFiltrosBeneficiarios() {
         beneficiariosSelecionados
     );
 
+    carregarFotosDaTabela();
+
     atualizarTextoResultado(
         resultadoFiltrado.length
     );
@@ -1864,6 +1868,45 @@ async function carregarInstituicoesSelect() {
 
 
 // =====================================================
+// FOTO NO CADASTRO DO BENEFICIÁRIO
+// =====================================================
+function encerrarCameraCadastroBeneficiario() {
+    if (streamCameraCadastroBeneficiario) {
+        streamCameraCadastroBeneficiario.getTracks().forEach(track => track.stop());
+        streamCameraCadastroBeneficiario = null;
+    }
+    const video = document.getElementById("videoFotoCadastroBeneficiario");
+    if (video) video.srcObject = null;
+    const area = document.getElementById("areaCameraCadastroBeneficiario");
+    if (area) area.hidden = true;
+}
+function limparFotoCadastroBeneficiario() {
+    encerrarCameraCadastroBeneficiario(); fotoCadastroBeneficiarioBase64 = null;
+    const img=document.getElementById("previewFotoCadastroBeneficiario"), ph=document.getElementById("placeholderFotoCadastroBeneficiario"), rm=document.getElementById("btnRemoverFotoCadastroBeneficiario"), input=document.getElementById("arquivoFotoCadastroBeneficiario");
+    if(img){img.hidden=true;img.removeAttribute("src");} if(ph)ph.hidden=false; if(rm)rm.hidden=true; if(input)input.value="";
+}
+function atualizarPreviewFotoCadastro(foto) {
+    fotoCadastroBeneficiarioBase64=foto; const img=document.getElementById("previewFotoCadastroBeneficiario"),ph=document.getElementById("placeholderFotoCadastroBeneficiario"),rm=document.getElementById("btnRemoverFotoCadastroBeneficiario");
+    if(img){img.src=foto;img.hidden=false;} if(ph)ph.hidden=true; if(rm)rm.hidden=false;
+}
+function garantirAreaFotoCadastroBeneficiario() {
+    if (!elementos.formulario || document.getElementById("fotoCadastroBeneficiario")) return;
+    const grupoNome=campos.nomeCompleto?.closest(".form-group")||campos.nomeCompleto?.parentElement; if(!grupoNome?.parentElement)return;
+    const area=document.createElement("div"); area.id="fotoCadastroBeneficiario"; area.className="foto-cadastro-beneficiario";
+    area.innerHTML=`<div class="foto-cadastro-titulo"><strong>Foto do beneficiário</strong><span>Opcional. Tire pela câmera ou selecione uma imagem.</span></div><div class="foto-cadastro-conteudo"><div class="foto-cadastro-preview"><div id="placeholderFotoCadastroBeneficiario" class="foto-cadastro-placeholder"><i class="fa-solid fa-user"></i></div><img id="previewFotoCadastroBeneficiario" alt="Prévia" hidden></div><div class="foto-cadastro-botoes"><button type="button" class="btn-foto-cadastro" id="btnAbrirCameraCadastroBeneficiario"><i class="fa-solid fa-camera"></i> Abrir câmera</button><button type="button" class="btn-foto-cadastro" id="btnSelecionarFotoCadastroBeneficiario"><i class="fa-solid fa-upload"></i> Selecionar arquivo</button><button type="button" class="btn-foto-cadastro" id="btnRemoverFotoCadastroBeneficiario" hidden>Remover foto</button><input id="arquivoFotoCadastroBeneficiario" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></div><div id="areaCameraCadastroBeneficiario" class="foto-cadastro-camera" hidden><video id="videoFotoCadastroBeneficiario" autoplay playsinline muted></video><div class="foto-cadastro-camera-acoes"><button type="button" class="btn-foto-cadastro btn-capturar" id="btnCapturarFotoCadastroBeneficiario"><i class="fa-solid fa-camera"></i> Capturar foto</button><button type="button" class="btn-foto-cadastro" id="btnCancelarCameraCadastroBeneficiario">Cancelar</button></div></div>`;
+    grupoNome.parentElement.insertBefore(area,grupoNome);
+    document.getElementById("btnAbrirCameraCadastroBeneficiario")?.addEventListener("click",async()=>{try{if(!navigator.mediaDevices?.getUserMedia)throw new Error("Este navegador não permite acesso à câmera.");encerrarCameraCadastroBeneficiario();const box=document.getElementById("areaCameraCadastroBeneficiario"),video=document.getElementById("videoFotoCadastroBeneficiario");box.hidden=false;streamCameraCadastroBeneficiario=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:720},height:{ideal:720}},audio:false});video.srcObject=streamCameraCadastroBeneficiario;await video.play();}catch(e){encerrarCameraCadastroBeneficiario();mostrarErro(e.message||"Não foi possível abrir a câmera.");}});
+    document.getElementById("btnCancelarCameraCadastroBeneficiario")?.addEventListener("click",encerrarCameraCadastroBeneficiario);
+    document.getElementById("btnCapturarFotoCadastroBeneficiario")?.addEventListener("click",()=>{const v=document.getElementById("videoFotoCadastroBeneficiario");if(!v?.videoWidth)return mostrarErro("A câmera ainda não está pronta.");const lado=Math.min(v.videoWidth,v.videoHeight),c=document.createElement("canvas");c.width=720;c.height=720;c.getContext("2d").drawImage(v,(v.videoWidth-lado)/2,(v.videoHeight-lado)/2,lado,lado,0,0,720,720);atualizarPreviewFotoCadastro(c.toDataURL("image/jpeg",.82));encerrarCameraCadastroBeneficiario();});
+    document.getElementById("btnSelecionarFotoCadastroBeneficiario")?.addEventListener("click",()=>document.getElementById("arquivoFotoCadastroBeneficiario")?.click());
+    document.getElementById("arquivoFotoCadastroBeneficiario")?.addEventListener("change",e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith("image/")||f.size>3*1024*1024)return mostrarErro("Selecione uma imagem de até 3 MB.");const r=new FileReader();r.onload=()=>atualizarPreviewFotoCadastro(String(r.result));r.readAsDataURL(f);});
+    document.getElementById("btnRemoverFotoCadastroBeneficiario")?.addEventListener("click",limparFotoCadastroBeneficiario);
+}
+async function carregarFotosDaTabela() {
+    await Promise.all([...document.querySelectorAll("[data-foto-beneficiario-id]")].map(async avatar=>{try{const r=await obterFotoBeneficiarioAPI(Number(avatar.dataset.fotoBeneficiarioId));if(!r.ok)return;const url=URL.createObjectURL(await r.blob()),img=document.createElement("img");img.src=url;img.className="beneficiario-avatar-foto";img.alt="";img.onload=()=>URL.revokeObjectURL(url);avatar.replaceChildren(img);}catch{}}));
+}
+
+// =====================================================
 // PREPARAR MODAL PARA CADASTRO
 // =====================================================
 
@@ -1880,6 +1923,11 @@ async function abrirModalNovoBeneficiario() {
     limparFormulario(
         elementos.formulario
     );
+
+    garantirAreaFotoCadastroBeneficiario();
+    limparFotoCadastroBeneficiario();
+    const areaFotoCadastro = document.getElementById("fotoCadastroBeneficiario");
+    if (areaFotoCadastro) areaFotoCadastro.hidden = false;
 
     // No cadastro, CPF e data de nascimento permanecem editáveis.
     campos.cpf.disabled = false;
@@ -1943,6 +1991,8 @@ async function abrirModalNovoBeneficiario() {
 // =====================================================
 
 function fecharModalBeneficiario() {
+
+    limparFotoCadastroBeneficiario();
 
     fecharModal(
         elementos.modal
@@ -2152,6 +2202,13 @@ async function salvarBeneficiario(event) {
 
         }
 
+        if (!editando && fotoCadastroBeneficiarioBase64) {
+            const novoId = Number(resultado?.beneficiario?.id ?? resultado?.data?.id);
+            if (!novoId) throw new Error("Beneficiário cadastrado, mas não foi possível salvar a foto.");
+            const respostaFoto = await salvarFotoBeneficiarioAPI(novoId, fotoCadastroBeneficiarioBase64);
+            if (!respostaFoto.ok) throw new Error("Beneficiário cadastrado, mas ocorreu erro ao salvar a foto.");
+        }
+
         mostrarSucesso(
             editando
                 ? "Beneficiário atualizado com sucesso!"
@@ -2214,6 +2271,11 @@ async function editarBeneficiario(id) {
 
         beneficiarioEditandoId =
             Number(id);
+
+        garantirAreaFotoCadastroBeneficiario();
+        encerrarCameraCadastroBeneficiario();
+        const areaFotoCadastro = document.getElementById("fotoCadastroBeneficiario");
+        if (areaFotoCadastro) areaFotoCadastro.hidden = true;
 
         alterarTitulo(
             elementos.tituloModal,

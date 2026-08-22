@@ -297,11 +297,8 @@ export function renderizarTabela(
 
                         <div class="beneficiario-identificacao">
 
-                            <div
-                                class="beneficiario-avatar"
-                                aria-hidden="true"
-                            >
-                                ${escaparHtml(iniciais)}
+                            <div class="beneficiario-avatar${beneficiario.possuiFoto ? " tem-foto" : ""}" aria-hidden="true" ${beneficiario.possuiFoto ? `data-foto-beneficiario-id="${id}"` : ""}>
+                                <span>${escaparHtml(iniciais)}</span>
                             </div>
 
                             <div class="beneficiario-nome">
