@@ -81,6 +81,7 @@ let usuarioLogado = null;
 let beneficiarioEditandoId = null;
 let fotoCadastroBeneficiarioBase64 = null;
 let streamCameraCadastroBeneficiario = null;
+let etapaCadastroBeneficiarioAtual = 1;
 
 let cameraCarteirinhaStream = null;
 
@@ -1906,6 +1907,223 @@ async function carregarFotosDaTabela() {
     await Promise.all([...document.querySelectorAll("[data-foto-beneficiario-id]")].map(async avatar=>{try{const r=await obterFotoBeneficiarioAPI(Number(avatar.dataset.fotoBeneficiarioId));if(!r.ok)return;const url=URL.createObjectURL(await r.blob()),img=document.createElement("img");img.src=url;img.className="beneficiario-avatar-foto";img.alt="";img.onload=()=>URL.revokeObjectURL(url);avatar.replaceChildren(img);}catch{}}));
 }
 
+
+// =====================================================
+// MODAL EM 3 ETAPAS
+// =====================================================
+
+function prepararModalBeneficiarioEmEtapas() {
+    const formulario = elementos.formulario;
+    if (!formulario) return;
+
+    const body = formulario.querySelector(".modal-beneficiario-body");
+    const footer = formulario.querySelector(".modal-beneficiario-actions");
+    if (!body || !footer) return;
+
+    const secoes = Array.from(body.querySelectorAll(":scope > .form-section"));
+
+    // Estrutura atual:
+    // 0 Dados pessoais
+    // 1 Endereço
+    // 2 Contato
+    // 3 Benefício
+    // 4 Informações complementares
+    secoes.forEach((secao, indice) => {
+        if (indice === 0 || indice === 2) {
+            secao.dataset.etapaCadastro = "1";
+        } else if (indice === 1) {
+            secao.dataset.etapaCadastro = "2";
+        } else {
+            secao.dataset.etapaCadastro = "3";
+        }
+    });
+
+    if (!formulario.querySelector(".beneficiario-etapas")) {
+        const etapas = document.createElement("div");
+        etapas.className = "beneficiario-etapas";
+        etapas.innerHTML = `
+            <button type="button" class="beneficiario-etapa" data-ir-etapa="1">
+                <span class="beneficiario-etapa-numero">1</span>
+                <span class="beneficiario-etapa-texto">
+                    <strong>Dados pessoais</strong>
+                    <small>Identificação e contato</small>
+                </span>
+            </button>
+
+            <span class="beneficiario-etapa-linha" aria-hidden="true"></span>
+
+            <button type="button" class="beneficiario-etapa" data-ir-etapa="2">
+                <span class="beneficiario-etapa-numero">2</span>
+                <span class="beneficiario-etapa-texto">
+                    <strong>Endereço</strong>
+                    <small>Localização do beneficiário</small>
+                </span>
+            </button>
+
+            <span class="beneficiario-etapa-linha" aria-hidden="true"></span>
+
+            <button type="button" class="beneficiario-etapa" data-ir-etapa="3">
+                <span class="beneficiario-etapa-numero">3</span>
+                <span class="beneficiario-etapa-texto">
+                    <strong>Benefício</strong>
+                    <small>Benefício e observações</small>
+                </span>
+            </button>
+        `;
+        formulario.insertBefore(etapas, body);
+    }
+
+    let btnAnterior = footer.querySelector("#btnEtapaAnteriorBeneficiario");
+    if (!btnAnterior) {
+        btnAnterior = document.createElement("button");
+        btnAnterior.type = "button";
+        btnAnterior.id = "btnEtapaAnteriorBeneficiario";
+        btnAnterior.className = "btn btn-secondary btn-etapa-anterior";
+        btnAnterior.innerHTML = `<i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Anterior`;
+
+        const cancelar = footer.querySelector("#btnCancelarBeneficiario");
+        if (cancelar?.nextSibling) {
+            footer.insertBefore(btnAnterior, cancelar.nextSibling);
+        } else {
+            footer.appendChild(btnAnterior);
+        }
+    }
+
+    let btnProximo = footer.querySelector("#btnEtapaProximaBeneficiario");
+    if (!btnProximo) {
+        btnProximo = document.createElement("button");
+        btnProximo.type = "button";
+        btnProximo.id = "btnEtapaProximaBeneficiario";
+        btnProximo.className = "btn btn-primary btn-etapa-proxima";
+        btnProximo.innerHTML = `Próximo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>`;
+
+        const submit = footer.querySelector('button[type="submit"]');
+        footer.insertBefore(btnProximo, submit);
+    }
+
+    if (!formulario.dataset.etapasConfiguradas) {
+        formulario.dataset.etapasConfiguradas = "true";
+
+        formulario.querySelector("#btnEtapaAnteriorBeneficiario")
+            ?.addEventListener("click", () => {
+                mostrarEtapaCadastroBeneficiario(etapaCadastroBeneficiarioAtual - 1);
+            });
+
+        formulario.querySelector("#btnEtapaProximaBeneficiario")
+            ?.addEventListener("click", () => {
+                if (!validarEtapaCadastroBeneficiario(etapaCadastroBeneficiarioAtual)) {
+                    return;
+                }
+
+                mostrarEtapaCadastroBeneficiario(etapaCadastroBeneficiarioAtual + 1);
+            });
+
+        formulario.querySelectorAll("[data-ir-etapa]").forEach((botao) => {
+            botao.addEventListener("click", () => {
+                const destino = Number(botao.dataset.irEtapa);
+
+                // Pode voltar livremente. Para avançar pelo cabeçalho,
+                // valida a etapa atual antes.
+                if (
+                    destino > etapaCadastroBeneficiarioAtual &&
+                    !validarEtapaCadastroBeneficiario(etapaCadastroBeneficiarioAtual)
+                ) {
+                    return;
+                }
+
+                mostrarEtapaCadastroBeneficiario(destino);
+            });
+        });
+    }
+
+    mostrarEtapaCadastroBeneficiario(1);
+}
+
+function validarEtapaCadastroBeneficiario(etapa) {
+    const formulario = elementos.formulario;
+    if (!formulario) return true;
+
+    const secoes = formulario.querySelectorAll(
+        `[data-etapa-cadastro="${etapa}"]`
+    );
+
+    for (const secao of secoes) {
+        const camposEtapa = secao.querySelectorAll("input, select, textarea");
+
+        for (const campo of camposEtapa) {
+            if (
+                campo.disabled ||
+                campo.type === "hidden" ||
+                campo.offsetParent === null
+            ) {
+                continue;
+            }
+
+            if (!campo.checkValidity()) {
+                campo.reportValidity();
+                campo.focus();
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+function mostrarEtapaCadastroBeneficiario(etapa) {
+    const formulario = elementos.formulario;
+    if (!formulario) return;
+
+    const etapaValidada = Math.min(3, Math.max(1, Number(etapa) || 1));
+    etapaCadastroBeneficiarioAtual = etapaValidada;
+
+    formulario.querySelectorAll("[data-etapa-cadastro]").forEach((secao) => {
+        secao.hidden =
+            Number(secao.dataset.etapaCadastro) !== etapaValidada;
+    });
+
+    formulario.querySelectorAll(".beneficiario-etapa").forEach((botao) => {
+        const numero = Number(botao.dataset.irEtapa);
+        botao.classList.toggle("ativo", numero === etapaValidada);
+        botao.classList.toggle("concluido", numero < etapaValidada);
+        botao.setAttribute(
+            "aria-current",
+            numero === etapaValidada ? "step" : "false"
+        );
+    });
+
+    const linhas = formulario.querySelectorAll(".beneficiario-etapa-linha");
+    linhas.forEach((linha, indice) => {
+        linha.classList.toggle("concluida", indice + 1 < etapaValidada);
+    });
+
+    const btnAnterior =
+        formulario.querySelector("#btnEtapaAnteriorBeneficiario");
+
+    const btnProximo =
+        formulario.querySelector("#btnEtapaProximaBeneficiario");
+
+    const btnSalvar =
+        formulario.querySelector('button[type="submit"]');
+
+    if (btnAnterior) {
+        btnAnterior.hidden = etapaValidada === 1;
+    }
+
+    if (btnProximo) {
+        btnProximo.hidden = etapaValidada === 3;
+    }
+
+    if (btnSalvar) {
+        btnSalvar.hidden = etapaValidada !== 3;
+    }
+
+    const body = formulario.querySelector(".modal-beneficiario-body");
+    if (body) {
+        body.scrollTop = 0;
+    }
+}
+
 // =====================================================
 // PREPARAR MODAL PARA CADASTRO
 // =====================================================
@@ -1928,6 +2146,9 @@ async function abrirModalNovoBeneficiario() {
     limparFotoCadastroBeneficiario();
     const areaFotoCadastro = document.getElementById("fotoCadastroBeneficiario");
     if (areaFotoCadastro) areaFotoCadastro.hidden = false;
+
+    prepararModalBeneficiarioEmEtapas();
+    mostrarEtapaCadastroBeneficiario(1);
 
     // No cadastro, CPF e data de nascimento permanecem editáveis.
     campos.cpf.disabled = false;
@@ -2144,6 +2365,13 @@ async function salvarBeneficiario(event) {
 
     event.preventDefault();
 
+    if (etapaCadastroBeneficiarioAtual !== 3) {
+        if (validarEtapaCadastroBeneficiario(etapaCadastroBeneficiarioAtual)) {
+            mostrarEtapaCadastroBeneficiario(etapaCadastroBeneficiarioAtual + 1);
+        }
+        return;
+    }
+
     let dados;
 
     try {
@@ -2276,6 +2504,9 @@ async function editarBeneficiario(id) {
         encerrarCameraCadastroBeneficiario();
         const areaFotoCadastro = document.getElementById("fotoCadastroBeneficiario");
         if (areaFotoCadastro) areaFotoCadastro.hidden = true;
+
+        prepararModalBeneficiarioEmEtapas();
+        mostrarEtapaCadastroBeneficiario(1);
 
         alterarTitulo(
             elementos.tituloModal,
