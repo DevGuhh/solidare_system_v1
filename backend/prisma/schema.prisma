@@ -73,7 +73,7 @@ model Beneficiario {
   telefonePrincipal      String?
   telefoneSecundario     String?
   email                  String?
-  instituicaoId          Int
+  instituicaoId          Int?
   tipoBeneficio          TipoBeneficio @default(CESTA)
   situacaoSocioeconomica String?
   dataCadastro           DateTime      @default(now())
@@ -86,7 +86,7 @@ model Beneficiario {
   fotoPerfil             Bytes?
   fotoPerfilMimeType     String?
 
-  instituicao InstituicaoParceira     @relation(fields: [instituicaoId], references: [id])
+  instituicao InstituicaoParceira?    @relation(fields: [instituicaoId], references: [id])
   doacoes     Doacao[]
   historico   HistoricoBeneficiario[]
   qrcodes     QRCode[]

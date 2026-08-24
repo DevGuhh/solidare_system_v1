@@ -2397,10 +2397,14 @@ async function salvarBeneficiario(event) {
             beneficiarioEditandoId !==
             null;
 
-        // CPF e data de nascimento não são enviados em atualizações.
-        if (editando) {
+        // Regras de edição por perfil:
+        // ADMIN pode alterar CPF e data de nascimento.
+        // INSTITUICAO mantém CPF bloqueado, mas pode alterar data de nascimento.
+        if (
+            editando &&
+            usuarioLogado?.role === "INSTITUICAO"
+        ) {
             delete dados.cpf;
-            delete dados.dataNascimento;
         }
 
         const resposta =
@@ -2526,9 +2530,13 @@ async function editarBeneficiario(id) {
                     .substring(0, 10)
                 : "";
 
-        // Campos imutáveis na edição.
-        campos.cpf.disabled = true;
-        campos.dataNascimento.disabled = true;
+        // Permissões de edição:
+        // ADMIN: CPF e data de nascimento editáveis.
+        // INSTITUICAO: CPF bloqueado e data de nascimento editável.
+        const usuarioEhAdmin = usuarioLogado?.role === "ADMIN";
+
+        campos.cpf.disabled = !usuarioEhAdmin;
+        campos.dataNascimento.disabled = false;
 
         campos.cep.value =
             formatarCEP(beneficiario.cep ?? "");

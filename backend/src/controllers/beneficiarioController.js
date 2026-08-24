@@ -215,28 +215,41 @@ class BeneficiarioController {
       // Valida os dados enviados.
       const data = atualizarBeneficiarioSchema.parse(req.body);
 
-      // CPF e data de nascimento são imutáveis após o cadastro.
-      // Mesmo uma chamada manual à API não pode alterar esses campos.
-      if (data.cpf !== undefined && data.cpf !== beneficiario.cpf) {
-        return res.status(400).json({
-          error: "O CPF não pode ser alterado após o cadastro.",
-        });
-      }
-
-      if (data.dataNascimento !== undefined) {
-        const dataAtual = new Date(beneficiario.dataNascimento).getTime();
-        const dataRecebida = new Date(data.dataNascimento).getTime();
-
-        if (dataAtual !== dataRecebida) {
+      // Regras de edição por perfil:
+      // ADMIN pode alterar CPF e data de nascimento.
+      // INSTITUICAO pode alterar data de nascimento, mas nunca o CPF.
+      if (req.user.role === "INSTITUICAO") {
+        if (data.cpf !== undefined && data.cpf !== beneficiario.cpf) {
           return res.status(400).json({
-            error: "A data de nascimento não pode ser alterada após o cadastro.",
+            error: "A instituição não pode alterar o CPF do beneficiário.",
           });
         }
-      }
 
-      // Remove os campos imutáveis do objeto enviado ao Prisma.
-      delete data.cpf;
-      delete data.dataNascimento;
+        // Mesmo que o formulário envie o CPF atual, ele não participa do update.
+        delete data.cpf;
+
+        // A instituição também não pode transferir o beneficiário por edição.
+        delete data.instituicaoId;
+      } else if (req.user.role === "ADMIN") {
+        // Se o ADMIN alterar o CPF, garante que o novo CPF não pertence
+        // a outro beneficiário.
+        if (data.cpf !== undefined && data.cpf !== beneficiario.cpf) {
+          const cpfEmUso = await prisma.beneficiario.findUnique({
+            where: { cpf: data.cpf },
+            select: { id: true },
+          });
+
+          if (cpfEmUso && cpfEmUso.id !== id) {
+            return res.status(400).json({
+              error: "Já existe outro beneficiário cadastrado com este CPF.",
+            });
+          }
+        }
+      } else {
+        return res.status(403).json({
+          error: "Acesso não autorizado.",
+        });
+      }
 
       const alteracoes = montarAlteracoesBeneficiario(beneficiario, data);
 
@@ -313,10 +326,31 @@ class BeneficiarioController {
         });
       }
 
-      // Atualiza apenas o campo ativo.
+      // Quando uma INSTITUICAO desativa o beneficiário, ele deixa de
+      // pertencer à instituição. Como a listagem da instituição filtra pelo
+      // instituicaoId do usuário, ele desaparece imediatamente da tabela dela.
+      // O ADMIN continua vendo o registro, agora inativo e sem instituição.
+      const dadosAtualizacao =
+        req.user.role === "INSTITUICAO" && ativo === false
+          ? {
+              ativo: false,
+              instituicaoId: null,
+            }
+          : {
+              ativo,
+            };
+
       const beneficiarioAtualizado = await prisma.beneficiario.update({
         where: { id },
-        data: { ativo },
+        data: dadosAtualizacao,
+        include: {
+          instituicao: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
       });
 
       // Registra a mudança de status no histórico, se ela realmente ocorreu.
@@ -324,9 +358,12 @@ class BeneficiarioController {
         await registrarEventoHistorico({
           beneficiarioId: id,
           tipo: "ATUALIZACAO",
-          descricao: ativo
-            ? "Beneficiário reativado."
-            : "Beneficiário inativado.",
+          descricao:
+            req.user.role === "INSTITUICAO" && ativo === false
+              ? "Beneficiário inativado e desvinculado da instituição."
+              : ativo
+                ? "Beneficiário reativado."
+                : "Beneficiário inativado.",
           detalhes: {
             alteracoes: [
               {
@@ -335,6 +372,18 @@ class BeneficiarioController {
                 de: String(beneficiario.ativo),
                 para: String(ativo),
               },
+              ...(
+                req.user.role === "INSTITUICAO" && ativo === false
+                  ? [
+                      {
+                        campo: "instituicaoId",
+                        rotulo: "Instituição",
+                        de: String(beneficiario.instituicaoId ?? ""),
+                        para: "",
+                      },
+                    ]
+                  : []
+              ),
             ],
           },
           usuarioId: req.user.id,
