@@ -19,7 +19,6 @@ import beneficiariosRoutes from "./routes/beneficiariosRoutes.js";
 import doacoesRoutes from "./routes/doacoesRoutes.js";
 import qrcodeRoutes from "./routes/qrcodeRoutes.js";
 import saldoCestaRoutes from "./routes/saldoCestaRoutes.js";
-import ocrRoutes from "./routes/orcRoutes.js";
 import comprovanteRoutes from "./routes/comprovanteRoutes.js";
 
 // ===============================
@@ -74,12 +73,6 @@ app.use(cookieParser());
 app.use(express.json({ limit: "8mb" }));
 app.use(express.urlencoded({ extended: true, limit: "8mb" }));
 // Rotas
-app.use("/auth", authRoutes);
-app.use("/instituicoes", instituicoesRoutes);
-app.use("/beneficiarios", beneficiariosRoutes);
-app.use("/doacoes", doacoesRoutes);
-app.use("/saldo-cestas", saldoCestaRoutes);
-app.use("/ocr", ocrRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/comprovantes", comprovanteRoutes);
 
@@ -111,8 +104,6 @@ app.use("/doacoes", doacoesRoutes);
 app.use("/qrcodes", qrcodeRoutes);
 
 app.use("/saldo-cestas", saldoCestaRoutes);
-
-app.use("/ocr", ocrRoutes);
 
 // ===============================
 // PORTA
