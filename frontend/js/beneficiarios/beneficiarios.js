@@ -1890,6 +1890,49 @@ function atualizarPreviewFotoCadastro(foto) {
     fotoCadastroBeneficiarioBase64=foto; const img=document.getElementById("previewFotoCadastroBeneficiario"),ph=document.getElementById("placeholderFotoCadastroBeneficiario"),rm=document.getElementById("btnRemoverFotoCadastroBeneficiario");
     if(img){img.src=foto;img.hidden=false;} if(ph)ph.hidden=true; if(rm)rm.hidden=false;
 }
+
+async function carregarFotoAtualNoFormulario(id) {
+    const img = document.getElementById("previewFotoCadastroBeneficiario");
+    const ph = document.getElementById("placeholderFotoCadastroBeneficiario");
+    const rm = document.getElementById("btnRemoverFotoCadastroBeneficiario");
+
+    // Foto atual não conta como alteração. Só envia ao backend se o usuário
+    // tirar/selecionar uma nova foto.
+    fotoCadastroBeneficiarioBase64 = null;
+
+    if (rm) rm.hidden = true;
+
+    try {
+        const resposta = await obterFotoBeneficiarioAPI(Number(id));
+
+        if (!resposta.ok) {
+            if (img) {
+                img.hidden = true;
+                img.removeAttribute("src");
+            }
+            if (ph) ph.hidden = false;
+            return;
+        }
+
+        const blob = await resposta.blob();
+        const url = URL.createObjectURL(blob);
+
+        if (img) {
+            img.src = url;
+            img.hidden = false;
+            img.onload = () => URL.revokeObjectURL(url);
+        }
+
+        if (ph) ph.hidden = true;
+    } catch (erro) {
+        console.warn("Não foi possível carregar a foto atual no formulário.", erro);
+        if (img) {
+            img.hidden = true;
+            img.removeAttribute("src");
+        }
+        if (ph) ph.hidden = false;
+    }
+}
 function garantirAreaFotoCadastroBeneficiario() {
     if (!elementos.formulario || document.getElementById("fotoCadastroBeneficiario")) return;
     const grupoNome=campos.nomeCompleto?.closest(".form-group")||campos.nomeCompleto?.parentElement; if(!grupoNome?.parentElement)return;
@@ -2434,11 +2477,31 @@ async function salvarBeneficiario(event) {
 
         }
 
-        if (!editando && fotoCadastroBeneficiarioBase64) {
-            const novoId = Number(resultado?.beneficiario?.id ?? resultado?.data?.id);
-            if (!novoId) throw new Error("Beneficiário cadastrado, mas não foi possível salvar a foto.");
-            const respostaFoto = await salvarFotoBeneficiarioAPI(novoId, fotoCadastroBeneficiarioBase64);
-            if (!respostaFoto.ok) throw new Error("Beneficiário cadastrado, mas ocorreu erro ao salvar a foto.");
+        if (fotoCadastroBeneficiarioBase64) {
+            const idFoto = editando
+                ? Number(beneficiarioEditandoId)
+                : Number(resultado?.beneficiario?.id ?? resultado?.data?.id);
+
+            if (!idFoto) {
+                throw new Error(
+                    editando
+                        ? "Beneficiário atualizado, mas não foi possível identificar o ID para salvar a foto."
+                        : "Beneficiário cadastrado, mas não foi possível identificar o ID para salvar a foto."
+                );
+            }
+
+            const respostaFoto = await salvarFotoBeneficiarioAPI(
+                idFoto,
+                fotoCadastroBeneficiarioBase64
+            );
+
+            if (!respostaFoto.ok) {
+                throw new Error(
+                    editando
+                        ? "Beneficiário atualizado, mas ocorreu erro ao salvar a foto."
+                        : "Beneficiário cadastrado, mas ocorreu erro ao salvar a foto."
+                );
+            }
         }
 
         mostrarSucesso(
@@ -2507,7 +2570,8 @@ async function editarBeneficiario(id) {
         garantirAreaFotoCadastroBeneficiario();
         encerrarCameraCadastroBeneficiario();
         const areaFotoCadastro = document.getElementById("fotoCadastroBeneficiario");
-        if (areaFotoCadastro) areaFotoCadastro.hidden = true;
+        if (areaFotoCadastro) areaFotoCadastro.hidden = false;
+        await carregarFotoAtualNoFormulario(id);
 
         prepararModalBeneficiarioEmEtapas();
         mostrarEtapaCadastroBeneficiario(1);
