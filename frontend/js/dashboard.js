@@ -973,6 +973,10 @@ function configurarLogout() {
                     "paginaAtualDashboard"
                 );
 
+                sessionStorage.removeItem(
+                    "boasVindasDashboardExibidas"
+                );
+
                 await aguardar(500);
 
                 await realizarLogout();
@@ -994,6 +998,10 @@ function configurarLogout() {
 
                 sessionStorage.removeItem(
                     "paginaAtualDashboard"
+                );
+
+                sessionStorage.removeItem(
+                    "boasVindasDashboardExibidas"
                 );
 
                 loading.ocultar({
@@ -1080,16 +1088,29 @@ async function inicializarDashboard() {
             ) || document
         );
 
-        toast.sucesso(
-            `Bem-vindo, ${usuario.nome || "usuário"}!`,
-            {
-                titulo:
-                    "Acesso realizado",
+        // Exibe a mensagem de boas-vindas apenas uma vez por login.
+        // Recarregar a página ou navegar entre módulos não deve repetir o modal.
+        if (
+            sessionStorage.getItem(
+                "boasVindasDashboardExibidas"
+            ) !== "true"
+        ) {
+            sessionStorage.setItem(
+                "boasVindasDashboardExibidas",
+                "true"
+            );
 
-                duracao:
-                    3500
-            }
-        );
+            toast.sucesso(
+                `Bem-vindo, ${usuario.nome || "usuário"}!`,
+                {
+                    titulo:
+                        "Acesso realizado",
+
+                    duracao:
+                        3500
+                }
+            );
+        }
 
     } catch (erro) {
 
