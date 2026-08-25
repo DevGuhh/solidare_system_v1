@@ -63,7 +63,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 // ===============================
@@ -76,13 +76,12 @@ app.use(express.urlencoded({ extended: true, limit: "8mb" }));
 // Rotas
 app.use("/auth", authRoutes);
 app.use("/instituicoes", instituicoesRoutes);
-app.use("/beneficiarios", beneficariosRoutes);
+app.use("/beneficiarios", beneficiariosRoutes);
 app.use("/doacoes", doacoesRoutes);
 app.use("/saldo-cestas", saldoCestaRoutes);
 app.use("/ocr", ocrRoutes);
-app.use('/uploads', express.static('uploads'));
-app.use('/api/comprovantes', comprovanteRoutes);
-
+app.use("/uploads", express.static("uploads"));
+app.use("/api/comprovantes", comprovanteRoutes);
 
 // ===============================
 // RATE LIMIT
