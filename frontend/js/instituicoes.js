@@ -77,6 +77,7 @@ function capturarElementos() {
     campos = {
         id: document.getElementById("instituicaoId"),
         nome: document.getElementById("nome"),
+        cnpj: document.getElementById("cnpj"),
         tipo: document.getElementById("tipo"),
         responsavel: document.getElementById("responsavel"),
         email: document.getElementById("email"),
@@ -95,7 +96,7 @@ function validarEstrutura() {
     const obrigatorios = [
         el.btnNova, el.btnAtualizar, el.pesquisa, el.tabela, el.modal, el.formulario,
         el.btnFecharModal, el.btnCancelar, el.btnSalvar, el.modalCredenciais,
-        campos.nome, campos.tipo, campos.responsavel, campos.email, campos.telefone,
+        campos.nome, campos.cnpj, campos.tipo, campos.responsavel, campos.email, campos.telefone,
         campos.cep, campos.logradouro, campos.numero, campos.bairro, campos.cidade, campos.uf
     ];
     if (obrigatorios.some((item) => !item)) {
@@ -477,6 +478,7 @@ async function editarInstituicao(id) {
         estado.editandoId = Number(id);
         campos.id.value = i.id || id;
         campos.nome.value = i.nome || "";
+        campos.cnpj.value = i.cnpj || "";
         campos.tipo.value = i.tipo || "";
         campos.responsavel.value = i.responsavel || "";
         campos.email.value = i.email || "";
@@ -499,6 +501,7 @@ async function editarInstituicao(id) {
 function montarDados() {
     return {
         nome: campos.nome.value.trim(),
+        cnpj: campos.cnpj.value.trim(),
         tipo: campos.tipo.value,
         responsavel: campos.responsavel.value.trim(),
         email: campos.email.value.trim().toLowerCase(),

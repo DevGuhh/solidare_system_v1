@@ -178,6 +178,7 @@ class InstituicaoController {
           instituicao: {
             create: {
               nome: data.nome.trim(),
+              cnpj: data.cnpj,
               email: emailNormalizado,
               tipo: data.tipo,
               responsavel: data.responsavel.trim(),

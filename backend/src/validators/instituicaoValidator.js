@@ -1,6 +1,12 @@
 import { z } from "zod";
 
 export const criarInstituicaoSchema = z.object({
+  cnpj: z
+    .string()
+    .trim()
+    .refine(validarCNPJ, "Informe um CNPJ válido.")
+    .transform((value) => value.replace(/\D/g, "")),
+  
   nome: z
     .string()
     .trim()
