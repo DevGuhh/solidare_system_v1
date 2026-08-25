@@ -1,0 +1,50 @@
+.notificacoes-lista {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+.notificacao-item {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+.notificacao-item:hover {
+    background: #e9ecef;
+}
+.notificacao-item .titulo {
+    font-weight: 600;
+    font-size: 1rem;
+}
+.notificacao-item .subtitulo {
+    font-size: 0.9rem;
+    color: #6c757d;
+    display: flex;
+    justify-content: space-between;
+}
+.notificacao-item .descricao {
+    font-size: 0.9rem;
+    color: #333;
+    margin-top: 5px;
+}
+.notificacao-item .tipo-badge {
+    background: #007bff;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+}
+.notificacao-item .data {
+    font-size: 0.75rem;
+    color: #adb5bd;
+}
+.form-notificacao .form-group {
+    margin-bottom: 1rem;
+}
+.form-notificacao label {
+    font-weight: 500;
+}

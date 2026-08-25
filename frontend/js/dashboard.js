@@ -245,16 +245,49 @@ function possuiPermissaoElemento(
 // =====================================================
 
 function aplicarPermissoesElementos(
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
     usuario,
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
     raiz = document
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
 ) {
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
 
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
     if (!usuario || !raiz) {
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
         return;
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
     }
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
 
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
     const perfilUsuario =
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
         normalizarPerfil(usuario.role);
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
 
     const elementosProtegidos =
         raiz.querySelectorAll(
@@ -413,9 +446,21 @@ function configurarObservadorPermissoes() {
             }
 
             aplicarPermissoesElementos(
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
                 usuarioAutenticadoAtual,
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
                 conteudo
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
             );
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
 
         });
 
@@ -579,8 +624,17 @@ async function carregarUsuarioLogado() {
          * que já estão presentes no dashboard.html.
          */
         aplicarPermissoesElementos(
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
             usuario
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
         );
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
 
         salvarUsuarioNaSessao(
             usuario
@@ -721,9 +775,21 @@ async function carregarPaginaInicial(usuario) {
             );
 
         aplicarPermissoesElementos(
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
             usuario,
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
             conteudo || document
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
         );
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
 
     }
 
@@ -1074,11 +1140,29 @@ async function inicializarDashboard() {
          * que a página inicial foi inserida no DOM.
          */
         aplicarPermissoesElementos(
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
             usuario,
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
             document.getElementById(
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
                 "conteudo"
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
             ) || document
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
         );
+        // Carregar notificações
+        await new Promise(resolve => setTimeout(resolve, 100));
+        carregarNotificacoesDashboard(5);
 
         toast.sucesso(
             `Bem-vindo, ${usuario.nome || "usuário"}!`,
