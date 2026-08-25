@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validarCNPJ } from "../utils/cnpj.js";
 
 export const criarInstituicaoSchema = z.object({
   cnpj: z
