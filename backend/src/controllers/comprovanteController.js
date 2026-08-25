@@ -7,8 +7,29 @@ import comprovanteService from "../services/comprovanteService.js";
 // CONFIGURAÇÃO DO MULTER
 // Cria uma configuração do Multer.
 // O Multer será responsável por receber o arquivo enviado pelo usuário.
+const TIPOS_PERMITIDOS = new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+]);
+
 const upload = multer({
   storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB
+  },
+  fileFilter: (req, file, cb) => {
+    if (!TIPOS_PERMITIDOS.has(file.mimetype)) {
+      const error = new Error(
+        "Tipo de arquivo não permitido. Envie um PDF, PNG, JPEG ou WEBP.",
+      );
+      error.code = "FILE_TYPE_NOT_ALLOWED";
+      return cb(error);
+    }
+
+    cb(null, true);
+  },
 });
 
 // MIDDLEWARE DE UPLOAD
@@ -20,6 +41,22 @@ export const uploadMiddleware = (req, res, next) => {
       console.error("Campo rejeitado:", err.field);
       console.error("Mensagem:", err.message);
       console.error("==================================");
+
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({
+          message: "Arquivo muito grande. O tamanho máximo permitido é 10 MB.",
+          code: err.code,
+          field: err.field,
+        });
+      }
+
+      if (err.code === "FILE_TYPE_NOT_ALLOWED") {
+        return res.status(400).json({
+          message: err.message,
+          code: err.code,
+          field: err.field,
+        });
+      }
 
       return res.status(400).json({
         message: "Erro no upload",
