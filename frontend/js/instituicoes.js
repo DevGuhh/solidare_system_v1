@@ -894,3 +894,7 @@ export async function inicializarInstituicoes() {
         mostrarErro(erro.message || "Não foi possível inicializar a tela de Instituições.");
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    initFormNotificacao();
+});
