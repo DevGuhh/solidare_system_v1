@@ -89,6 +89,28 @@ class ComprovanteService {
     });
   }
 
+  async rejeitar(comprovanteId) {
+    const comprovante = await prisma.comprovante.findUnique({
+      where: {
+        id: Number(comprovanteId),
+      },
+    });
+
+    if (!comprovante) {
+      throw new Error("Comprovante não encontrado.");
+    }
+
+    return prisma.comprovante.update({
+      where: {
+        id: Number(comprovanteId),
+      },
+      data: {
+        status: "REJEITADO",
+        revisadoEm: new Date(),
+      },
+    });
+  }
+
   async vincularManualmente(comprovanteId, instituicaoId) {
     const comprovante = await prisma.comprovante.findUnique({
       where: {

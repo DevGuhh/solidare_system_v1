@@ -143,6 +143,24 @@ class ComprovanteController {
       });
     }
   }
+
+  async rejeitar(req, res) {
+    try {
+      const { id } = req.params;
+
+      const comprovante = await comprovanteService.rejeitar(id);
+      return res.status(200).json(comprovante);
+    } catch (error) {
+      if (error.message === "Comprovante não encontrado.") {
+        return res.status(404).json({ message: error.message });
+      }
+
+      return res.status(500).json({
+        message: "Erro ao rejeitar comprovante",
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default new ComprovanteController();

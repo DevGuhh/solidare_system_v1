@@ -20,6 +20,12 @@ router.patch(
   authorize("ADMIN"),
   comprovanteController.vincular,
 );
+router.patch(
+  "/:id/rejeitar",
+  protect,
+  authorize("ADMIN"),
+  comprovanteController.rejeitar,
+);
 
 export default router;
 
