@@ -54,6 +54,8 @@ model InstituicaoParceira {
   doacoes       Doacao[]
   saldoCesta    SaldoCesta?
   usuario       Usuario?
+  cnpj          String?          @unique
+  comprovantes  Comprovante[]
 
   @@map("instituicoes_parceiras")
 }
@@ -132,6 +134,7 @@ model Doacao {
   usuario            Usuario             @relation(fields: [usuarioId], references: [id])
   movimentacoesSaldo MovimentacaoSaldo[]
   comprovanteEntrega ComprovanteEntrega?
+  comprovantes  Comprovante[]
 
   @@index([beneficiarioId])
   @@index([instituicaoId])
@@ -205,6 +208,24 @@ model QRCode {
   @@map("qrcodes")
 }
 
+model Comprovante {
+  id            Int                 @id @default(autoincrement())
+  arquivoUrl    String
+  tipoDoc       String
+  cnpjExtraido  String?
+  status        StatusComprovante   @default(PENDENTE_REVISAO)
+  instituicaoId Int?
+  instituicao   InstituicaoParceira? @relation(fields: [instituicaoId], references: [id])
+  doacaoId      Int?
+  doacao        Doacao?             @relation(fields: [doacaoId], references: [id])
+  criadoEm      DateTime            @default(now())
+  revisadoEm    DateTime?
+
+  @@index([instituicaoId])
+  @@index([status])
+  @@map("comprovantes")
+}
+
 enum RoleUsuario {
   ADMIN
   INSTITUICAO
@@ -238,4 +259,10 @@ enum TipoMovimentacaoSaldo {
   ENTRADA
   SAIDA_DOACAO
   ESTORNO_DOACAO
+}
+
+enum StatusComprovante {
+  VINCULADO
+  PENDENTE_REVISAO
+  REJEITADO
 }
