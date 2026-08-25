@@ -74,6 +74,15 @@ app.use(express.json({ limit: "8mb" }));
 app.use(express.urlencoded({ extended: true, limit: "8mb" }));
 // Rotas
 app.use("/uploads", express.static("uploads"));
+
+// Se o arquivo físico não existir, encerra aqui.
+// Isso impede que /uploads caia no rate limit global.
+app.use("/uploads", (req, res) => {
+  return res.status(404).json({
+    error: "Arquivo não encontrado.",
+  });
+});
+
 app.use("/api/comprovantes", comprovanteRoutes);
 
 // ===============================

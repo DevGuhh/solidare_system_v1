@@ -48,6 +48,7 @@ const paginasPermitidasPorPerfil = {
         "instituicoes.html",
         "qrcode.html",
         "doacoes.html",
+        "comprovantes.html",
         "relatorios.html"
     ],
 
@@ -55,7 +56,8 @@ const paginasPermitidasPorPerfil = {
         "home.html",
         "beneficiarios.html",
         "qrcode.html",
-        "doacoes.html"
+        "doacoes.html",
+        "comprovantes.html"
     ]
 
 };

@@ -1,0 +1,191 @@
+<!-- =====================================================
+     PÁGINA DE COMPROVANTES / NOTAS FISCAIS
+====================================================== -->
+
+<section class="pagina-conteudo pagina-comprovantes">
+
+    <header class="cabecalho-pagina">
+        <div class="cabecalho-pagina-texto">
+            <span class="cabecalho-pagina-icone">
+                <i class="fa-solid fa-file-invoice"></i>
+            </span>
+
+            <div>
+                <h1>Comprovantes</h1>
+                <p>
+                    Envie comprovantes e notas fiscais para identificação
+                    automática da instituição.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <section class="comprovantes-grid-principal">
+
+        <!-- UPLOAD -->
+        <article class="painel-comprovantes">
+            <header class="painel-comprovantes-cabecalho">
+                <span class="painel-comprovantes-icone">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </span>
+
+                <div>
+                    <span class="painel-comprovantes-subtitulo">
+                        Novo documento
+                    </span>
+                    <h2>Enviar comprovante</h2>
+                    <p>
+                        O sistema tentará identificar automaticamente o CNPJ
+                        e vincular o arquivo à instituição correta.
+                    </p>
+                </div>
+            </header>
+
+            <form id="formUploadComprovante" class="form-comprovante">
+                <div class="campo-comprovante">
+                    <label for="tipoDocComprovante">
+                        Tipo do documento <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="tipoDocComprovante"
+                        name="tipo_doc"
+                        list="tiposDocumentoComprovante"
+                        placeholder="Ex.: nota_fiscal"
+                        maxlength="60"
+                        autocomplete="off"
+                        required
+                    >
+
+                    <datalist id="tiposDocumentoComprovante">
+                        <option value="nota_fiscal"></option>
+                        <option value="comprovante_doacao"></option>
+                        <option value="recibo"></option>
+                    </datalist>
+
+                    <small>
+                        O backend ainda não possui lista fixa de tipos.
+                        As opções acima são apenas sugestões e o texto pode ser alterado.
+                    </small>
+                </div>
+
+                <div class="campo-comprovante">
+                    <label>
+                        Arquivo <span>*</span>
+                    </label>
+
+                    <label
+                        class="comprovante-dropzone"
+                        id="dropzoneComprovante"
+                        for="arquivoComprovante"
+                    >
+                        <input
+                            type="file"
+                            id="arquivoComprovante"
+                            name="arquivo"
+                            accept=".pdf,image/*"
+                            required
+                        >
+
+                        <span class="comprovante-dropzone-icone">
+                            <i class="fa-solid fa-file-arrow-up"></i>
+                        </span>
+
+                        <strong id="nomeArquivoComprovante">
+                            Clique para selecionar um arquivo
+                        </strong>
+
+                        <span>
+                            PDF ou imagem
+                        </span>
+                    </label>
+                </div>
+
+                <button
+                    type="submit"
+                    id="btnEnviarComprovante"
+                    class="btn btn-primary btn-enviar-comprovante"
+                >
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    Enviar e processar
+                </button>
+            </form>
+        </article>
+
+        <!-- RESULTADO DO ÚLTIMO UPLOAD -->
+        <article class="painel-comprovantes resultado-upload-comprovante">
+            <header class="painel-comprovantes-cabecalho">
+                <span class="painel-comprovantes-icone">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                </span>
+
+                <div>
+                    <span class="painel-comprovantes-subtitulo">
+                        Processamento
+                    </span>
+                    <h2>Resultado do último envio</h2>
+                    <p>
+                        Confira como o documento foi classificado pelo OCR.
+                    </p>
+                </div>
+            </header>
+
+            <div id="resultadoUploadComprovante" class="resultado-upload-vazio">
+                <i class="fa-regular fa-file-lines"></i>
+                <strong>Nenhum documento enviado nesta sessão.</strong>
+                <span>O resultado aparecerá aqui após o processamento.</span>
+            </div>
+        </article>
+
+    </section>
+
+    <!-- FILA ADMIN -->
+    <section
+        id="secaoRevisaoComprovantes"
+        class="painel-comprovantes painel-revisao-comprovantes"
+        hidden
+    >
+        <header class="painel-comprovantes-cabecalho cabecalho-fila-comprovantes">
+            <div class="painel-comprovantes-cabecalho-lado">
+                <span class="painel-comprovantes-icone">
+                    <i class="fa-solid fa-list-check"></i>
+                </span>
+
+                <div>
+                    <span class="painel-comprovantes-subtitulo">
+                        Exclusivo ADMIN
+                    </span>
+                    <h2>Fila de revisão manual</h2>
+                    <p>
+                        Documentos em que o OCR não encontrou uma instituição correspondente.
+                    </p>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                id="btnAtualizarPendentes"
+                class="btn btn-secondary"
+            >
+                <i class="fa-solid fa-rotate"></i>
+                Atualizar fila
+            </button>
+        </header>
+
+        <div class="fila-comprovantes-resumo">
+            <span>
+                <strong id="totalComprovantesPendentes">0</strong>
+                pendente(s)
+            </span>
+        </div>
+
+        <div id="listaComprovantesPendentes" class="lista-comprovantes-pendentes">
+            <div class="estado-comprovantes">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <strong>Carregando fila...</strong>
+            </div>
+        </div>
+    </section>
+
+</section>

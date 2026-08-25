@@ -45,6 +45,11 @@ const configuracoesPaginas = {
     "relatorios.html": {
         titulo: "Relatórios",
         descricao: "Consulte indicadores e informações do sistema."
+    },
+
+    "comprovantes.html": {
+        titulo: "Comprovantes",
+        descricao: "Envie documentos e revise vinculações pendentes."
     }
 
 };
@@ -196,6 +201,29 @@ const inicializadoresPaginas = {
                 "A página de Instituições não possui um inicializador compatível.",
                 erro
             );
+
+        }
+
+    },
+
+
+    // =================================================
+    // COMPROVANTES
+    // =================================================
+
+    "comprovantes.html": async () => {
+
+        const modulo =
+            await import(
+                "./comprovantes.js"
+            );
+
+        if (
+            typeof modulo.inicializarComprovantes ===
+            "function"
+        ) {
+
+            await modulo.inicializarComprovantes();
 
         }
 
