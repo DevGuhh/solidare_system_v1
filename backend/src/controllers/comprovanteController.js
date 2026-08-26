@@ -143,6 +143,41 @@ class ComprovanteController {
     }
   }
 
+  async abrirArquivo(req, res) {
+    try {
+      const { id } = req.params;
+
+      const resultado = await comprovanteService.localizarArquivo(id);
+
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename*=UTF-8''${encodeURIComponent(resultado.nomeArquivo)}`,
+      );
+
+      return res.sendFile(resultado.caminhoArquivo);
+    } catch (error) {
+      if (
+        error.message === "Comprovante não encontrado." ||
+        error.message === "Arquivo físico não encontrado."
+      ) {
+        return res.status(404).json({
+          message: error.message,
+        });
+      }
+
+      if (error.message === "ID do comprovante inválido.") {
+        return res.status(400).json({
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        message: "Erro ao abrir o documento",
+        error: error.message,
+      });
+    }
+  }
+
   async vincular(req, res) {
     try {
       const { id } = req.params;

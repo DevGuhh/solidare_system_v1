@@ -9,7 +9,7 @@ import {
 
 import {
     listarComprovantesInstituicaoAPI,
-    montarUrlArquivoComprovante
+    abrirArquivoComprovanteAPI
 } from "./api/comprovantesApi.js";
 
 import { mostrarSucesso, mostrarErro } from "./utils/toast.js";
@@ -523,7 +523,6 @@ function renderizarDocumentosInstituicao(documentos) {
     }
 
     lista.innerHTML = documentos.map((documento) => {
-        const url = montarUrlArquivoComprovante(documento.arquivoUrl);
         const tipo = escapar(documento.tipoDoc || "Documento");
         const cnpj = escapar(formatarCnpjDocumento(documento.cnpjExtraido));
         const criadoEm = escapar(formatarDataDocumento(documento.criadoEm));
@@ -560,20 +559,83 @@ function renderizarDocumentosInstituicao(documentos) {
                         Vinculado
                     </span>
 
-                    <a
-                        href="${escapar(url)}"
+                    <button
+                        type="button"
                         class="btnAbrirDocumentoInstituicao"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        data-documento-id="${documento.id}"
                         title="Abrir documento"
                     >
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
                         Abrir
-                    </a>
+                    </button>
                 </div>
             </article>
         `;
     }).join("");
+}
+
+async function abrirArquivoDocumentoInstituicao(botao) {
+    const id = Number(botao?.dataset?.documentoId);
+
+    if (!Number.isInteger(id) || id <= 0) {
+        mostrarErro("Documento inválido.");
+        return;
+    }
+
+    const conteudoOriginal = botao.innerHTML;
+
+    botao.disabled = true;
+    botao.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Abrindo...
+    `;
+
+    try {
+        const resposta = await abrirArquivoComprovanteAPI(id);
+
+        if (!resposta.ok) {
+            let dados = {};
+
+            try {
+                dados = await resposta.json();
+            } catch {
+                dados = {};
+            }
+
+            throw new Error(
+                dados.message ||
+                dados.error ||
+                "Não foi possível abrir o documento."
+            );
+        }
+
+        const blob = await resposta.blob();
+        const urlTemporaria = URL.createObjectURL(blob);
+
+        const novaJanela = window.open(
+            urlTemporaria,
+            "_blank",
+            "noopener,noreferrer"
+        );
+
+        if (!novaJanela) {
+            URL.revokeObjectURL(urlTemporaria);
+
+            throw new Error(
+                "O navegador bloqueou a abertura do documento."
+            );
+        }
+
+        window.setTimeout(() => {
+            URL.revokeObjectURL(urlTemporaria);
+        }, 60_000);
+    } catch (erro) {
+        console.error("Erro ao abrir documento:", erro);
+        mostrarErro(erro.message);
+    } finally {
+        botao.disabled = false;
+        botao.innerHTML = conteudoOriginal;
+    }
 }
 
 async function abrirDocumentosInstituicao(id, nome) {
@@ -999,6 +1061,14 @@ function configurarEventos() {
     document
         .getElementById("modalDocumentosInstituicao")
         ?.addEventListener("click", (e) => {
+            const botaoAbrir =
+                e.target.closest(".btnAbrirDocumentoInstituicao");
+
+            if (botaoAbrir) {
+                abrirArquivoDocumentoInstituicao(botaoAbrir);
+                return;
+            }
+
             if (e.target.id === "modalDocumentosInstituicao") {
                 fecharDocumentosInstituicao();
             }
