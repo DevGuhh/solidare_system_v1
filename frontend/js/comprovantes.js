@@ -5,8 +5,6 @@ import {
     listarComprovantesPendentesAPI,
     vincularComprovanteAPI,
     montarUrlArquivoComprovante,
-    montarUrlsArquivoComprovante,
-    resolverUrlArquivoComprovante,
 } from "./api/comprovantesApi.js";
 
 let usuarioAtual = null;
@@ -179,92 +177,21 @@ function opcoesInstituicoes() {
 }
 
 function renderizarPreviewArquivo(comprovante) {
-    const urls = montarUrlsArquivoComprovante(comprovante.arquivoUrl);
-    const principal = urls[0] || "#";
-    const fallback = urls[1] || "";
-
-    if (ehImagem(comprovante.arquivoUrl)) {
-        return `
-            <a
-                class="preview-comprovante preview-imagem-comprovante"
-                href="${escaparHtml(principal)}"
-                data-arquivo-url="${escaparHtml(comprovante.arquivoUrl || "")}"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Abrir imagem"
-            >
-                <img
-                    src="${escaparHtml(principal)}"
-                    data-fallback-src="${escaparHtml(fallback)}"
-                    data-preview-comprovante
-                    alt="Pré-visualização do comprovante ${comprovante.id}"
-                    loading="lazy"
-                >
-            </a>
-        `;
-    }
+    const url = montarUrlArquivoComprovante(comprovante.arquivoUrl);
+    const imagem = ehImagem(comprovante.arquivoUrl);
 
     return `
         <a
-            class="preview-comprovante preview-pdf-comprovante"
-            href="${escaparHtml(principal)}"
-            data-arquivo-url="${escaparHtml(comprovante.arquivoUrl || "")}"
+            class="preview-comprovante preview-arquivo-manual"
+            href="${escaparHtml(url)}"
             target="_blank"
             rel="noopener noreferrer"
+            title="${imagem ? "Abrir imagem" : "Abrir PDF"}"
         >
-            <i class="fa-solid fa-file-pdf"></i>
-            <span>Abrir PDF</span>
+            <i class="fa-solid ${imagem ? "fa-file-image" : "fa-file-pdf"}"></i>
+            <span>${imagem ? "Abrir imagem" : "Abrir PDF"}</span>
         </a>
     `;
-}
-
-function configurarFallbackPreviewsComprovantes() {
-    document
-        .querySelectorAll("[data-preview-comprovante]")
-        .forEach((imagem) => {
-            if (imagem.dataset.fallbackConfigurado === "true") {
-                return;
-            }
-
-            imagem.dataset.fallbackConfigurado = "true";
-
-            imagem.addEventListener("error", () => {
-                const fallback = imagem.dataset.fallbackSrc;
-
-                if (
-                    fallback &&
-                    imagem.dataset.fallbackTentado !== "true"
-                ) {
-                    imagem.dataset.fallbackTentado = "true";
-                    imagem.src = fallback;
-
-                    const link =
-                        imagem.closest("[data-arquivo-url]");
-
-                    if (link) {
-                        link.href = fallback;
-                    }
-
-                    return;
-                }
-
-                const link =
-                    imagem.closest(".preview-imagem-comprovante");
-
-                if (!link) return;
-
-                link.removeAttribute("href");
-                link.removeAttribute("data-arquivo-url");
-                link.classList.add(
-                    "preview-arquivo-indisponivel"
-                );
-
-                link.innerHTML = `
-                    <i class="fa-solid fa-file-circle-xmark"></i>
-                    <span>Arquivo indisponível</span>
-                `;
-            });
-        });
 }
 
 function renderizarPendentes(pendentes) {
@@ -342,7 +269,6 @@ function renderizarPendentes(pendentes) {
         </article>
     `).join("");
 
-    configurarFallbackPreviewsComprovantes();
 }
 
 async function carregarPendentes() {
@@ -451,11 +377,16 @@ async function enviarComprovante(event = null) {
 
         if (dados.status === "VINCULADO") {
             toast.sucesso(
-                "Comprovante processado e vinculado automaticamente."
+                "Comprovante enviado e vinculado automaticamente."
+            );
+        } else if (dados.ocrProcessado === false) {
+            toast.aviso(
+                "Arquivo enviado com sucesso. O OCR está indisponível e o documento foi encaminhado para revisão manual.",
+                { duracao: 4200 }
             );
         } else {
             toast.aviso(
-                "Comprovante recebido, mas precisa de revisão manual.",
+                "Arquivo enviado com sucesso e encaminhado para revisão manual.",
                 { duracao: 3400 }
             );
         }
@@ -578,23 +509,7 @@ function configurarEventos() {
                 return;
             }
 
-            const linkArquivo = event.target.closest(
-                "[data-arquivo-url]"
-            );
-
-            if (!linkArquivo) return;
-
-            event.preventDefault();
-
-            const arquivoUrl = linkArquivo.dataset.arquivoUrl;
-            const urlResolvida =
-                await resolverUrlArquivoComprovante(arquivoUrl);
-
-            window.open(
-                urlResolvida,
-                "_blank",
-                "noopener,noreferrer"
-            );
+            // Links de arquivo são abertos diretamente pelo navegador.
         }, { signal });
 }
 

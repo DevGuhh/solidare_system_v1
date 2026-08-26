@@ -19,31 +19,45 @@ class ComprovanteService {
     tipoDoc,
     doacaoId = null,
   }) {
-    const ocrResult = await OcrService.sendBuffer(buffer);
-
-    // Converte o resultado do Azure OCR em uma lista de textos
-    const texts = (ocrResult.regions ?? [])
-      .flatMap((region) =>
-        (region.lines ?? []).map((line) =>
-          (line.words ?? []).map((word) => word.text).join(" "),
-        ),
-      )
-      .filter(Boolean);
-
-    // Extrai CNPJs válidos encontrados no documento
-    const candidatosCnpj = validarTexto.extrairCandidatos(texts);
-
-    // Usa o primeiro CNPJ válido encontrado
-    const cnpjEncontrado = candidatosCnpj[0] ?? null;
-
+    let cnpjEncontrado = null;
     let instituicao = null;
+    let ocrProcessado = true;
+    let erroOcr = null;
 
-    if (cnpjEncontrado) {
-      instituicao = await prisma.instituicaoParceira.findFirst({
-        where: {
-          cnpj: cnpjEncontrado,
-        },
-      });
+    /*
+     * O arquivo já foi recebido e salvo pelo controller.
+     * Uma indisponibilidade do Azure OCR não pode fazer o upload ser perdido.
+     * Nessa situação o comprovante segue para revisão manual.
+     */
+    try {
+      const ocrResult = await OcrService.sendBuffer(buffer);
+
+      const texts = (ocrResult.regions ?? [])
+        .flatMap((region) =>
+          (region.lines ?? []).map((line) =>
+            (line.words ?? []).map((word) => word.text).join(" "),
+          ),
+        )
+        .filter(Boolean);
+
+      const candidatosCnpj = validarTexto.extrairCandidatos(texts);
+      cnpjEncontrado = candidatosCnpj[0] ?? null;
+
+      if (cnpjEncontrado) {
+        instituicao = await prisma.instituicaoParceira.findFirst({
+          where: {
+            cnpj: cnpjEncontrado,
+          },
+        });
+      }
+    } catch (error) {
+      ocrProcessado = false;
+      erroOcr = error?.message || "Falha desconhecida no OCR.";
+
+      console.error(
+        "OCR indisponível. Comprovante será enviado para revisão manual:",
+        erroOcr,
+      );
     }
 
     let arquivoUrl = `/uploads/comprovantes/pendentes/${nomeArquivo}`;
@@ -66,7 +80,7 @@ class ComprovanteService {
       arquivoUrl = `/uploads/comprovantes/${instituicao.id}/${nomeArquivo}`;
     }
 
-    return prisma.comprovante.create({
+    const comprovante = await prisma.comprovante.create({
       data: {
         arquivoUrl,
         tipoDoc,
@@ -76,6 +90,14 @@ class ComprovanteService {
         status: instituicao ? "VINCULADO" : "PENDENTE_REVISAO",
       },
     });
+
+    return {
+      ...comprovante,
+      ocrProcessado,
+      avisoOcr: ocrProcessado
+        ? null
+        : "OCR indisponível. Documento enviado para revisão manual.",
+    };
   }
 
   async listarPendentes() {
