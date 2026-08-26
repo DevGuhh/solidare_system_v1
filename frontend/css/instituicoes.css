@@ -6,7 +6,6 @@
     width: 100%;
 }
 
-
 /* =====================================================
    CABEÇALHO
 ===================================================== */
@@ -34,11 +33,9 @@
         0 10px 26px rgba(15, 23, 42, 0.05);
 }
 
-
 .instituicoes-header-texto {
     min-width: 0;
 }
-
 
 .instituicoes-eyebrow {
     display: block;
@@ -53,7 +50,6 @@
     text-transform: uppercase;
 }
 
-
 .instituicoes-header h1 {
     margin: 0 0 8px;
 
@@ -62,7 +58,6 @@
     font-size: clamp(1.6rem, 2.5vw, 2rem);
     line-height: 1.2;
 }
-
 
 .instituicoes-header p {
     max-width: 620px;
@@ -74,7 +69,6 @@
     line-height: 1.55;
 }
 
-
 .instituicoes-header-acoes {
     display: flex;
     align-items: center;
@@ -82,7 +76,6 @@
 
     flex-shrink: 0;
 }
-
 
 /* =====================================================
    BOTÕES
@@ -117,12 +110,10 @@
         opacity 0.2s ease;
 }
 
-
 .instituicoes-page .btn:hover,
 .modal-instituicao-content .btn:hover {
     transform: translateY(-1px);
 }
-
 
 .instituicoes-page .btn:focus-visible,
 .modal-instituicao-content .btn:focus-visible {
@@ -130,14 +121,12 @@
     outline-offset: 3px;
 }
 
-
 .instituicoes-page .btn:disabled,
 .modal-instituicao-content .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
-
 
 .instituicoes-page .btn-primary,
 .modal-instituicao-content .btn-primary {
@@ -148,7 +137,6 @@
         0 8px 18px rgba(133, 0, 19, 0.18);
 }
 
-
 .instituicoes-page .btn-primary:hover,
 .modal-instituicao-content .btn-primary:hover {
     background: #a3001d;
@@ -157,14 +145,12 @@
         0 11px 22px rgba(133, 0, 19, 0.24);
 }
 
-
 .instituicoes-page .btn-info {
     border-color: #dce2e8;
 
     background: #ffffff;
     color: #475467;
 }
-
 
 .instituicoes-page .btn-info:hover {
     border-color: #d9b9bf;
@@ -173,7 +159,6 @@
     color: #850013;
 }
 
-
 .modal-instituicao-content .btn-secondary {
     border-color: #dce2e8;
 
@@ -181,11 +166,9 @@
     color: #475467;
 }
 
-
 .modal-instituicao-content .btn-secondary:hover {
     background: #f4f6f8;
 }
-
 
 /* =====================================================
    BARRA DE PESQUISA
@@ -209,13 +192,11 @@
         0 7px 20px rgba(15, 23, 42, 0.04);
 }
 
-
 .instituicoes-search {
     position: relative;
 
     width: min(100%, 500px);
 }
-
 
 .instituicoes-search > i {
     position: absolute;
@@ -230,7 +211,6 @@
 
     pointer-events: none;
 }
-
 
 .instituicoes-search input {
     width: 100%;
@@ -254,11 +234,9 @@
         box-shadow 0.2s ease;
 }
 
-
 .instituicoes-search input::placeholder {
     color: #98a2b3;
 }
-
 
 .instituicoes-search input:focus {
     border-color: #850013;
@@ -268,7 +246,6 @@
     box-shadow:
         0 0 0 4px rgba(133, 0, 19, 0.08);
 }
-
 
 .instituicoes-toolbar-info {
     display: flex;
@@ -281,11 +258,9 @@
     line-height: 1.4;
 }
 
-
 .instituicoes-toolbar-info i {
     color: #850013;
 }
-
 
 /* =====================================================
    LISTAGEM
@@ -303,7 +278,6 @@
         0 10px 26px rgba(15, 23, 42, 0.05);
 }
 
-
 .instituicoes-listagem-header {
     display: flex;
     align-items: center;
@@ -314,7 +288,6 @@
 
     border-bottom: 1px solid #eceff3;
 }
-
 
 .instituicoes-listagem-eyebrow {
     display: block;
@@ -329,7 +302,6 @@
     text-transform: uppercase;
 }
 
-
 .instituicoes-listagem-header h2 {
     margin: 0;
 
@@ -338,13 +310,11 @@
     font-size: 1.05rem;
 }
 
-
 .instituicoes-listagem-legenda {
     display: flex;
     align-items: center;
     gap: 14px;
 }
-
 
 .legenda-status {
     display: inline-flex;
@@ -357,14 +327,12 @@
     font-weight: 600;
 }
 
-
 .legenda-indicador {
     width: 8px;
     height: 8px;
 
     border-radius: 50%;
 }
-
 
 .legenda-indicador.ativo {
     background: #22a06b;
@@ -373,14 +341,12 @@
         0 0 0 4px rgba(34, 160, 107, 0.1);
 }
 
-
 .legenda-indicador.inativo {
     background: #c43d56;
 
     box-shadow:
         0 0 0 4px rgba(196, 61, 86, 0.1);
 }
-
 
 /* =====================================================
    TABELA
@@ -392,7 +358,6 @@
     overflow-x: auto;
 }
 
-
 .instituicoes-table {
     width: 100%;
     min-width: 1080px;
@@ -402,11 +367,9 @@
     border-spacing: 0;
 }
 
-
 .instituicoes-table thead {
     background: #fafbfc;
 }
-
 
 .instituicoes-table th {
     padding: 14px 16px;
@@ -423,7 +386,6 @@
     white-space: nowrap;
 }
 
-
 .instituicoes-table td {
     padding: 15px 16px;
 
@@ -436,13 +398,11 @@
     vertical-align: middle;
 }
 
-
 .instituicoes-table tbody tr {
     transition:
         background-color 0.18s ease,
         box-shadow 0.18s ease;
 }
-
 
 .instituicoes-table tbody tr:hover {
     background: #fffafb;
@@ -451,21 +411,17 @@
         inset 4px 0 0 #850013;
 }
 
-
 .instituicoes-table tbody tr:last-child td {
     border-bottom: 0;
 }
-
 
 .instituicoes-table .coluna-acoes {
     text-align: center;
 }
 
-
 .tabela-carregando td {
     padding: 0;
 }
-
 
 .instituicoes-loading {
     min-height: 230px;
@@ -479,7 +435,6 @@
 
     font-size: 0.85rem;
 }
-
 
 /* =====================================================
    STATUS E BENEFÍCIO
@@ -502,20 +457,17 @@
     white-space: nowrap;
 }
 
-
 .instituicoes-table .status-ativo,
 .instituicoes-table .ativo {
     background: #e9f7ef;
     color: #18794e;
 }
 
-
 .instituicoes-table .status-inativo,
 .instituicoes-table .inativo {
     background: #fdecef;
     color: #a23549;
 }
-
 
 /* =====================================================
    BOTÕES DA TABELA
@@ -555,11 +507,9 @@
         transform 0.18s ease;
 }
 
-
 .instituicoes-table button:hover {
     transform: translateY(-1px);
 }
-
 
 .instituicoes-table .btnEditar:hover {
     border-color: #bad2ef;
@@ -568,7 +518,6 @@
     color: #1d5da8;
 }
 
-
 .instituicoes-table .btnExcluir:hover {
     border-color: #efc3ca;
 
@@ -576,14 +525,12 @@
     color: #a23549;
 }
 
-
 .instituicoes-table .btnStatusBeneficiario:hover {
     border-color: #c8e7d7;
 
     background: #effaf4;
     color: #18794e;
 }
-
 
 /* =====================================================
    MODAL
@@ -621,7 +568,6 @@
     display: flex;
 }
 
-
 .modal-instituicao-content {
     width: min(100%, 900px);
     max-height: calc(100vh - 40px);
@@ -642,7 +588,6 @@
     box-shadow:
         0 28px 70px rgba(15, 23, 42, 0.3);
 }
-
 
 /* =====================================================
    CABEÇALHO DO MODAL
@@ -666,7 +611,6 @@
         );
 }
 
-
 .modal-instituicao-titulo {
     min-width: 0;
 
@@ -674,7 +618,6 @@
     align-items: center;
     gap: 13px;
 }
-
 
 .modal-instituicao-icone {
     width: 46px;
@@ -694,7 +637,6 @@
     font-size: 1rem;
 }
 
-
 .modal-instituicao-eyebrow {
     display: block;
 
@@ -708,7 +650,6 @@
     text-transform: uppercase;
 }
 
-
 .modal-instituicao-header h2 {
     margin: 0;
 
@@ -716,7 +657,6 @@
 
     font-size: 1.2rem;
 }
-
 
 .modal-instituicao-fechar {
     width: 38px;
@@ -743,12 +683,10 @@
         color 0.18s ease;
 }
 
-
 .modal-instituicao-fechar:hover {
     background: #f7e8eb;
     color: #850013;
 }
-
 
 /* =====================================================
    CORPO DO MODAL
@@ -761,13 +699,11 @@
     flex-direction: column;
 }
 
-
 .modal-instituicao-body {
     padding: 24px;
 
     overflow-y: auto;
 }
-
 
 .form-section {
     margin-bottom: 25px;
@@ -776,14 +712,12 @@
     border-bottom: 1px solid #eceff3;
 }
 
-
 .form-section:last-child {
     margin-bottom: 0;
     padding-bottom: 0;
 
     border-bottom: 0;
 }
-
 
 .form-section-header {
     display: flex;
@@ -792,7 +726,6 @@
 
     margin-bottom: 18px;
 }
-
 
 .form-section-icon {
     width: 36px;
@@ -812,7 +745,6 @@
     font-size: 0.85rem;
 }
 
-
 .form-section-header h3 {
     margin: 0 0 3px;
 
@@ -820,7 +752,6 @@
 
     font-size: 0.96rem;
 }
-
 
 .form-section-header p {
     margin: 0;
@@ -830,7 +761,6 @@
     font-size: 0.76rem;
     line-height: 1.4;
 }
-
 
 /* =====================================================
    FORMULÁRIO
@@ -843,7 +773,6 @@
     gap: 16px;
 }
 
-
 .form-group {
     min-width: 0;
 
@@ -854,11 +783,9 @@
     margin-bottom: 16px;
 }
 
-
 .form-group.full {
     grid-column: 1 / -1;
 }
-
 
 .form-group label {
     color: #344054;
@@ -867,11 +794,9 @@
     font-weight: 700;
 }
 
-
 .required {
     color: #b4233a;
 }
-
 
 .form-group input,
 .form-group select,
@@ -894,14 +819,12 @@
         box-shadow 0.2s ease;
 }
 
-
 .form-group input,
 .form-group select {
     min-height: 44px;
 
     padding: 0 13px;
 }
-
 
 .form-group textarea {
     min-height: 105px;
@@ -911,12 +834,10 @@
     resize: vertical;
 }
 
-
 .form-group input::placeholder,
 .form-group textarea::placeholder {
     color: #a4acb8;
 }
-
 
 .form-group input:focus,
 .form-group select:focus,
@@ -929,14 +850,12 @@
         0 0 0 4px rgba(133, 0, 19, 0.08);
 }
 
-
 .form-help {
     color: #98a2b3;
 
     font-size: 0.68rem;
     line-height: 1.4;
 }
-
 
 /* =====================================================
    RODAPÉ DO MODAL
@@ -954,7 +873,6 @@
 
     background: #fafbfc;
 }
-
 
 /* =====================================================
    RESPONSIVIDADE
@@ -981,7 +899,6 @@
     }
 
 }
-
 
 @media (max-width: 700px) {
 
@@ -1025,7 +942,6 @@
 
 }
 
-
 @media (max-width: 520px) {
 
     #modalInstituicao.modal {
@@ -1050,7 +966,6 @@
 
 }
 
-
 @media (prefers-reduced-motion: reduce) {
 
     .instituicoes-page .btn,
@@ -1073,7 +988,6 @@
     font-weight: 700;
 }
 
-
 .instituicao-identificacao {
     min-width: 190px;
 
@@ -1081,7 +995,6 @@
     align-items: center;
     gap: 11px;
 }
-
 
 .instituicao-avatar {
     width: 38px;
@@ -1111,7 +1024,6 @@
         0 6px 14px rgba(133, 0, 19, 0.16);
 }
 
-
 .instituicao-nome {
     min-width: 0;
 
@@ -1119,7 +1031,6 @@
     flex-direction: column;
     gap: 3px;
 }
-
 
 .instituicao-nome strong {
     max-width: 230px;
@@ -1134,13 +1045,11 @@
     white-space: nowrap;
 }
 
-
 .instituicao-nome span {
     color: #98a2b3;
 
     font-size: 0.68rem;
 }
-
 
 .instituicao-dado-monospaced {
     color: #475467;
@@ -1153,7 +1062,6 @@
     white-space: nowrap;
 }
 
-
 .instituicao-contato,
 .instituicao-instituicao {
     display: flex;
@@ -1163,7 +1071,6 @@
     color: #667085;
 }
 
-
 .instituicao-contato i,
 .instituicao-instituicao i {
     flex-shrink: 0;
@@ -1172,11 +1079,9 @@
     font-size: 0.72rem;
 }
 
-
 .instituicao-instituicao {
     max-width: 180px;
 }
-
 
 .instituicao-instituicao span {
     overflow: hidden;
@@ -1184,7 +1089,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 
 /* =====================================================
    BADGES DE BENEFÍCIO
@@ -1204,30 +1108,25 @@
     white-space: nowrap;
 }
 
-
 .beneficio-cesta {
     background: #fff2e3;
     color: #a15c00;
 }
-
 
 .beneficio-granel {
     background: #e8f1ff;
     color: #1d5da8;
 }
 
-
 .beneficio-ambos {
     background: #f0ecff;
     color: #6941c6;
 }
 
-
 .beneficio-padrao {
     background: #f2f4f7;
     color: #667085;
 }
-
 
 /* =====================================================
    STATUS CLICÁVEL
@@ -1257,11 +1156,9 @@
         transform 0.18s ease;
 }
 
-
 .status-instituicao:hover {
     transform: translateY(-1px);
 }
-
 
 .status-instituicao.status-ativo {
     border-color: #c8e7d7;
@@ -1270,11 +1167,9 @@
     color: #18794e;
 }
 
-
 .status-instituicao.status-ativo:hover {
     background: #dff3e8;
 }
-
 
 .status-instituicao.status-inativo {
     border-color: #efc8cf;
@@ -1283,11 +1178,9 @@
     color: #a23549;
 }
 
-
 .status-instituicao.status-inativo:hover {
     background: #fbe1e6;
 }
-
 
 .status-indicador {
     width: 7px;
@@ -1306,7 +1199,6 @@
         );
 }
 
-
 /* =====================================================
    AÇÕES
 ===================================================== */
@@ -1315,7 +1207,6 @@
     text-align: center;
     white-space: nowrap;
 }
-
 
 .instituicao-acoes .btnEditar,
 .instituicao-acoes .btnExcluir {
@@ -1343,7 +1234,6 @@
         transform 0.18s ease;
 }
 
-
 .instituicao-acoes .btnEditar:hover {
     border-color: #bad2ef;
 
@@ -1352,7 +1242,6 @@
 
     transform: translateY(-1px);
 }
-
 
 .instituicao-acoes .btnExcluir:hover {
     border-color: #efc3ca;
@@ -1363,7 +1252,6 @@
     transform: translateY(-1px);
 }
 
-
 /* =====================================================
    ESTADO VAZIO
 ===================================================== */
@@ -1372,12 +1260,10 @@
     padding: 0;
 }
 
-
 .instituicoes-vazio:hover {
     background: transparent !important;
     box-shadow: none !important;
 }
-
 
 .instituicoes-empty-state {
     min-height: 280px;
@@ -1392,7 +1278,6 @@
 
     text-align: center;
 }
-
 
 .instituicoes-empty-icon {
     width: 58px;
@@ -1412,13 +1297,11 @@
     font-size: 1.2rem;
 }
 
-
 .instituicoes-empty-state strong {
     color: #344054;
 
     font-size: 0.95rem;
 }
-
 
 .instituicoes-empty-state span {
     max-width: 360px;
@@ -1439,7 +1322,6 @@
     gap: 15px;
 }
 
-
 .instituicoes-toolbar-principal {
     display: flex;
     align-items: center;
@@ -1447,16 +1329,13 @@
     gap: 18px;
 }
 
-
 .instituicoes-search {
     flex: 1;
 }
 
-
 .instituicoes-search input {
     padding-right: 45px;
 }
-
 
 .instituicoes-search-clear {
     position: absolute;
@@ -1485,17 +1364,14 @@
         color 0.18s ease;
 }
 
-
 .instituicoes-search-clear:hover {
     background: #f7e8eb;
     color: #850013;
 }
 
-
 .instituicoes-search-clear[hidden] {
     display: none;
 }
-
 
 /* =====================================================
    BOTÕES DE FILTRO
@@ -1508,7 +1384,6 @@
 
     flex-shrink: 0;
 }
-
 
 .instituicoes-filtro {
     min-height: 40px;
@@ -1540,7 +1415,6 @@
         box-shadow 0.18s ease;
 }
 
-
 .instituicoes-filtro:hover {
     border-color: #d9b9bf;
 
@@ -1549,7 +1423,6 @@
 
     transform: translateY(-1px);
 }
-
 
 .instituicoes-filtro.ativo {
     border-color: #850013;
@@ -1560,7 +1433,6 @@
     box-shadow:
         0 7px 16px rgba(133, 0, 19, 0.18);
 }
-
 
 .instituicoes-filtro strong {
     min-width: 23px;
@@ -1579,12 +1451,10 @@
     font-size: 0.66rem;
 }
 
-
 .instituicoes-filtro.ativo strong {
     background: rgba(255, 255, 255, 0.18);
     color: #ffffff;
 }
-
 
 .filtro-status-indicador {
     width: 7px;
@@ -1593,22 +1463,18 @@
     border-radius: 50%;
 }
 
-
 .filtro-status-indicador.ativo {
     background: #22a06b;
 }
-
 
 .filtro-status-indicador.inativo {
     background: #c43d56;
 }
 
-
 .instituicoes-filtro.ativo
 .filtro-status-indicador {
     background: #ffffff;
 }
-
 
 /* =====================================================
    RODAPÉ DA BARRA
@@ -1625,7 +1491,6 @@
     border-top: 1px solid #eceff3;
 }
 
-
 .instituicoes-resultado {
     color: #667085;
 
@@ -1633,7 +1498,6 @@
     font-weight: 700;
     white-space: nowrap;
 }
-
 
 /* =====================================================
    RESPONSIVIDADE DOS FILTROS
@@ -1655,7 +1519,6 @@
     }
 
 }
-
 
 @media (max-width: 620px) {
 
@@ -1692,7 +1555,6 @@
     background: #fafbfc;
 }
 
-
 .instituicoes-paginacao-info {
     display: flex;
     align-items: center;
@@ -1703,7 +1565,6 @@
     font-size: 0.75rem;
     font-weight: 600;
 }
-
 
 .instituicoes-paginacao-info select {
     min-height: 36px;
@@ -1724,14 +1585,12 @@
     font-weight: 700;
 }
 
-
 .instituicoes-paginacao-info select:focus {
     border-color: #850013;
 
     box-shadow:
         0 0 0 3px rgba(133, 0, 19, 0.08);
 }
-
 
 .instituicoes-paginacao-controles {
     width: auto;
@@ -1748,7 +1607,6 @@
     white-space: nowrap;
 }
 
-
 .paginacao-numeros {
     display: flex;
     flex-direction: row;
@@ -1759,12 +1617,10 @@
     min-width: max-content;
 }
 
-
 .instituicoes-paginacao-controles > *,
 .paginacao-numeros > * {
     flex: 0 0 auto;
 }
-
 
 .paginacao-botao,
 .paginacao-numero {
@@ -1795,7 +1651,6 @@
         opacity 0.18s ease;
 }
 
-
 .paginacao-botao:hover:not(:disabled),
 .paginacao-numero:hover {
     border-color: #d9b9bf;
@@ -1805,7 +1660,6 @@
 
     transform: translateY(-1px);
 }
-
 
 .paginacao-numero.ativo {
     border-color: #850013;
@@ -1817,19 +1671,16 @@
         0 6px 14px rgba(133, 0, 19, 0.18);
 }
 
-
 .paginacao-botao:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
-
 
 .paginacao-botao:focus-visible,
 .paginacao-numero:focus-visible {
     outline: 3px solid rgba(133, 0, 19, 0.14);
     outline-offset: 2px;
 }
-
 
 /* =====================================================
    RESPONSIVIDADE DA PAGINAÇÃO
@@ -1851,7 +1702,6 @@
     }
 
 }
-
 
 @media (max-width: 480px) {
 
@@ -1902,7 +1752,6 @@
         color 0.18s ease;
 }
 
-
 .instituicoes-ordenacao i {
     color: #b2bac5;
 
@@ -1913,16 +1762,13 @@
         transform 0.18s ease;
 }
 
-
 .instituicoes-ordenacao:hover {
     color: #850013;
 }
 
-
 .instituicoes-ordenacao:hover i {
     color: #850013;
 }
-
 
 .instituicoes-ordenacao:focus-visible {
     border-radius: 4px;
@@ -1933,25 +1779,21 @@
     outline-offset: 4px;
 }
 
-
 /* COLUNA ATUALMENTE ORDENADA */
 
 .instituicoes-ordenacao.ordenacao-ativa {
     color: #850013;
 }
 
-
 .instituicoes-ordenacao.ordenacao-ativa i {
     color: #850013;
 }
-
 
 /* DIREÇÃO CRESCENTE */
 
 .instituicoes-ordenacao[data-direcao="asc"] i {
     transform: rotate(0deg);
 }
-
 
 /* DIREÇÃO DECRESCENTE */
 
@@ -2006,11 +1848,9 @@
         0 9px 22px rgba(133, 0, 19, 0.08);
 }
 
-
 .instituicoes-selecao-barra[hidden] {
     display: none;
 }
-
 
 .instituicoes-selecao-info {
     min-width: 0;
@@ -2019,7 +1859,6 @@
     align-items: center;
     gap: 12px;
 }
-
 
 .instituicoes-selecao-icone {
     width: 40px;
@@ -2040,7 +1879,6 @@
         0 7px 16px rgba(133, 0, 19, 0.2);
 }
 
-
 .instituicoes-selecao-info div:last-child {
     min-width: 0;
 
@@ -2049,20 +1887,17 @@
     gap: 3px;
 }
 
-
 .instituicoes-selecao-info strong {
     color: #344054;
 
     font-size: 0.84rem;
 }
 
-
 .instituicoes-selecao-info span {
     color: #98a2b3;
 
     font-size: 0.72rem;
 }
-
 
 .instituicoes-selecao-acoes {
     display: flex;
@@ -2072,7 +1907,6 @@
     flex-wrap: wrap;
     justify-content: flex-end;
 }
-
 
 .btn-selecao {
     min-height: 37px;
@@ -2101,17 +1935,14 @@
         opacity 0.18s ease;
 }
 
-
 .btn-selecao:hover:not(:disabled) {
     transform: translateY(-1px);
 }
-
 
 .btn-selecao:disabled {
     opacity: 0.45;
     cursor: not-allowed;
 }
-
 
 .btn-selecao-sucesso {
     border-color: #b9dfcc;
@@ -2120,14 +1951,12 @@
     color: #18794e;
 }
 
-
 .btn-selecao-alerta {
     border-color: #efd9a9;
 
     background: #fff8e6;
     color: #936400;
 }
-
 
 .btn-selecao-perigo {
     border-color: #efc3ca;
@@ -2136,14 +1965,12 @@
     color: #a23549;
 }
 
-
 .btn-selecao-neutro {
     border-color: #dfe3e8;
 
     background: #ffffff;
     color: #667085;
 }
-
 
 @media (max-width: 900px) {
 
@@ -2159,7 +1986,6 @@
     }
 
 }
-
 
 @media (max-width: 560px) {
 
@@ -2198,7 +2024,6 @@
 .credenciais-box { margin:0; }
 .credenciais-box > p { margin:0 0 18px; color:#6b7280; line-height:1.5; }
 @media (max-width: 760px) { .instituicoes-filtros { width:100%; } .instituicoes-filtro { flex:1 1 135px; } }
-
 
 /* =====================================================
    INSTITUIÇÕES - CORREÇÕES DE CABEÇALHO E AÇÕES
@@ -2256,7 +2081,6 @@
     display: block;
 }
 
-
 /* =====================================================
    CORREÇÃO FINAL DOS MODAIS DE INSTITUIÇÕES
 ===================================================== */
@@ -2274,7 +2098,6 @@
 body.modal-aberto {
     overflow: hidden !important;
 }
-
 
 /* =====================================================
    MODAL DE CONFIRMAÇÃO - PADRÃO VISUAL SOLIDARE
@@ -2412,7 +2235,6 @@ body.modal-aberto {
         flex: 1;
     }
 }
-
 
 /* =====================================================
    INSTITUIÇÕES - AJUSTE VISUAL FINAL
@@ -2558,7 +2380,6 @@ body.modal-aberto {
     border-color: #ffda6a !important;
     color: #664d03 !important;
 }
-
 
 /* =====================================================
    INSTITUIÇÕES - ÍCONES E CENTRALIZAÇÃO DOS DADOS
@@ -3142,4 +2963,599 @@ body.modal-aberto {
     .saldo-cestas-historico-topo select {
         width: 100%;
     }
+}
+
+/* =====================================================
+   INSTITUIÇÕES - TABELA SEM ROLAGEM HORIZONTAL NO DESKTOP
+===================================================== */
+@media (min-width: 1100px) {
+    .instituicoes-table-wrapper {
+        overflow-x: hidden !important;
+    }
+
+    .instituicoes-table {
+        width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed;
+    }
+
+    .instituicoes-table th,
+    .instituicoes-table td {
+        min-width: 0;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .instituicoes-table th:nth-child(1),
+    .instituicoes-table td:nth-child(1) { width: 3%; }
+
+    .instituicoes-table th:nth-child(2),
+    .instituicoes-table td:nth-child(2) { width: 5%; }
+
+    .instituicoes-table th:nth-child(3),
+    .instituicoes-table td:nth-child(3) { width: 17%; }
+
+    .instituicoes-table th:nth-child(4),
+    .instituicoes-table td:nth-child(4) { width: 12%; }
+
+    .instituicoes-table th:nth-child(5),
+    .instituicoes-table td:nth-child(5) { width: 18%; }
+
+    .instituicoes-table th:nth-child(6),
+    .instituicoes-table td:nth-child(6) { width: 14%; }
+
+    .instituicoes-table th:nth-child(7),
+    .instituicoes-table td:nth-child(7) { width: 9%; }
+
+    .instituicoes-table th:nth-child(8),
+    .instituicoes-table td:nth-child(8) { width: 8%; }
+
+    .instituicoes-table th:nth-child(9),
+    .instituicoes-table td:nth-child(9) { width: 8%; }
+
+    .instituicoes-table th:nth-child(10),
+    .instituicoes-table td:nth-child(10) { width: 10%; }
+
+    .instituicoes-table .instituicao-celula,
+    .instituicoes-table .contato-celula {
+        min-width: 0 !important;
+    }
+
+    .instituicoes-table .instituicao-principal,
+    .instituicoes-table .instituicao-dado-centralizado,
+    .instituicoes-table .instituicao-dado-com-icone,
+    .instituicoes-table .contato-celula,
+    .instituicoes-table .localizacao-celula-centralizada {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .instituicoes-table .instituicao-principal strong,
+    .instituicoes-table .instituicao-dado-centralizado span,
+    .instituicoes-table .instituicao-dado-com-icone span,
+    .instituicoes-table .contato-secundario,
+    .instituicoes-table .localizacao-celula-centralizada strong,
+    .instituicoes-table .localizacao-celula-centralizada small {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* =====================================================
+   BOTÃO DOCUMENTAÇÕES
+===================================================== */
+.instituicoes-table .acoes-instituicao {
+    min-width: 112px;
+    gap: 6px !important;
+}
+
+.instituicoes-table .btnDocumentosInstituicao {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    display: inline-grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #dfe3e8;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #850013;
+    cursor: pointer;
+    transition: .18s ease;
+}
+
+.instituicoes-table .btnDocumentosInstituicao:hover {
+    border-color: #cfa6ad;
+    background: #fff4f6;
+    color: #a3001d;
+    transform: translateY(-1px);
+}
+
+/* =====================================================
+   MODAL - DOCUMENTOS DA INSTITUIÇÃO
+===================================================== */
+.modal-documentos-instituicao[hidden] {
+    display: none !important;
+}
+
+.modal-documentos-instituicao {
+    position: fixed;
+    inset: 0;
+    z-index: 10020;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, .56);
+    backdrop-filter: blur(4px);
+}
+
+.modal-documentos-content {
+    width: min(860px, calc(100vw - 32px));
+    max-height: min(760px, calc(100vh - 40px));
+    overflow: hidden;
+    border: 1px solid #e7eaf0;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 26px 70px rgba(15, 23, 42, .24);
+}
+
+.modal-documentos-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 22px;
+    border-bottom: 1px solid #eceff3;
+}
+
+.modal-documentos-titulo {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.modal-documentos-icone {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: #f8e9ec;
+    color: #850013;
+}
+
+.modal-documentos-eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    color: #850013;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.modal-documentos-header h2 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.12rem;
+}
+
+.modal-documentos-header p {
+    margin: 4px 0 0;
+    color: #7b8794;
+    font-size: .8rem;
+}
+
+.modal-documentos-fechar {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 36px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #7b8794;
+    cursor: pointer;
+}
+
+.modal-documentos-fechar:hover {
+    background: #f4f6f8;
+    color: #850013;
+}
+
+.lista-documentos-instituicao {
+    max-height: calc(100vh - 175px);
+    overflow-y: auto;
+    padding: 16px 18px 18px;
+}
+
+.documentos-instituicao-estado {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 30px;
+    color: #7b8794;
+    text-align: center;
+}
+
+.documentos-instituicao-estado > i {
+    margin-bottom: 5px;
+    color: #850013;
+    font-size: 30px;
+}
+
+.documentos-instituicao-estado strong {
+    color: #344054;
+}
+
+.documentos-instituicao-estado span {
+    font-size: .78rem;
+}
+
+.documentos-instituicao-estado.erro > i {
+    color: #c43d56;
+}
+
+.documento-instituicao-card {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid #e9edf2;
+    border-radius: 13px;
+    background: #ffffff;
+}
+
+.documento-instituicao-card + .documento-instituicao-card {
+    margin-top: 10px;
+}
+
+.documento-instituicao-icone {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: #f8e9ec;
+    color: #850013;
+    font-size: 18px;
+}
+
+.documento-instituicao-info {
+    min-width: 0;
+}
+
+.documento-instituicao-topo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.documento-instituicao-topo > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.documento-instituicao-id {
+    color: #850013;
+    font-size: .68rem;
+    font-weight: 800;
+}
+
+.documento-instituicao-topo strong {
+    overflow: hidden;
+    color: #253047;
+    font-size: .9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.documento-instituicao-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #dff8eb;
+    color: #087443;
+    font-size: .7rem;
+    font-weight: 800;
+}
+
+.documento-instituicao-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 7px;
+    color: #788497;
+    font-size: .75rem;
+}
+
+.documento-instituicao-meta i {
+    width: 14px;
+    color: #9ca6b5;
+}
+
+.btnAbrirDocumentoInstituicao {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 13px;
+    border: 1px solid #850013;
+    border-radius: 9px;
+    background: #850013;
+    color: #ffffff;
+    font-size: .78rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btnAbrirDocumentoInstituicao:hover {
+    background: #a3001d;
+}
+
+body.modal-documentos-aberto {
+    overflow: hidden;
+}
+
+@media (max-width: 680px) {
+    .modal-documentos-instituicao {
+        padding: 10px;
+    }
+
+    .documento-instituicao-card {
+        grid-template-columns: 42px minmax(0, 1fr);
+    }
+
+    .btnAbrirDocumentoInstituicao {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .documento-instituicao-topo {
+        flex-direction: column;
+    }
+}
+
+/* =====================================================
+   AJUSTE FINAL - TABELA DE INSTITUIÇÕES CENTRALIZADA
+===================================================== */
+.instituicoes-table th,
+.instituicoes-table td {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.instituicoes-table th > *,
+.instituicoes-table td > * {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Nome + avatar centralizados como um único conjunto */
+.instituicoes-table .instituicao-celula {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px;
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+
+.instituicoes-table .instituicao-principal {
+    min-width: 0;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.instituicoes-table .instituicao-principal strong {
+    display: block;
+    max-width: 100% !important;
+    text-align: center !important;
+}
+
+/* ID, responsável, contato e localização */
+.instituicoes-table .instituicao-dado-centralizado,
+.instituicoes-table .instituicao-dado-com-icone {
+    width: 100%;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.instituicoes-table .contato-celula-centralizada,
+.instituicoes-table .localizacao-celula-centralizada {
+    width: 100%;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.instituicoes-table .contato-celula-centralizada > span,
+.instituicoes-table .contato-celula-centralizada > small,
+.instituicoes-table .localizacao-celula-centralizada > span,
+.instituicoes-table .localizacao-celula-centralizada > small {
+    margin-inline: auto !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.instituicoes-table .tipo-instituicao,
+.instituicoes-table .btnStatusInstituicao,
+.instituicoes-table .status-aprovacao {
+    display: inline-flex !important;
+    margin-inline: auto !important;
+}
+
+.instituicoes-table .acoes-instituicao {
+    width: 100%;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Mantém os títulos das colunas realmente centralizados */
+.instituicoes-table .instituicoes-ordenacao {
+    display: flex !important;
+    width: 100% !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+/* =====================================================
+   MODAL DE DOCUMENTOS - STATUS AO LADO DO ABRIR
+===================================================== */
+.documento-instituicao-card {
+    grid-template-columns: 48px minmax(0, 1fr) auto !important;
+    align-items: center !important;
+}
+
+.documento-instituicao-topo {
+    justify-content: flex-start !important;
+}
+
+.documento-instituicao-acoes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+.documento-instituicao-status,
+.btnAbrirDocumentoInstituicao {
+    min-height: 36px;
+    box-sizing: border-box;
+}
+
+.documento-instituicao-status {
+    height: 36px;
+    padding: 0 11px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap;
+}
+
+.btnAbrirDocumentoInstituicao {
+    height: 36px;
+}
+
+@media (max-width: 680px) {
+    .documento-instituicao-acoes {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .documento-instituicao-acoes .btnAbrirDocumentoInstituicao {
+        width: auto;
+        flex: 1;
+    }
+}
+
+
+/* =====================================================
+   AJUSTE FINAL - COLUNA INSTITUIÇÃO COMO NO LAYOUT ORIGINAL
+===================================================== */
+
+/* Mantém o cabeçalho da coluna centralizado */
+.instituicoes-table th:nth-child(3) {
+    text-align: center !important;
+}
+
+.instituicoes-table th:nth-child(3) .instituicoes-ordenacao {
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+/* Dados da instituição alinhados à esquerda */
+.instituicoes-table td:nth-child(3) {
+    text-align: left !important;
+}
+
+.instituicoes-table td:nth-child(3) > * {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.instituicoes-table .instituicao-celula {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.instituicoes-table .instituicao-principal {
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+
+.instituicoes-table .instituicao-principal strong {
+    text-align: left !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* =====================================================
+   AJUSTE FINAL - CABEÇALHO DOCUMENTAÇÃO
+===================================================== */
+@media (min-width: 1100px) {
+    .instituicoes-table th:nth-child(9),
+    .instituicoes-table td:nth-child(9) {
+        width: 9% !important;
+    }
+
+    .instituicoes-table th:nth-child(10),
+    .instituicoes-table td:nth-child(10) {
+        width: 9% !important;
+    }
+}
+
+.instituicoes-table th:nth-child(9) {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+
+.instituicoes-table th:nth-child(9) .instituicoes-ordenacao {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    gap: 3px !important;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.instituicoes-table th:nth-child(9) .instituicoes-ordenacao span {
+    min-width: 0;
+    font-size: 10px !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap;
+}
+
+.instituicoes-table th:nth-child(9) .instituicoes-ordenacao i {
+    flex: 0 0 auto;
+    font-size: 9px;
 }
