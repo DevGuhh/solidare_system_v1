@@ -29,6 +29,16 @@ export function listarComprovantesPendentesAPI() {
     });
 }
 
+export function listarComprovantesInstituicaoAPI(instituicaoId) {
+    return fetch(
+        `${API_URL}/api/comprovantes/instituicao/${Number(instituicaoId)}`,
+        {
+            headers: headersAutenticacao(),
+            cache: "no-store",
+        }
+    );
+}
+
 export function vincularComprovanteAPI(id, instituicaoId) {
     return fetch(`${API_URL}/api/comprovantes/${id}/vincular`, {
         method: "PATCH",

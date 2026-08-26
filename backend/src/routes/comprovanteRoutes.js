@@ -14,6 +14,13 @@ router.get(
   authorize("ADMIN"),
   comprovanteController.listarPendentes,
 );
+router.get(
+  "/instituicao/:instituicaoId",
+  protect,
+  authorize("ADMIN"),
+  comprovanteController.listarPorInstituicao,
+);
+
 router.patch(
   "/:id/vincular",
   protect,

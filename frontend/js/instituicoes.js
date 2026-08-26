@@ -7,6 +7,11 @@ import {
     alterarSituacaoInstituicaoAPI
 } from "./api/instituicoesApi.js";
 
+import {
+    listarComprovantesInstituicaoAPI,
+    montarUrlArquivoComprovante
+} from "./api/comprovantesApi.js";
+
 import { mostrarSucesso, mostrarErro } from "./utils/toast.js";
 import { mostrarLoading, esconderLoading } from "./utils/loading.js";
 import {
@@ -331,6 +336,7 @@ function criarLinha(i) {
             <td class="coluna-acoes">
                 <div class="acoes-instituicao">
                     <button type="button" class="btnSaldoInstituicao" data-id="${id}" data-nome="${escapar(i.nome)}" title="Saldo de cestas" aria-label="Consultar saldo de cestas"><i class="fa-solid fa-boxes-stacked"></i></button>
+                    <button type="button" class="btnDocumentosInstituicao" data-id="${id}" data-nome="${escapar(i.nome)}" title="Documentações vinculadas" aria-label="Ver documentações vinculadas"><i class="fa-solid fa-folder-open"></i></button>
                     <button type="button" class="btnEditarInstituicao" data-id="${id}" title="Editar instituição" aria-label="Editar instituição"><i class="fa-solid fa-pen"></i></button>
                 </div>
             </td>
@@ -468,6 +474,171 @@ function novaInstituicao() {
     campos.nome.focus();
 }
 
+function formatarDataDocumento(valor) {
+    if (!valor) return "-";
+
+    const data = new Date(valor);
+    if (Number.isNaN(data.getTime())) return String(valor);
+
+    return data.toLocaleString("pt-BR");
+}
+
+function formatarCnpjDocumento(valor) {
+    const numeros = String(valor || "").replace(/\D/g, "");
+
+    if (numeros.length !== 14) {
+        return valor || "Não identificado";
+    }
+
+    return numeros.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+        "$1.$2.$3/$4-$5"
+    );
+}
+
+function fecharDocumentosInstituicao() {
+    const modal = document.getElementById("modalDocumentosInstituicao");
+    if (!modal) return;
+
+    modal.classList.remove("ativo", "aberto", "show");
+    modal.hidden = true;
+    modal.setAttribute("hidden", "");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-documentos-aberto");
+}
+
+function renderizarDocumentosInstituicao(documentos) {
+    const lista = document.getElementById("listaDocumentosInstituicao");
+    if (!lista) return;
+
+    if (!Array.isArray(documentos) || documentos.length === 0) {
+        lista.innerHTML = `
+            <div class="documentos-instituicao-estado vazio">
+                <i class="fa-regular fa-folder-open"></i>
+                <strong>Nenhum documento vinculado</strong>
+                <span>Esta instituição ainda não possui comprovantes vinculados.</span>
+            </div>
+        `;
+        return;
+    }
+
+    lista.innerHTML = documentos.map((documento) => {
+        const url = montarUrlArquivoComprovante(documento.arquivoUrl);
+        const tipo = escapar(documento.tipoDoc || "Documento");
+        const cnpj = escapar(formatarCnpjDocumento(documento.cnpjExtraido));
+        const criadoEm = escapar(formatarDataDocumento(documento.criadoEm));
+
+        return `
+            <article class="documento-instituicao-card">
+                <div class="documento-instituicao-icone">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </div>
+
+                <div class="documento-instituicao-info">
+                    <div class="documento-instituicao-topo">
+                        <div>
+                            <span class="documento-instituicao-id">#${documento.id}</span>
+                            <strong>${tipo}</strong>
+                        </div>
+                    </div>
+
+                    <div class="documento-instituicao-meta">
+                        <span>
+                            <i class="fa-solid fa-building"></i>
+                            CNPJ: ${cnpj}
+                        </span>
+                        <span>
+                            <i class="fa-regular fa-calendar"></i>
+                            ${criadoEm}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="documento-instituicao-acoes">
+                    <span class="documento-instituicao-status">
+                        <i class="fa-solid fa-circle-check"></i>
+                        Vinculado
+                    </span>
+
+                    <a
+                        href="${escapar(url)}"
+                        class="btnAbrirDocumentoInstituicao"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Abrir documento"
+                    >
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        Abrir
+                    </a>
+                </div>
+            </article>
+        `;
+    }).join("");
+}
+
+async function abrirDocumentosInstituicao(id, nome) {
+    const modal = document.getElementById("modalDocumentosInstituicao");
+    const lista = document.getElementById("listaDocumentosInstituicao");
+    const nomeEl = document.getElementById("nomeInstituicaoDocumentos");
+
+    if (!modal || !lista) {
+        mostrarErro("Não foi possível abrir a área de documentações.");
+        return;
+    }
+
+    if (nomeEl) {
+        nomeEl.textContent = nome || "Instituição";
+    }
+
+    lista.innerHTML = `
+        <div class="documentos-instituicao-estado">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <strong>Carregando documentos...</strong>
+        </div>
+    `;
+
+    modal.hidden = false;
+    modal.removeAttribute("hidden");
+    modal.setAttribute("aria-hidden", "false");
+    modal.classList.add("ativo");
+    document.body.classList.add("modal-documentos-aberto");
+
+    try {
+        const resposta =
+            await listarComprovantesInstituicaoAPI(Number(id));
+
+        let dados = {};
+        try {
+            dados = await resposta.json();
+        } catch {
+            dados = {};
+        }
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.message ||
+                dados.error ||
+                "Não foi possível carregar os documentos."
+            );
+        }
+
+        renderizarDocumentosInstituicao(dados);
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar documentações da instituição:",
+            erro
+        );
+
+        lista.innerHTML = `
+            <div class="documentos-instituicao-estado erro">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <strong>Não foi possível carregar os documentos</strong>
+                <span>${escapar(erro.message)}</span>
+            </div>
+        `;
+    }
+}
+
 async function editarInstituicao(id) {
     mostrarLoading();
     try {
@@ -541,7 +712,6 @@ async function salvar(event) {
         el.btnSalvar.disabled = false;
     }
 }
-
 
 let resolverConfirmacaoInstituicao = null;
 
@@ -805,6 +975,15 @@ function configurarEventos() {
     el.tabela.addEventListener("click", (e) => {
         const saldo = e.target.closest(".btnSaldoInstituicao");
         if (saldo) return abrirSaldoInstituicao(saldo.dataset.id, saldo.dataset.nome);
+
+        const documentos = e.target.closest(".btnDocumentosInstituicao");
+        if (documentos) {
+            return abrirDocumentosInstituicao(
+                documentos.dataset.id,
+                documentos.dataset.nome
+            );
+        }
+
         const editar = e.target.closest(".btnEditarInstituicao");
         if (editar) return editarInstituicao(editar.dataset.id);
         const status = e.target.closest(".btnStatusInstituicao, .btnAlternarInstituicao");
@@ -812,6 +991,18 @@ function configurarEventos() {
         const aprovacao = e.target.closest(".btnAprovacaoInstituicao");
         if (aprovacao) return alternarAprovacao(aprovacao.dataset.id, aprovacao.dataset.status);
     }, op);
+
+    document
+        .getElementById("btnFecharDocumentosInstituicao")
+        ?.addEventListener("click", fecharDocumentosInstituicao, op);
+
+    document
+        .getElementById("modalDocumentosInstituicao")
+        ?.addEventListener("click", (e) => {
+            if (e.target.id === "modalDocumentosInstituicao") {
+                fecharDocumentosInstituicao();
+            }
+        }, op);
 
     el.btnFecharModal.addEventListener("click", fecharModal, op);
     el.btnCancelar.addEventListener("click", fecharModal, op);
@@ -838,6 +1029,13 @@ function configurarEventos() {
     campos.cep.addEventListener("input", mascaraCEP, op);
     campos.cep.addEventListener("blur", buscarCEP, op);
     document.addEventListener("keydown", (e) => {
+        if (
+            e.key === "Escape" &&
+            document.getElementById("modalDocumentosInstituicao")?.hidden === false
+        ) {
+            fecharDocumentosInstituicao();
+            return;
+        }
         if (e.key !== "Escape") return;
 
         if (el.modalConfirmacao?.hidden === false) {

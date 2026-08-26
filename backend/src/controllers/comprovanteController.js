@@ -124,6 +124,25 @@ class ComprovanteController {
     }
   }
 
+  async listarPorInstituicao(req, res) {
+    try {
+      const { instituicaoId } = req.params;
+
+      const documentos =
+        await comprovanteService.listarPorInstituicao(instituicaoId);
+
+      return res.status(200).json(documentos);
+    } catch (error) {
+      const status =
+        error.message === "ID da instituição inválido." ? 400 : 500;
+
+      return res.status(status).json({
+        message: "Erro ao listar documentos da instituição",
+        error: error.message,
+      });
+    }
+  }
+
   async vincular(req, res) {
     try {
       const { id } = req.params;

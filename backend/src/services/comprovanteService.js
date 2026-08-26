@@ -111,6 +111,24 @@ class ComprovanteService {
     });
   }
 
+  async listarPorInstituicao(instituicaoId) {
+    const id = Number(instituicaoId);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new Error("ID da instituição inválido.");
+    }
+
+    return prisma.comprovante.findMany({
+      where: {
+        instituicaoId: id,
+        status: "VINCULADO",
+      },
+      orderBy: {
+        criadoEm: "desc",
+      },
+    });
+  }
+
   async rejeitar(comprovanteId) {
     const comprovante = await prisma.comprovante.findUnique({
       where: {
