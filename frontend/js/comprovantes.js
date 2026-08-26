@@ -179,24 +179,93 @@ function opcoesInstituicoes() {
 }
 
 function renderizarPreviewArquivo(comprovante) {
-    const url = montarUrlArquivoComprovante(comprovante.arquivoUrl);
-    const imagem = ehImagem(comprovante.arquivoUrl);
+    const urls = montarUrlsArquivoComprovante(comprovante.arquivoUrl);
+    const principal = urls[0] || "#";
+    const fallback = urls[1] || "";
+
+    if (ehImagem(comprovante.arquivoUrl)) {
+        return `
+            <a
+                class="preview-comprovante preview-imagem-comprovante"
+                href="${escaparHtml(principal)}"
+                data-arquivo-url="${escaparHtml(comprovante.arquivoUrl || "")}"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Abrir imagem"
+            >
+                <img
+                    src="${escaparHtml(principal)}"
+                    data-fallback-src="${escaparHtml(fallback)}"
+                    data-preview-comprovante
+                    alt="Pré-visualização do comprovante ${comprovante.id}"
+                    loading="lazy"
+                >
+            </a>
+        `;
+    }
 
     return `
         <a
-            class="preview-comprovante preview-arquivo-manual"
-            href="${escaparHtml(url)}"
+            class="preview-comprovante preview-pdf-comprovante"
+            href="${escaparHtml(principal)}"
             data-arquivo-url="${escaparHtml(comprovante.arquivoUrl || "")}"
             target="_blank"
             rel="noopener noreferrer"
-            title="${imagem ? "Abrir imagem" : "Abrir PDF"}"
         >
-            <i class="fa-solid ${imagem ? "fa-file-image" : "fa-file-pdf"}"></i>
-            <span>${imagem ? "Abrir imagem" : "Abrir PDF"}</span>
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Abrir PDF</span>
         </a>
     `;
 }
 
+function configurarFallbackPreviewsComprovantes() {
+    document
+        .querySelectorAll("[data-preview-comprovante]")
+        .forEach((imagem) => {
+            if (imagem.dataset.fallbackConfigurado === "true") {
+                return;
+            }
+
+            imagem.dataset.fallbackConfigurado = "true";
+
+            imagem.addEventListener("error", () => {
+                const fallback = imagem.dataset.fallbackSrc;
+
+                if (
+                    fallback &&
+                    imagem.dataset.fallbackTentado !== "true"
+                ) {
+                    imagem.dataset.fallbackTentado = "true";
+                    imagem.src = fallback;
+
+                    const link =
+                        imagem.closest("[data-arquivo-url]");
+
+                    if (link) {
+                        link.href = fallback;
+                    }
+
+                    return;
+                }
+
+                const link =
+                    imagem.closest(".preview-imagem-comprovante");
+
+                if (!link) return;
+
+                link.removeAttribute("href");
+                link.removeAttribute("data-arquivo-url");
+                link.classList.add(
+                    "preview-arquivo-indisponivel"
+                );
+
+                link.innerHTML = `
+                    <i class="fa-solid fa-file-circle-xmark"></i>
+                    <span>Arquivo indisponível</span>
+                `;
+            });
+        });
+}
 
 function renderizarPendentes(pendentes) {
     const lista = document.getElementById("listaComprovantesPendentes");
@@ -273,6 +342,7 @@ function renderizarPendentes(pendentes) {
         </article>
     `).join("");
 
+    configurarFallbackPreviewsComprovantes();
 }
 
 async function carregarPendentes() {
@@ -493,10 +563,6 @@ function configurarEventos() {
                     "Clique para selecionar um arquivo";
             }
         }, { signal });
-
-    document
-        .getElementById("btnAtualizarPendentes")
-        ?.addEventListener("click", carregarPendentes, { signal });
 
     const listaPendentes =
         document.getElementById("listaComprovantesPendentes");

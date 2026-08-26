@@ -467,27 +467,87 @@
 }
 
 
-/* Preview manual: evita carregar arquivos inexistentes ao abrir a fila */
-.preview-arquivo-manual {
+/* =====================================================
+   AJUSTE DE ALINHAMENTO - FILA DE REVISÃO
+   ===================================================== */
+
+/* Mantém todo o conteúdo textual alinhado pela mesma margem */
+.dados-comprovante-pendente {
+    display: flex;
     flex-direction: column;
-    gap: 8px;
-    color: #7f8999;
-    text-align: center;
-    transition: .18s ease;
+    min-width: 0;
 }
 
-.preview-arquivo-manual:hover {
-    border-color: #c9a4ab;
-    background: #fff7f8;
-    color: #a9001d;
+/* CNPJ/Data ficam alinhados com o título do comprovante */
+.metadados-comprovante {
+    align-items: center;
+    margin-top: 8px;
+    gap: 16px;
 }
 
-.preview-arquivo-manual i {
-    font-size: 30px;
-    color: #a9001d;
+/* Remove o recuo visual do primeiro metadado para o CNPJ
+   começar exatamente na mesma linha do título */
+.metadados-comprovante span:first-child i {
+    display: none;
 }
 
-.preview-arquivo-manual span {
-    font-size: 11px;
-    font-weight: 800;
+.metadados-comprovante span:first-child {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+/* Área de vinculação em uma linha bem definida */
+.vinculacao-manual-comprovante {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 118px;
+    align-items: end;
+    column-gap: 10px;
+    margin-top: 14px;
+}
+
+/* O label ocupa toda a coluna do select */
+.vinculacao-manual-comprovante label {
+    width: 100%;
+    margin: 0;
+}
+
+/* Select e botão com exatamente a mesma altura */
+.vinculacao-manual-comprovante select,
+.vinculacao-manual-comprovante .btn {
+    height: 40px;
+    min-height: 40px;
+    box-sizing: border-box;
+}
+
+/* Botão perfeitamente centralizado ao lado do select */
+.vinculacao-manual-comprovante .btn {
+    width: 118px;
+    margin: 0;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    align-self: end;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Um pouco mais de respiro entre um documento e outro */
+.card-comprovante-pendente {
+    align-items: start;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+/* Mobile continua empilhado */
+@media (max-width: 720px) {
+    .vinculacao-manual-comprovante {
+        grid-template-columns: 1fr;
+        row-gap: 10px;
+    }
+
+    .vinculacao-manual-comprovante .btn {
+        width: 100%;
+    }
 }
