@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,7 +12,11 @@
 
     <title>Instituto Solidare - Dashboard</title>
 
-    <!-- Bibliotecas -->
+
+    <!-- =====================================================
+         BIBLIOTECAS
+    ====================================================== -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script
@@ -27,7 +32,11 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     >
 
-    <!-- CSS do sistema -->
+
+    <!-- =====================================================
+         CSS DO SISTEMA
+    ====================================================== -->
+
     <link
         rel="stylesheet"
         href="../css/admin.css"
@@ -82,13 +91,19 @@
         rel="stylesheet"
         href="../css/components/loading.css"
     >
+
 </head>
+
 
 <body>
 
     <div class="container">
 
-        <!-- MENU LATERAL -->
+
+        <!-- =================================================
+             MENU LATERAL
+        ================================================== -->
+
         <aside>
 
             <div class="logo">
@@ -102,9 +117,12 @@
 
             </div>
 
+
             <nav id="menuPrincipal">
 
-                <!-- Disponível para todos os perfis -->
+
+                <!-- Dashboard -->
+
                 <a
                     href="#"
                     class="menu-link ativo"
@@ -112,15 +130,19 @@
                     data-tooltip="Dashboard"
                     title="Dashboard"
                 >
+
                     <i
                         class="fa-solid fa-chart-line"
                         aria-hidden="true"
                     ></i>
 
                     <span>Dashboard</span>
+
                 </a>
 
-                <!-- Disponível para todos os perfis -->
+
+                <!-- Beneficiários -->
+
                 <a
                     href="#"
                     class="menu-link"
@@ -128,15 +150,19 @@
                     data-tooltip="Beneficiários"
                     title="Beneficiários"
                 >
+
                     <i
                         class="fa-solid fa-users"
                         aria-hidden="true"
                     ></i>
 
                     <span>Beneficiários</span>
+
                 </a>
 
-                <!-- Disponível para todos até definirmos outra regra -->
+
+                <!-- Instituições -->
+
                 <a
                     href="#"
                     class="menu-link"
@@ -144,34 +170,39 @@
                     data-tooltip="Instituições"
                     title="Instituições"
                 >
+
                     <i
                         class="fa-solid fa-building"
                         aria-hidden="true"
                     ></i>
 
                     <span>Instituições</span>
+
                 </a>
 
-              <!-- Disponível para todos até definirmos outra regra -->
+
+                <!-- QR Codes -->
+
                 <a
-    href="#"
-    class="menu-link"
-    data-pagina="qrcode.html"
-    data-tooltip="QR Codes"
-    title="QR Codes"
->
-    <i
-        class="fa-solid fa-qrcode"
-        aria-hidden="true"
-    ></i>
+                    href="#"
+                    class="menu-link"
+                    data-pagina="qrcode.html"
+                    data-tooltip="QR Codes"
+                    title="QR Codes"
+                >
 
-    <span>QR Codes</span>
-</a>
+                    <i
+                        class="fa-solid fa-qrcode"
+                        aria-hidden="true"
+                    ></i>
+
+                    <span>QR Codes</span>
+
+                </a>
 
 
+                <!-- Doações -->
 
-
-                <!-- Disponível para todos os perfis -->
                 <a
                     href="#"
                     class="menu-link"
@@ -179,15 +210,19 @@
                     data-tooltip="Doações"
                     title="Doações"
                 >
+
                     <i
                         class="fa-solid fa-hand-holding-heart"
                         aria-hidden="true"
                     ></i>
 
                     <span>Doações</span>
+
                 </a>
 
-                <!-- Upload disponível para todos; revisão manual aparece apenas ao ADMIN -->
+
+                <!-- Comprovantes -->
+
                 <a
                     href="#"
                     class="menu-link"
@@ -195,15 +230,19 @@
                     data-tooltip="Comprovantes"
                     title="Comprovantes"
                 >
+
                     <i
                         class="fa-solid fa-file-invoice"
                         aria-hidden="true"
                     ></i>
 
                     <span>Comprovantes</span>
+
                 </a>
 
-                <!-- Exclusivo para administradores -->
+
+                <!-- Relatórios -->
+
                 <a
                     href="#"
                     class="menu-link"
@@ -212,15 +251,22 @@
                     data-perfis="ADMIN"
                     title="Relatórios"
                 >
+
                     <i
                         class="fa-solid fa-file-lines"
                         aria-hidden="true"
                     ></i>
 
                     <span>Relatórios</span>
+
                 </a>
 
             </nav>
+
+
+            <!-- =================================================
+                 RODAPÉ DO MENU
+            ================================================== -->
 
             <div class="sidebar-footer">
 
@@ -235,11 +281,14 @@
 
                         <strong>Sistema online</strong>
 
-                        <span>Todos os serviços ativos</span>
+                        <span>
+                            Todos os serviços ativos
+                        </span>
 
                     </div>
 
                 </div>
+
 
                 <div class="sidebar-versao">
 
@@ -248,7 +297,9 @@
                         aria-hidden="true"
                     ></i>
 
-                    <span>Versão 1.0.0</span>
+                    <span>
+                        Versão 1.0.0
+                    </span>
 
                 </div>
 
@@ -256,8 +307,18 @@
 
         </aside>
 
-        <!-- ÁREA PRINCIPAL -->
+
+
+        <!-- =================================================
+             ÁREA PRINCIPAL
+        ================================================== -->
+
         <div class="content">
+
+
+            <!-- =================================================
+                 TOPBAR
+            ================================================== -->
 
             <header class="topbar">
 
@@ -271,10 +332,7 @@
                         aria-expanded="true"
                         title="Recolher menu"
                     >
-                        <i
-                            class="fa-solid fa-bars"
-                            aria-hidden="true"
-                        ></i>
+                        <i class="fa-solid fa-bars"></i>
                     </button>
 
                     <div class="topbar-header">
@@ -283,24 +341,18 @@
                             class="breadcrumb"
                             aria-label="Navegação estrutural"
                         >
+
                             <button
                                 id="breadcrumbInicio"
                                 class="breadcrumb-inicio"
                                 type="button"
                                 title="Voltar ao Dashboard"
                             >
-                                <i
-                                    class="fa-solid fa-house"
-                                    aria-hidden="true"
-                                ></i>
-
+                                <i class="fa-solid fa-house"></i>
                                 Início
                             </button>
 
-                            <i
-                                class="fa-solid fa-chevron-right breadcrumb-separador"
-                                aria-hidden="true"
-                            ></i>
+                            <i class="fa-solid fa-chevron-right breadcrumb-separador"></i>
 
                             <span
                                 id="breadcrumbPagina"
@@ -308,6 +360,7 @@
                             >
                                 Dashboard
                             </span>
+
                         </nav>
 
                         <h2
@@ -328,48 +381,102 @@
 
                 </div>
 
-                <div class="usuario">
+                <div class="topbar-lado-direito">
 
-                    <div class="usuario-avatar">
+                    <div class="notificacoes-wrapper">
 
-                        <i
-                            class="fa-solid fa-user"
-                            aria-hidden="true"
-                        ></i>
+                        <button
+                            type="button"
+                            id="btnNotificacoes"
+                            class="btn-notificacoes"
+                            aria-label="Abrir notificações"
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            title="Notificações"
+                        >
+                            <i class="fa-regular fa-bell"></i>
+
+                            <span
+                                id="badgeNotificacoes"
+                                class="badge-notificacoes"
+                                hidden
+                            >
+                                0
+                            </span>
+                        </button>
+
+                        <div
+                            id="painelNotificacoes"
+                            class="painel-notificacoes"
+                            hidden
+                        >
+
+                            <div class="painel-notificacoes-header">
+
+                                <div>
+                                    <strong>Notificações</strong>
+                                    <span id="textoContadorNotificacoes">Nenhuma nova notificação</span>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    id="btnMarcarTodasLidas"
+                                    class="btn-marcar-todas"
+                                >
+                                    Marcar todas como lidas
+                                </button>
+
+                            </div>
+
+                            <div
+                                id="listaNotificacoes"
+                                class="lista-notificacoes"
+                            ></div>
+
+                            <div class="painel-notificacoes-footer">
+                                <button
+                                    type="button"
+                                    id="btnVerTodasNotificacoes"
+                                >
+                                    Ver todas as notificações
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+
+                        </div>
 
                     </div>
 
-                    <div class="usuario-info">
+                    <div class="usuario">
 
-                        <strong id="nomeUsuario">
-                            Carregando...
-                        </strong>
+                        <div class="usuario-avatar">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
 
-                        <span id="perfilUsuario">
-                            Usuário
-                        </span>
+                        <div class="usuario-info">
+                            <strong id="nomeUsuario">Carregando...</strong>
+                            <span id="perfilUsuario">Usuário</span>
+                            <small id="emailUsuario">...</small>
+                        </div>
 
-                        <small id="emailUsuario">
-                            ...
-                        </small>
+                        <button
+                            id="logout"
+                            type="button"
+                        >
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            Sair
+                        </button>
 
                     </div>
-
-                    <button
-                        id="logout"
-                        type="button"
-                    >
-                        <i
-                            class="fa-solid fa-right-from-bracket"
-                            aria-hidden="true"
-                        ></i>
-
-                        Sair
-                    </button>
 
                 </div>
 
             </header>
+
+
+            <!-- =================================================
+                 CONTEÚDO
+            ================================================== -->
 
             <main id="conteudo">
 
@@ -386,9 +493,16 @@
 
             </main>
 
+
         </div>
 
     </div>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
 
     <script
         type="module"
@@ -398,6 +512,11 @@
     <script
         type="module"
         src="../js/dashboard.js"
+    ></script>
+
+    <script
+        type="module"
+        src="../js/notificacoes.js"
     ></script>
 
 </body>

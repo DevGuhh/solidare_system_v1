@@ -2711,3 +2711,80 @@ body.modal-aberto{
 
 }
 
+/* =====================================================
+   SINO — HEADER
+===================================================== */
+
+.topbar-lado-direito {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+}
+
+.notificacoes-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.btn-notificacoes {
+    position: relative;
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    background: #fff;
+    color: #555f6f;
+
+    border: 1px solid #e3e6eb;
+    border-radius: 12px;
+
+    cursor: pointer;
+}
+
+.btn-notificacoes:hover {
+    color: #8b0015;
+    background: #fff8f9;
+    border-color: #e8c5cb;
+}
+
+.btn-notificacoes i {
+    font-size: 18px;
+}
+
+.badge-notificacoes {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+
+    min-width: 19px;
+    height: 19px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 5px;
+
+    background: #b00020;
+    color: #fff;
+
+    border: 2px solid #fff;
+    border-radius: 50px;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.badge-notificacoes[hidden] {
+    display: none;
+}

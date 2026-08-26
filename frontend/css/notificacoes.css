@@ -1,50 +1,534 @@
-.notificacoes-lista {
-    max-height: 300px;
-    overflow-y: auto;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-}
-.notificacao-item {
-    background: #f8f9fa;
-    border-left: 4px solid #007bff;
-    padding: 12px 15px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-}
-.notificacao-item:hover {
-    background: #e9ecef;
-}
-.notificacao-item .titulo {
-    font-weight: 600;
-    font-size: 1rem;
-}
-.notificacao-item .subtitulo {
-    font-size: 0.9rem;
-    color: #6c757d;
+/* =====================================================
+   CENTRAL DE NOTIFICAÇÕES - SOLIDARE
+===================================================== */
+
+
+/* =====================================================
+   SINO NO HEADER
+===================================================== */
+
+.notificacoes-wrapper {
+    position: relative;
+
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+
+    flex-shrink: 0;
+
+    margin-left: auto;
+    margin-right: 14px;
 }
-.notificacao-item .descricao {
-    font-size: 0.9rem;
-    color: #333;
-    margin-top: 5px;
-}
-.notificacao-item .tipo-badge {
-    background: #007bff;
-    color: #fff;
-    padding: 2px 8px;
+
+
+/* =====================================================
+   BOTÃO DO SINO
+===================================================== */
+
+.btn-notificacoes {
+    position: relative;
+
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    background: #ffffff;
+    color: #555f6f;
+
+    border: 1px solid #e3e6eb;
     border-radius: 12px;
-    font-size: 0.7rem;
-    text-transform: uppercase;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
-.notificacao-item .data {
-    font-size: 0.75rem;
-    color: #adb5bd;
+
+.btn-notificacoes:hover {
+    color: #8b0015;
+
+    background: #fff8f9;
+
+    border-color: #e8c5cb;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 14px rgba(139, 0, 21, 0.10);
 }
-.form-notificacao .form-group {
-    margin-bottom: 1rem;
+
+.btn-notificacoes:active {
+    transform: scale(0.96);
 }
-.form-notificacao label {
-    font-weight: 500;
+
+.btn-notificacoes i {
+    font-size: 18px;
+}
+
+
+/* =====================================================
+   BADGE DE NOTIFICAÇÕES
+===================================================== */
+
+.badge-notificacoes {
+    position: absolute;
+
+    top: -5px;
+    right: -5px;
+
+    min-width: 19px;
+    height: 19px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 5px;
+
+    background: #b00020;
+    color: #ffffff;
+
+    border: 2px solid #ffffff;
+
+    border-radius: 50px;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    line-height: 1;
+
+    box-shadow:
+        0 3px 8px rgba(176, 0, 32, 0.25);
+}
+
+.badge-notificacoes[hidden] {
+    display: none;
+}
+
+
+/* =====================================================
+   GARANTIR SINO + PERFIL NA DIREITA
+===================================================== */
+
+.notificacoes-wrapper + .usuario {
+    margin-left: 0 !important;
+}
+
+
+/* =====================================================
+   PAINEL DE NOTIFICAÇÕES
+===================================================== */
+
+.painel-notificacoes {
+    position: absolute;
+
+    top: calc(100% + 12px);
+    right: 0;
+
+    width: 410px;
+    max-width: calc(100vw - 30px);
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #e7e9ee;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.18),
+        0 4px 12px rgba(15, 23, 42, 0.06);
+
+    z-index: 5000;
+}
+
+.painel-notificacoes[hidden] {
+    display: none;
+}
+
+
+/* =====================================================
+   CABEÇALHO DO PAINEL
+===================================================== */
+
+.painel-notificacoes-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 18px;
+
+    border-bottom: 1px solid #eef0f3;
+}
+
+.painel-notificacoes-header > div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.painel-notificacoes-header strong {
+    color: #1f2937;
+
+    font-size: 17px;
+    font-weight: 750;
+}
+
+.painel-notificacoes-header span {
+    color: #8a94a4;
+
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   BOTÃO MARCAR TODAS
+===================================================== */
+
+.btn-marcar-todas {
+    padding: 4px 0;
+
+    background: transparent;
+
+    color: #8b0015;
+
+    border: none;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+.btn-marcar-todas:hover {
+    color: #a3001d;
+}
+
+
+/* =====================================================
+   LISTA
+===================================================== */
+
+.lista-notificacoes {
+    max-height: 390px;
+
+    overflow-y: auto;
+}
+
+
+/* =====================================================
+   ITEM
+===================================================== */
+
+.notificacao-item {
+    position: relative;
+
+    display: flex;
+
+    gap: 12px;
+
+    width: 100%;
+
+    padding: 15px 18px;
+
+    background: #ffffff;
+
+    border: none;
+    border-bottom: 1px solid #f0f1f3;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.18s ease;
+}
+
+.notificacao-item:hover {
+    background: #faf7f8;
+}
+
+.notificacao-item.nao-lida {
+    background: #fff8f9;
+}
+
+.notificacao-item.nao-lida::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    width: 3px;
+
+    background: #8b0015;
+}
+
+
+/* =====================================================
+   ÍCONE
+===================================================== */
+
+.notificacao-icone {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background: #f7e7ea;
+
+    color: #8b0015;
+
+    border-radius: 11px;
+
+    font-size: 15px;
+}
+
+
+/* =====================================================
+   CONTEÚDO
+===================================================== */
+
+.notificacao-conteudo {
+    min-width: 0;
+
+    flex: 1;
+}
+
+.notificacao-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 4px;
+}
+
+.notificacao-instituicao {
+    overflow: hidden;
+
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 750;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notificacao-tempo {
+    flex-shrink: 0;
+
+    color: #9ca3af;
+
+    font-size: 10px;
+}
+
+.notificacao-assunto {
+    margin-bottom: 4px;
+
+    overflow: hidden;
+
+    color: #1f2937;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notificacao-descricao {
+    display: -webkit-box;
+
+    overflow: hidden;
+
+    color: #7b8492;
+
+    font-size: 12px;
+
+    line-height: 1.45;
+
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+
+/* =====================================================
+   PONTO DE NÃO LIDA
+===================================================== */
+
+.notificacao-nao-lida {
+    width: 7px;
+    height: 7px;
+
+    flex-shrink: 0;
+
+    margin-top: 5px;
+
+    background: #b00020;
+
+    border-radius: 50%;
+}
+
+
+/* =====================================================
+   ESTADO VAZIO
+===================================================== */
+
+.notificacoes-vazio {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    min-height: 210px;
+
+    padding: 30px;
+
+    text-align: center;
+}
+
+.notificacoes-vazio-icone {
+    width: 54px;
+    height: 54px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 6px;
+
+    background: #f7f7f8;
+
+    color: #9ca3af;
+
+    border-radius: 50%;
+
+    font-size: 21px;
+}
+
+.notificacoes-vazio strong {
+    color: #374151;
+
+    font-size: 14px;
+}
+
+.notificacoes-vazio span {
+    max-width: 260px;
+
+    color: #9ca3af;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   RODAPÉ
+===================================================== */
+
+.painel-notificacoes-footer {
+    padding: 11px 18px;
+
+    background: #fafbfc;
+
+    border-top: 1px solid #eef0f3;
+}
+
+.painel-notificacoes-footer button {
+    width: 100%;
+
+    padding: 9px;
+
+    background: transparent;
+
+    color: #8b0015;
+
+    border: none;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    cursor: pointer;
+}
+
+.painel-notificacoes-footer button:hover {
+    background: #fff0f2;
+}
+
+
+/* =====================================================
+   SCROLLBAR
+===================================================== */
+
+.lista-notificacoes::-webkit-scrollbar {
+    width: 5px;
+}
+
+.lista-notificacoes::-webkit-scrollbar-track {
+    background: #f8f8f8;
+}
+
+.lista-notificacoes::-webkit-scrollbar-thumb {
+    background: #d6d8dc;
+
+    border-radius: 999px;
+}
+
+.lista-notificacoes::-webkit-scrollbar-thumb:hover {
+    background: #b9bcc2;
+}
+
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+
+@media (max-width: 600px) {
+
+    .painel-notificacoes {
+        position: fixed;
+
+        top: 74px;
+        right: 15px;
+        left: 15px;
+
+        width: auto;
+        max-width: none;
+    }
+
+    .painel-notificacoes-header {
+        padding: 16px;
+    }
+
+    .notificacao-item {
+        padding: 14px 16px;
+    }
+
 }
