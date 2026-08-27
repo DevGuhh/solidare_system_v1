@@ -6,8 +6,20 @@ const router = express.Router();
 
 router.use(protect);
 
-router.get("/", authorize("ADMIN", "INSTITUICAO"), notificacoesController.listar);
-router.post("/", authorize("ADMIN", "INSTITUICAO"), notificacoesController.criar);
-router.patch("/:id/lida", authorize("ADMIN", "INSTITUICAO"), notificacoesController.marcarComoLida);
+router.get(
+  "/",
+  authorize("ADMIN", "INSTITUICAO"),
+  notificacoesController.listar,
+);
+router.post(
+  "/",
+  authorize("ADMIN", "INSTITUICAO"),
+  notificacoesController.criar,
+);
+router.patch(
+  "/:id/lida",
+  authorize("ADMIN", "INSTITUICAO"),
+  notificacoesController.marcarComoLida,
+);
 
 export default router;

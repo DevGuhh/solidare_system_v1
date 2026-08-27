@@ -1,17 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
 
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Instituto Solidare - Dashboard</title>
-
 
     <!-- =====================================================
          BIBLIOTECAS
@@ -19,510 +13,317 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.2/jspdf.umd.min.js">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.2/jspdf.umd.min.js"></script>
 
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
 
     <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    >
-
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
 
     <!-- =====================================================
          CSS DO SISTEMA
     ====================================================== -->
 
-    <link
-        rel="stylesheet"
-        href="../css/admin.css"
-    >
+    <link rel="stylesheet" href="../css/admin.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/dashboard.css"
-    >
+    <link rel="stylesheet" href="../css/dashboard.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/beneficiarios.css"
-    >
+    <link rel="stylesheet" href="../css/beneficiarios.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/instituicoes.css"
-    >
+    <link rel="stylesheet" href="../css/instituicoes.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/doacoes.css"
-    >
+    <link rel="stylesheet" href="../css/doacoes.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/relatorios.css"
-    >
+    <link rel="stylesheet" href="../css/relatorios.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/qrcode.css"
-    >
+    <link rel="stylesheet" href="../css/qrcode.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/comprovantes.css"
-    >
+    <link rel="stylesheet" href="../css/comprovantes.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/components/modal.css"
-    >
+    <link rel="stylesheet" href="../css/components/modal.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/components/toast.css"
-    >
+    <link rel="stylesheet" href="../css/components/toast.css" />
 
-    <link
-        rel="stylesheet"
-        href="../css/components/loading.css"
-    >
-    <link
-        rel="stylesheet"
-        href="../css/notificacoes.css"
-    >
+    <link rel="stylesheet" href="../css/components/loading.css" />
+    <link rel="stylesheet" href="../css/notificacoes.css" />
+  </head>
 
-</head>
-
-
-<body>
-
+  <body>
     <div class="container">
-
-
-        <!-- =================================================
+      <!-- =================================================
              MENU LATERAL
         ================================================== -->
 
-        <aside>
+      <aside>
+        <div class="logo">
+          <i class="fa-solid fa-heart fa-3x" aria-hidden="true"></i>
 
-            <div class="logo">
+          <h2>Solidare</h2>
+        </div>
 
-                <i
-                    class="fa-solid fa-heart fa-3x"
-                    aria-hidden="true"
-                ></i>
+        <nav id="menuPrincipal">
+          <!-- Dashboard -->
 
-                <h2>Solidare</h2>
+          <a
+            href="#"
+            class="menu-link ativo"
+            data-pagina="home.html"
+            data-tooltip="Dashboard"
+            title="Dashboard"
+          >
+            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
 
-            </div>
+            <span>Dashboard</span>
+          </a>
 
+          <!-- Beneficiários -->
 
-            <nav id="menuPrincipal">
+          <a
+            href="#"
+            class="menu-link"
+            data-pagina="beneficiarios.html"
+            data-tooltip="Beneficiários"
+            title="Beneficiários"
+          >
+            <i class="fa-solid fa-users" aria-hidden="true"></i>
 
+            <span>Beneficiários</span>
+          </a>
 
-                <!-- Dashboard -->
+          <!-- Instituições -->
 
-                <a
-                    href="#"
-                    class="menu-link ativo"
-                    data-pagina="home.html"
-                    data-tooltip="Dashboard"
-                    title="Dashboard"
-                >
+          <a
+            href="#"
+            class="menu-link"
+            data-pagina="instituicoes.html"
+            data-tooltip="Instituições"
+            title="Instituições"
+          >
+            <i class="fa-solid fa-building" aria-hidden="true"></i>
 
-                    <i
-                        class="fa-solid fa-chart-line"
-                        aria-hidden="true"
-                    ></i>
+            <span>Instituições</span>
+          </a>
 
-                    <span>Dashboard</span>
+          <!-- QR Codes -->
 
-                </a>
+          <a
+            href="#"
+            class="menu-link"
+            data-pagina="qrcode.html"
+            data-tooltip="QR Codes"
+            title="QR Codes"
+          >
+            <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
 
+            <span>QR Codes</span>
+          </a>
 
-                <!-- Beneficiários -->
+          <!-- Doações -->
 
-                <a
-                    href="#"
-                    class="menu-link"
-                    data-pagina="beneficiarios.html"
-                    data-tooltip="Beneficiários"
-                    title="Beneficiários"
-                >
+          <a
+            href="#"
+            class="menu-link"
+            data-pagina="doacoes.html"
+            data-tooltip="Doações"
+            title="Doações"
+          >
+            <i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i>
 
-                    <i
-                        class="fa-solid fa-users"
-                        aria-hidden="true"
-                    ></i>
+            <span>Doações</span>
+          </a>
 
-                    <span>Beneficiários</span>
+          <!-- Comprovantes -->
 
-                </a>
+          <a
+            href="#"
+            class="menu-link"
+            data-pagina="comprovantes.html"
+            data-tooltip="Comprovantes"
+            title="Comprovantes"
+          >
+            <i class="fa-solid fa-file-invoice" aria-hidden="true"></i>
 
+            <span>Comprovantes</span>
+          </a>
 
-                <!-- Instituições -->
+          <!-- Relatórios -->
 
-                <a
-                    href="#"
-                    class="menu-link"
-                    data-pagina="instituicoes.html"
-                    data-tooltip="Instituições"
-                    title="Instituições"
-                >
+          <a
+            href="#"
+            class="menu-link"
+            data-pagina="relatorios.html"
+            data-tooltip="Relatórios"
+            data-perfis="ADMIN"
+            title="Relatórios"
+          >
+            <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
 
-                    <i
-                        class="fa-solid fa-building"
-                        aria-hidden="true"
-                    ></i>
+            <span>Relatórios</span>
+          </a>
+        </nav>
 
-                    <span>Instituições</span>
-
-                </a>
-
-
-                <!-- QR Codes -->
-
-                <a
-                    href="#"
-                    class="menu-link"
-                    data-pagina="qrcode.html"
-                    data-tooltip="QR Codes"
-                    title="QR Codes"
-                >
-
-                    <i
-                        class="fa-solid fa-qrcode"
-                        aria-hidden="true"
-                    ></i>
-
-                    <span>QR Codes</span>
-
-                </a>
-
-
-                <!-- Doações -->
-
-                <a
-                    href="#"
-                    class="menu-link"
-                    data-pagina="doacoes.html"
-                    data-tooltip="Doações"
-                    title="Doações"
-                >
-
-                    <i
-                        class="fa-solid fa-hand-holding-heart"
-                        aria-hidden="true"
-                    ></i>
-
-                    <span>Doações</span>
-
-                </a>
-
-
-                <!-- Comprovantes -->
-
-                <a
-                    href="#"
-                    class="menu-link"
-                    data-pagina="comprovantes.html"
-                    data-tooltip="Comprovantes"
-                    title="Comprovantes"
-                >
-
-                    <i
-                        class="fa-solid fa-file-invoice"
-                        aria-hidden="true"
-                    ></i>
-
-                    <span>Comprovantes</span>
-
-                </a>
-
-
-                <!-- Relatórios -->
-
-                <a
-                    href="#"
-                    class="menu-link"
-                    data-pagina="relatorios.html"
-                    data-tooltip="Relatórios"
-                    data-perfis="ADMIN"
-                    title="Relatórios"
-                >
-
-                    <i
-                        class="fa-solid fa-file-lines"
-                        aria-hidden="true"
-                    ></i>
-
-                    <span>Relatórios</span>
-
-                </a>
-
-            </nav>
-
-
-            <!-- =================================================
+        <!-- =================================================
                  RODAPÉ DO MENU
             ================================================== -->
 
-            <div class="sidebar-footer">
+        <div class="sidebar-footer">
+          <div class="sidebar-status">
+            <span class="sidebar-status-indicador" aria-hidden="true"></span>
 
-                <div class="sidebar-status">
+            <div class="sidebar-status-textos">
+              <strong>Sistema online</strong>
 
-                    <span
-                        class="sidebar-status-indicador"
-                        aria-hidden="true"
-                    ></span>
-
-                    <div class="sidebar-status-textos">
-
-                        <strong>Sistema online</strong>
-
-                        <span>
-                            Todos os serviços ativos
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="sidebar-versao">
-
-                    <i
-                        class="fa-solid fa-code-branch"
-                        aria-hidden="true"
-                    ></i>
-
-                    <span>
-                        Versão 1.0.0
-                    </span>
-
-                </div>
-
+              <span> Todos os serviços ativos </span>
             </div>
+          </div>
 
-        </aside>
+          <div class="sidebar-versao">
+            <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
 
+            <span> Versão 1.0.0 </span>
+          </div>
+        </div>
+      </aside>
 
-
-        <!-- =================================================
+      <!-- =================================================
              ÁREA PRINCIPAL
         ================================================== -->
 
-        <div class="content">
-
-
-            <!-- =================================================
+      <div class="content">
+        <!-- =================================================
                  TOPBAR
             ================================================== -->
 
-            <header class="topbar">
+        <header class="topbar">
+          <div class="topbar-lado-esquerdo">
+            <button
+              id="btnAlternarMenu"
+              class="botao-alternar-menu"
+              type="button"
+              aria-label="Recolher menu lateral"
+              aria-expanded="true"
+              title="Recolher menu"
+            >
+              <i class="fa-solid fa-bars"></i>
+            </button>
 
-                <div class="topbar-lado-esquerdo">
+            <div class="topbar-header">
+              <nav class="breadcrumb" aria-label="Navegação estrutural">
+                <button
+                  id="breadcrumbInicio"
+                  class="breadcrumb-inicio"
+                  type="button"
+                  title="Voltar ao Dashboard"
+                >
+                  <i class="fa-solid fa-house"></i>
+                  Início
+                </button>
 
-                    <button
-                        id="btnAlternarMenu"
-                        class="botao-alternar-menu"
-                        type="button"
-                        aria-label="Recolher menu lateral"
-                        aria-expanded="true"
-                        title="Recolher menu"
+                <i class="fa-solid fa-chevron-right breadcrumb-separador"></i>
+
+                <span id="breadcrumbPagina" class="breadcrumb-atual">
+                  Dashboard
+                </span>
+              </nav>
+
+              <h2 id="tituloPagina" class="topbar-titulo">Dashboard</h2>
+
+              <p id="descricaoPagina" class="topbar-descricao">
+                Visão geral do sistema.
+              </p>
+            </div>
+          </div>
+
+          <div class="topbar-lado-direito">
+            <div class="notificacoes-wrapper">
+              <button
+                type="button"
+                id="btnNotificacoes"
+                class="btn-notificacoes"
+                aria-label="Abrir notificações"
+                aria-expanded="false"
+                aria-haspopup="true"
+                title="Notificações"
+              >
+                <i class="fa-regular fa-bell"></i>
+
+                <span id="badgeNotificacoes" class="badge-notificacoes" hidden>
+                  0
+                </span>
+              </button>
+
+              <div id="painelNotificacoes" class="painel-notificacoes" hidden>
+                <div class="painel-notificacoes-header">
+                  <div class="painel-titulo-row">
+                    <strong>Notificações</strong>
+                    <span id="textoContadorNotificacoes"
+                      >Nenhuma nova notificação</span
                     >
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
+                  </div>
 
-                    <div class="topbar-header">
-
-                        <nav
-                            class="breadcrumb"
-                            aria-label="Navegação estrutural"
-                        >
-
-                            <button
-                                id="breadcrumbInicio"
-                                class="breadcrumb-inicio"
-                                type="button"
-                                title="Voltar ao Dashboard"
-                            >
-                                <i class="fa-solid fa-house"></i>
-                                Início
-                            </button>
-
-                            <i class="fa-solid fa-chevron-right breadcrumb-separador"></i>
-
-                            <span
-                                id="breadcrumbPagina"
-                                class="breadcrumb-atual"
-                            >
-                                Dashboard
-                            </span>
-
-                        </nav>
-
-                        <h2
-                            id="tituloPagina"
-                            class="topbar-titulo"
-                        >
-                            Dashboard
-                        </h2>
-
-                        <p
-                            id="descricaoPagina"
-                            class="topbar-descricao"
-                        >
-                            Visão geral do sistema.
-                        </p>
-
-                    </div>
-
+                  <button
+                    type="button"
+                    id="btnMarcarTodasLidas"
+                    class="btn-marcar-todas"
+                  >
+                    Marcar todas como lidas
+                  </button>
                 </div>
 
-                <div class="topbar-lado-direito">
+                <div id="listaNotificacoes" class="lista-notificacoes"></div>
 
-                    <div class="notificacoes-wrapper">
-
-                        <button
-                            type="button"
-                            id="btnNotificacoes"
-                            class="btn-notificacoes"
-                            aria-label="Abrir notificações"
-                            aria-expanded="false"
-                            aria-haspopup="true"
-                            title="Notificações"
-                        >
-                            <i class="fa-regular fa-bell"></i>
-
-                            <span
-                                id="badgeNotificacoes"
-                                class="badge-notificacoes"
-                                hidden
-                            >
-                                0
-                            </span>
-                        </button>
-
-                        <div
-                            id="painelNotificacoes"
-                            class="painel-notificacoes"
-                            hidden
-                        >
-
-                            <div class="painel-notificacoes-header">
-
-                                <div class="painel-titulo-row">
-                                        <strong>Notificações</strong>
-                                        <span id="textoContadorNotificacoes">Nenhuma nova notificação</span>
-                                    </div>
-
-                                <button
-                                    type="button"
-                                    id="btnMarcarTodasLidas"
-                                    class="btn-marcar-todas"
-                                >
-                                    Marcar todas como lidas
-                                </button>
-
-                            </div>
-
-                            <div
-                                id="listaNotificacoes"
-                                class="lista-notificacoes"
-                            ></div>
-
-                            <div class="painel-notificacoes-footer">
-                                <button
-                                    type="button"
-                                    id="btnVerTodasNotificacoes"
-                                >
-                                    Ver todas as notificações
-                                    <i class="fa-solid fa-arrow-right"></i>
-                                </button>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="usuario">
-
-                        <div class="usuario-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-
-                        <div class="usuario-info">
-                            <strong id="nomeUsuario">Carregando...</strong>
-                            <span id="perfilUsuario">Usuário</span>
-                            <small id="emailUsuario">...</small>
-                        </div>
-
-                        <button
-                            id="logout"
-                            type="button"
-                        >
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                            Sair
-                        </button>
-
-                    </div>
-
+                <div class="painel-notificacoes-footer">
+                  <button type="button" id="btnVerTodasNotificacoes">
+                    Ver todas as notificações
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </button>
                 </div>
+              </div>
+            </div>
 
-            </header>
+            <div class="usuario">
+              <div class="usuario-avatar">
+                <i class="fa-solid fa-user"></i>
+              </div>
 
+              <div class="usuario-info">
+                <strong id="nomeUsuario">Carregando...</strong>
+                <span id="perfilUsuario">Usuário</span>
+                <small id="emailUsuario">...</small>
+              </div>
 
-            <!-- =================================================
+              <button id="logout" type="button">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Sair
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- =================================================
                  CONTEÚDO
             ================================================== -->
 
-            <main id="conteudo">
+        <main id="conteudo">
+          <div class="carregando-pagina">
+            <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
 
-                <div class="carregando-pagina">
-
-                    <i
-                        class="fa-solid fa-spinner fa-spin"
-                        aria-hidden="true"
-                    ></i>
-
-                    &nbsp; Carregando painel...
-
-                </div>
-
-            </main>
-
-
-        </div>
-
+            &nbsp; Carregando painel...
+          </div>
+        </main>
+      </div>
     </div>
-
-
 
     <!-- =====================================================
          JAVASCRIPT
     ====================================================== -->
 
-    <script
-        type="module"
-        src="../js/router.js"
-    ></script>
+    <script type="module" src="../js/router.js"></script>
 
-    <script
-        type="module"
-        src="../js/dashboard.js"
-    ></script>
+    <script type="module" src="../js/dashboard.js"></script>
 
-    <script
-        type="module"
-        src="../js/notificacoes.js"
-    ></script>
-
-</body>
-
+    <script type="module" src="../js/notificacoes.js"></script>
+  </body>
 </html>

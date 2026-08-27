@@ -1,9 +1,12 @@
-import 'dotenv/config';
-import pkg from 'pg';
+import "dotenv/config";
+import pkg from "pg";
 const { Client } = pkg;
 
 async function main() {
-  const client = new Client({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
   await client.connect();
 
   const sql = `
@@ -26,12 +29,12 @@ async function main() {
   `;
 
   await client.query(sql);
-  console.log('Tabela notificacoes criada/atualizada com sucesso.');
+  console.log("Tabela notificacoes criada/atualizada com sucesso.");
 
   await client.end();
 }
 
 main().catch((e) => {
-  console.error('Erro criando tabela notificacoes:', e);
+  console.error("Erro criando tabela notificacoes:", e);
   process.exit(1);
 });

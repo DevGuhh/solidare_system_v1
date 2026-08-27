@@ -2,7 +2,8 @@ import { prisma } from "../config/db.js";
 
 export function normalizarNotificacao(item = {}) {
   const assunto = item.assunto || item.titulo || "Nova mensagem";
-  const descricao = item.descricao || item.mensagem || "Mensagem registrada no sistema.";
+  const descricao =
+    item.descricao || item.mensagem || "Mensagem registrada no sistema.";
   const instituicao = item.instituicao || item.remetente || "Sistema";
 
   return {
@@ -29,10 +30,12 @@ class NotificacoesController {
         take: limite,
       });
 
-      const dados = registros.map((item) => normalizarNotificacao({
-        ...item,
-        data: item.criadoEm,
-      }));
+      const dados = registros.map((item) =>
+        normalizarNotificacao({
+          ...item,
+          data: item.criadoEm,
+        }),
+      );
 
       return res.status(200).json({
         ok: true,
@@ -53,13 +56,27 @@ class NotificacoesController {
       const body = req.body || {};
 
       const payload = {
-        instituicao: String(body.instituicao || body.remetente || "Sistema").trim(),
+        instituicao: String(
+          body.instituicao || body.remetente || "Sistema",
+        ).trim(),
         assunto: String(body.assunto || "Nova mensagem").trim(),
-        descricao: String(body.descricao || body.mensagem || "Mensagem registrada pelo sistema.").trim(),
-        mensagem: String(body.mensagem || body.descricao || "Mensagem registrada pelo sistema.").trim(),
+        descricao: String(
+          body.descricao ||
+            body.mensagem ||
+            "Mensagem registrada pelo sistema.",
+        ).trim(),
+        mensagem: String(
+          body.mensagem ||
+            body.descricao ||
+            "Mensagem registrada pelo sistema.",
+        ).trim(),
         tipo: String(body.tipo || "MENSAGEM").trim(),
-        destinatario: body.destinatario ? String(body.destinatario).trim() : "Administrador Geral",
-        remetente: body.remetente ? String(body.remetente).trim() : body.instituicao || "Sistema",
+        destinatario: body.destinatario
+          ? String(body.destinatario).trim()
+          : "Administrador Geral",
+        remetente: body.remetente
+          ? String(body.remetente).trim()
+          : body.instituicao || "Sistema",
         lida: Boolean(body.lida),
       };
 
@@ -95,7 +112,9 @@ class NotificacoesController {
     try {
       const id = Number(req.params.id);
       if (!Number.isInteger(id) || id <= 0) {
-        return res.status(400).json({ ok: false, error: "ID da notificação inválido." });
+        return res
+          .status(400)
+          .json({ ok: false, error: "ID da notificação inválido." });
       }
 
       const registro = await prisma.notificacao.update({
