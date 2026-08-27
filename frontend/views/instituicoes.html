@@ -3,965 +3,522 @@
 ================================================== -->
 
 <section class="instituicoes-page">
-  <header class="instituicoes-header">
-    <div class="instituicoes-header-texto">
-      <span class="instituicoes-eyebrow">Gestão de parceiros</span>
-      <h1>Instituições</h1>
-      <p>
-        Consulte, cadastre e gerencie as instituições parceiras do Instituto
-        Solidare.
-      </p>
-    </div>
 
-    <div class="instituicoes-header-acoes">
-      <button id="btnAtualizarInstituicoes" class="btn btn-info" type="button">
-        <i class="fa-solid fa-rotate" aria-hidden="true"></i> Atualizar
-      </button>
-      <button
-        id="btnNovaMensagemInstituicao"
-        class="btn btn-outline"
-        type="button"
-      >
-        <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i> Enviar
-        mensagem
-      </button>
-      <button id="btnNovaInstituicao" class="btn btn-primary" type="button">
-        <i class="fa-solid fa-plus" aria-hidden="true"></i> Nova instituição
-      </button>
-    </div>
-  </header>
+    <header class="instituicoes-header">
+        <div class="instituicoes-header-texto">
+            <span class="instituicoes-eyebrow">Gestão de parceiros</span>
+            <h1>Instituições</h1>
+            <p>Consulte, cadastre e gerencie as instituições parceiras do Instituto Solidare.</p>
+        </div>
 
-  <section class="instituicoes-toolbar" aria-label="Ferramentas da listagem">
-    <div class="instituicoes-toolbar-principal">
-      <div class="instituicoes-search">
-        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-        <input
-          type="search"
-          id="pesquisaInstituicao"
-          placeholder="Pesquisar por nome, responsável, e-mail, cidade ou tipo..."
-          autocomplete="off"
-          aria-label="Pesquisar instituição"
-        />
-        <button
-          type="button"
-          id="btnLimparPesquisaInstituicao"
-          class="instituicoes-search-clear"
-          aria-label="Limpar pesquisa"
-          title="Limpar pesquisa"
-          hidden
-        >
-          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
-      </div>
+        <div class="instituicoes-header-acoes">
+            <button id="btnAtualizarInstituicoes" class="btn btn-info" type="button">
+                <i class="fa-solid fa-rotate" aria-hidden="true"></i> Atualizar
+            </button>
+           
+            <button id="btnNovaInstituicao" class="btn btn-primary" type="button">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i> Nova instituição
+            </button>
+        </div>
+    </header>
 
-      <div
-        class="instituicoes-filtros"
-        role="group"
-        aria-label="Filtrar instituições"
-      >
-        <button
-          type="button"
-          class="instituicoes-filtro ativo"
-          data-filtro-status="TODOS"
-          aria-pressed="true"
-        >
-          <span>Todos</span><strong id="contadorTodasInstituicoes">0</strong>
-        </button>
-        <button
-          type="button"
-          class="instituicoes-filtro"
-          data-filtro-status="ATIVAS"
-          aria-pressed="false"
-        >
-          <span class="filtro-status-indicador ativo" aria-hidden="true"></span>
-          <span>Ativas</span><strong id="contadorInstituicoesAtivas">0</strong>
-        </button>
-        <button
-          type="button"
-          class="instituicoes-filtro"
-          data-filtro-status="INATIVAS"
-          aria-pressed="false"
-        >
-          <span
-            class="filtro-status-indicador inativo"
-            aria-hidden="true"
-          ></span>
-          <span>Inativas</span
-          ><strong id="contadorInstituicoesInativas">0</strong>
-        </button>
-        <button
-          type="button"
-          class="instituicoes-filtro"
-          data-filtro-status="PENDENTES"
-          aria-pressed="false"
-        >
-          <span
-            class="filtro-status-indicador pendente"
-            aria-hidden="true"
-          ></span>
-          <span>Pendentes</span
-          ><strong id="contadorInstituicoesPendentes">0</strong>
-        </button>
-      </div>
-    </div>
+    <section class="instituicoes-toolbar" aria-label="Ferramentas da listagem">
+        <div class="instituicoes-toolbar-principal">
+            <div class="instituicoes-search">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" id="pesquisaInstituicao"
+                    placeholder="Pesquisar por nome, responsável, e-mail, cidade ou tipo..."
+                    autocomplete="off" aria-label="Pesquisar instituição">
+                <button type="button" id="btnLimparPesquisaInstituicao"
+                    class="instituicoes-search-clear" aria-label="Limpar pesquisa" title="Limpar pesquisa" hidden>
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
 
-    <div class="instituicoes-toolbar-rodape">
-      <div class="instituicoes-toolbar-info">
-        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-        <span
-          >“Status” controla o acesso da instituição e “Documentação” indica OK
-          ou Pendente.</span
-        >
-      </div>
-      <div
-        id="resultadoFiltroInstituicoes"
-        class="instituicoes-resultado"
-        aria-live="polite"
-      >
-        Exibindo 0 instituições
-      </div>
-    </div>
-  </section>
+            <div class="instituicoes-filtros" role="group" aria-label="Filtrar instituições">
+                <button type="button" class="instituicoes-filtro ativo" data-filtro-status="TODOS" aria-pressed="true">
+                    <span>Todos</span><strong id="contadorTodasInstituicoes">0</strong>
+                </button>
+                <button type="button" class="instituicoes-filtro" data-filtro-status="ATIVAS" aria-pressed="false">
+                    <span class="filtro-status-indicador ativo" aria-hidden="true"></span>
+                    <span>Ativas</span><strong id="contadorInstituicoesAtivas">0</strong>
+                </button>
+                <button type="button" class="instituicoes-filtro" data-filtro-status="INATIVAS" aria-pressed="false">
+                    <span class="filtro-status-indicador inativo" aria-hidden="true"></span>
+                    <span>Inativas</span><strong id="contadorInstituicoesInativas">0</strong>
+                </button>
+                <button type="button" class="instituicoes-filtro" data-filtro-status="PENDENTES" aria-pressed="false">
+                    <span class="filtro-status-indicador pendente" aria-hidden="true"></span>
+                    <span>Pendentes</span><strong id="contadorInstituicoesPendentes">0</strong>
+                </button>
+            </div>
+        </div>
 
-  <section
-    id="barraSelecaoInstituicoes"
-    class="instituicoes-selecao-barra"
-    aria-live="polite"
-    hidden
-  >
-    <div class="instituicoes-selecao-info">
-      <div class="instituicoes-selecao-icone" aria-hidden="true">
-        <i class="fa-solid fa-check"></i>
-      </div>
-      <div>
-        <strong id="quantidadeSelecionadasInstituicoes"
-          >0 instituições selecionadas</strong
-        >
-        <span>Escolha uma ação para os registros marcados.</span>
-      </div>
-    </div>
-    <div class="instituicoes-selecao-acoes">
-      <button
-        type="button"
-        id="btnAtivarSelecionadasInstituicoes"
-        class="btn-selecao btn-selecao-sucesso"
-        disabled
-      >
-        <i class="fa-solid fa-building-circle-check"></i> Ativar
-      </button>
-      <button
-        type="button"
-        id="btnInativarSelecionadasInstituicoes"
-        class="btn-selecao btn-selecao-alerta"
-        disabled
-      >
-        <i class="fa-solid fa-building-circle-xmark"></i> Inativar
-      </button>
-      <button
-        type="button"
-        id="btnLimparSelecaoInstituicoes"
-        class="btn-selecao btn-selecao-neutro"
-      >
-        <i class="fa-solid fa-xmark"></i> Limpar seleção
-      </button>
-    </div>
-  </section>
+        <div class="instituicoes-toolbar-rodape">
+            <div class="instituicoes-toolbar-info">
+                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                <span>“Status” controla o acesso da instituição e “Documentação” indica OK ou Pendente.</span>
+            </div>
+            <div id="resultadoFiltroInstituicoes" class="instituicoes-resultado" aria-live="polite">
+                Exibindo 0 instituições
+            </div>
+        </div>
+    </section>
 
-  <section class="instituicoes-listagem">
-    <div class="instituicoes-listagem-header">
-      <div>
-        <span class="instituicoes-listagem-eyebrow">Registros</span>
-        <h2>Instituições cadastradas</h2>
-      </div>
-      <div class="instituicoes-listagem-legenda">
-        <span class="legenda-status"
-          ><span class="legenda-indicador ativo"></span> Ativa</span
-        >
-        <span class="legenda-status"
-          ><span class="legenda-indicador inativo"></span> Inativa</span
-        >
-        <span class="legenda-status"
-          ><span class="legenda-indicador pendente"></span> Documentação
-          pendente</span
-        >
-      </div>
-    </div>
+    <section id="barraSelecaoInstituicoes" class="instituicoes-selecao-barra" aria-live="polite" hidden>
+        <div class="instituicoes-selecao-info">
+            <div class="instituicoes-selecao-icone" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+            <div>
+                <strong id="quantidadeSelecionadasInstituicoes">0 instituições selecionadas</strong>
+                <span>Escolha uma ação para os registros marcados.</span>
+            </div>
+        </div>
+        <div class="instituicoes-selecao-acoes">
+            <button type="button" id="btnAtivarSelecionadasInstituicoes" class="btn-selecao btn-selecao-sucesso" disabled>
+                <i class="fa-solid fa-building-circle-check"></i> Ativar
+            </button>
+            <button type="button" id="btnInativarSelecionadasInstituicoes" class="btn-selecao btn-selecao-alerta" disabled>
+                <i class="fa-solid fa-building-circle-xmark"></i> Inativar
+            </button>
+            <button type="button" id="btnLimparSelecaoInstituicoes" class="btn-selecao btn-selecao-neutro">
+                <i class="fa-solid fa-xmark"></i> Limpar seleção
+            </button>
+        </div>
+    </section>
 
-    <div class="instituicoes-table-wrapper">
-      <table class="instituicoes-table">
-        <thead>
-          <tr>
-            <th class="coluna-checkbox">
-              <input
-                type="checkbox"
-                id="selecionarTodasInstituicoes"
-                aria-label="Selecionar todas"
-              />
-            </th>
-            <th>
-              <button
-                type="button"
-                class="instituicoes-ordenacao"
-                data-ordenar-por="id"
-              >
-                <span>ID</span><i class="fa-solid fa-sort"></i>
-              </button>
-            </th>
-            <th>
-              <button
-                type="button"
-                class="instituicoes-ordenacao"
-                data-ordenar-por="nome"
-              >
-                <span>Instituição</span><i class="fa-solid fa-sort"></i>
-              </button>
-            </th>
-            <th>
-              <button
-                type="button"
-                class="instituicoes-ordenacao"
-                data-ordenar-por="responsavel"
-              >
-                <span>Responsável</span><i class="fa-solid fa-sort"></i>
-              </button>
-            </th>
-            <th class="coluna-contato">
-              <span class="instituicoes-cabecalho-estatico contato-cabecalho">
-                Contato
-              </span>
-            </th>
-            <th>
-              <button
-                type="button"
-                class="instituicoes-ordenacao"
-                data-ordenar-por="cidade"
-              >
-                <span>Localização</span><i class="fa-solid fa-sort"></i>
-              </button>
-            </th>
-            <th>
-              <button
-                type="button"
-                class="instituicoes-ordenacao"
-                data-ordenar-por="tipo"
-              >
-                <span>Tipo</span><i class="fa-solid fa-sort"></i>
-              </button>
-            </th>
-            <th>
-              <button
-                type="button"
-                class="instituicoes-ordenacao"
-                data-ordenar-por="ativa"
-              >
-                <span>Status</span><i class="fa-solid fa-sort"></i>
-              </button>
-            </th>
-            <th>
-              <button
-                type="button"
-                class="instituicoes-ordenacao"
-                data-ordenar-por="statusOk"
-              >
-                <span>Documentação</span><i class="fa-solid fa-sort"></i>
-              </button>
-            </th>
-            <th class="coluna-acoes">
-              <span class="instituicoes-cabecalho-estatico">Ações</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody id="tabelaInstituicoes">
-          <tr class="tabela-carregando">
-            <td colspan="10">
-              <div class="instituicoes-loading">
-                <i class="fa-solid fa-spinner fa-spin"></i
-                ><span>Carregando instituições...</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <section class="instituicoes-listagem">
+        <div class="instituicoes-listagem-header">
+            <div>
+                <span class="instituicoes-listagem-eyebrow">Registros</span>
+                <h2>Instituições cadastradas</h2>
+            </div>
+            <div class="instituicoes-listagem-legenda">
+                <span class="legenda-status"><span class="legenda-indicador ativo"></span> Ativa</span>
+                <span class="legenda-status"><span class="legenda-indicador inativo"></span> Inativa</span>
+                <span class="legenda-status"><span class="legenda-indicador pendente"></span> Documentação pendente</span>
+            </div>
+        </div>
 
-    <footer class="instituicoes-paginacao">
-      <div class="instituicoes-paginacao-info">
-        <span>Itens por página:</span>
-        <select
-          id="quantidadePorPaginaInstituicoes"
-          aria-label="Quantidade de instituições por página"
-        >
-          <option value="5">5</option>
-          <option value="10" selected>10</option>
-          <option value="20">20</option>
-        </select>
-        <span id="intervaloPaginacaoInstituicoes">0–0 de 0</span>
-      </div>
-      <nav
-        class="instituicoes-paginacao-controles"
-        aria-label="Paginação das instituições"
-      >
-        <button
-          type="button"
-          id="btnPrimeiraPaginaInstituicoes"
-          class="paginacao-botao"
-          title="Primeira página"
-          disabled
-        >
-          <i class="fa-solid fa-angles-left"></i>
-        </button>
-        <button
-          type="button"
-          id="btnPaginaAnteriorInstituicoes"
-          class="paginacao-botao"
-          title="Página anterior"
-          disabled
-        >
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <div id="numerosPaginacaoInstituicoes" class="paginacao-numeros"></div>
-        <button
-          type="button"
-          id="btnProximaPaginaInstituicoes"
-          class="paginacao-botao"
-          title="Próxima página"
-          disabled
-        >
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
-        <button
-          type="button"
-          id="btnUltimaPaginaInstituicoes"
-          class="paginacao-botao"
-          title="Última página"
-          disabled
-        >
-          <i class="fa-solid fa-angles-right"></i>
-        </button>
-      </nav>
-    </footer>
-  </section>
+        <div class="instituicoes-table-wrapper">
+            <table class="instituicoes-table">
+                <thead>
+                    <tr>
+                        <th class="coluna-checkbox"><input type="checkbox" id="selecionarTodasInstituicoes" aria-label="Selecionar todas"></th>
+                        <th><button type="button" class="instituicoes-ordenacao" data-ordenar-por="id"><span>ID</span><i class="fa-solid fa-sort"></i></button></th>
+                        <th><button type="button" class="instituicoes-ordenacao" data-ordenar-por="nome"><span>Instituição</span><i class="fa-solid fa-sort"></i></button></th>
+                        <th><button type="button" class="instituicoes-ordenacao" data-ordenar-por="responsavel"><span>Responsável</span><i class="fa-solid fa-sort"></i></button></th>
+                        <th class="coluna-contato">
+    <span class="instituicoes-cabecalho-estatico contato-cabecalho">
+        Contato
+    </span>
+</th>
+                        <th><button type="button" class="instituicoes-ordenacao" data-ordenar-por="cidade"><span>Localização</span><i class="fa-solid fa-sort"></i></button></th>
+                        <th><button type="button" class="instituicoes-ordenacao" data-ordenar-por="tipo"><span>Tipo</span><i class="fa-solid fa-sort"></i></button></th>
+                        <th><button type="button" class="instituicoes-ordenacao" data-ordenar-por="ativa"><span>Status</span><i class="fa-solid fa-sort"></i></button></th>
+                        <th><button type="button" class="instituicoes-ordenacao" data-ordenar-por="statusOk"><span>Documentação</span><i class="fa-solid fa-sort"></i></button></th>
+                        <th class="coluna-acoes"><span class="instituicoes-cabecalho-estatico">Ações</span></th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaInstituicoes">
+                    <tr class="tabela-carregando"><td colspan="10">
+                        <div class="instituicoes-loading"><i class="fa-solid fa-spinner fa-spin"></i><span>Carregando instituições...</span></div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="instituicoes-paginacao">
+            <div class="instituicoes-paginacao-info">
+                <span>Itens por página:</span>
+                <select id="quantidadePorPaginaInstituicoes" aria-label="Quantidade de instituições por página">
+                    <option value="5">5</option><option value="10" selected>10</option><option value="20">20</option>
+                </select>
+                <span id="intervaloPaginacaoInstituicoes">0–0 de 0</span>
+            </div>
+            <nav class="instituicoes-paginacao-controles" aria-label="Paginação das instituições">
+                <button type="button" id="btnPrimeiraPaginaInstituicoes" class="paginacao-botao" title="Primeira página" disabled><i class="fa-solid fa-angles-left"></i></button>
+                <button type="button" id="btnPaginaAnteriorInstituicoes" class="paginacao-botao" title="Página anterior" disabled><i class="fa-solid fa-chevron-left"></i></button>
+                <div id="numerosPaginacaoInstituicoes" class="paginacao-numeros"></div>
+                <button type="button" id="btnProximaPaginaInstituicoes" class="paginacao-botao" title="Próxima página" disabled><i class="fa-solid fa-chevron-right"></i></button>
+                <button type="button" id="btnUltimaPaginaInstituicoes" class="paginacao-botao" title="Última página" disabled><i class="fa-solid fa-angles-right"></i></button>
+            </nav>
+        </footer>
+    </section>
 </section>
+
 
 <!-- ==================================================
      DOCUMENTAÇÕES VINCULADAS À INSTITUIÇÃO
 ================================================== -->
 <div
-  id="modalDocumentosInstituicao"
-  class="modal modal-documentos-instituicao"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="tituloModalDocumentosInstituicao"
-  aria-hidden="true"
-  hidden
+    id="modalDocumentosInstituicao"
+    class="modal modal-documentos-instituicao"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tituloModalDocumentosInstituicao"
+    aria-hidden="true"
+    hidden
 >
-  <div class="modal-content modal-documentos-content">
-    <header class="modal-documentos-header">
-      <div class="modal-documentos-titulo">
-        <div class="modal-documentos-icone" aria-hidden="true">
-          <i class="fa-solid fa-folder-open"></i>
-        </div>
-        <div>
-          <span class="modal-documentos-eyebrow">Documentações</span>
-          <h2 id="tituloModalDocumentosInstituicao">Documentos vinculados</h2>
-          <p id="nomeInstituicaoDocumentos"></p>
-        </div>
-      </div>
+    <div class="modal-content modal-documentos-content">
+        <header class="modal-documentos-header">
+            <div class="modal-documentos-titulo">
+                <div class="modal-documentos-icone" aria-hidden="true">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div>
+                    <span class="modal-documentos-eyebrow">Documentações</span>
+                    <h2 id="tituloModalDocumentosInstituicao">
+                        Documentos vinculados
+                    </h2>
+                    <p id="nomeInstituicaoDocumentos"></p>
+                </div>
+            </div>
 
-      <button
-        type="button"
-        id="btnFecharDocumentosInstituicao"
-        class="modal-documentos-fechar"
-        aria-label="Fechar documentos"
-        title="Fechar"
-      >
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </header>
+            <button
+                type="button"
+                id="btnFecharDocumentosInstituicao"
+                class="modal-documentos-fechar"
+                aria-label="Fechar documentos"
+                title="Fechar"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
 
-    <div id="listaDocumentosInstituicao" class="lista-documentos-instituicao">
-      <div class="documentos-instituicao-estado">
-        <i class="fa-solid fa-spinner fa-spin"></i>
-        <strong>Carregando documentos...</strong>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div
-  id="modalEnviarMensagem"
-  class="modal"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="tituloModalMensagem"
-  aria-hidden="true"
-  hidden
->
-  <div class="modal-content modal-instituicao-content">
-    <header class="modal-instituicao-header">
-      <div class="modal-instituicao-titulo">
-        <div class="modal-instituicao-icone" aria-hidden="true">
-          <i class="fa-solid fa-envelope"></i>
-        </div>
-        <div>
-          <span class="modal-instituicao-eyebrow">COMUNICAÇÃO</span>
-          <h2 id="tituloModalMensagem">Enviar mensagem ao Administrador</h2>
-        </div>
-      </div>
-      <button
-        type="button"
-        id="btnFecharModalMensagem"
-        class="modal-instituicao-fechar"
-        aria-label="Fechar mensagem"
-      >
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </header>
-
-    <form
-      id="formEnviarNotificacao"
-      class="form-instituicao"
-      autocomplete="off"
-    >
-      <div class="modal-instituicao-body">
         <div
-          id="notificacaoThread"
-          class="notificacao-thread"
-          style="margin-bottom: 12px"
+            id="listaDocumentosInstituicao"
+            class="lista-documentos-instituicao"
         >
-          <!-- Thread de mensagens entre instituição e admin aparecerá aqui -->
+            <div class="documentos-instituicao-estado">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <strong>Carregando documentos...</strong>
+            </div>
         </div>
-        <section class="form-section">
-          <div class="form-section-header">
-            <div class="form-section-icon">
-              <i class="fa-solid fa-user-tie"></i>
-            </div>
-            <div>
-              <h3>Destinatário</h3>
-              <p>Mensagem direcionada ao administrador geral da plataforma.</p>
-            </div>
-          </div>
-
-          <div class="form-group full">
-            <label for="notificacaoDestinatario">Para</label>
-            <input
-              id="notificacaoDestinatario"
-              type="text"
-              value="Administrador Geral"
-              readonly
-            />
-          </div>
-        </section>
-
-        <section class="form-section">
-          <div class="form-section-header">
-            <div class="form-section-icon">
-              <i class="fa-solid fa-comment-dots"></i>
-            </div>
-            <div>
-              <h3>Mensagem</h3>
-              <p>Descreva a solicitação, aviso ou orientações.</p>
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group full">
-              <label for="notificacaoAssunto"
-                >Assunto <span class="required">*</span></label
-              >
-              <input
-                id="notificacaoAssunto"
-                type="text"
-                maxlength="120"
-                placeholder="Ex.: Solicitação de atualização cadastral"
-                required
-              />
-            </div>
-
-            <div class="form-group full">
-              <label for="notificacaoDescricao"
-                >Descrição <span class="required">*</span></label
-              >
-              <textarea
-                id="notificacaoDescricao"
-                rows="6"
-                maxlength="1000"
-                placeholder="Descreva o motivo da comunicação..."
-                required
-              ></textarea>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <footer class="modal-instituicao-actions">
-        <button
-          type="button"
-          id="btnCancelarMensagem"
-          class="btn btn-secondary"
-        >
-          Cancelar
-        </button>
-        <button type="submit" id="btnEnviarMensagem" class="btn btn-primary">
-          <i class="fa-solid fa-paper-plane"></i>
-          <span>Enviar mensagem</span>
-        </button>
-      </footer>
-    </form>
-  </div>
-</div>
-
-<div
-  id="modalInstituicao"
-  class="modal"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="tituloModalInstituicao"
-  aria-hidden="true"
-  hidden
->
-  <div class="modal-content modal-instituicao-content">
-    <header class="modal-instituicao-header">
-      <div class="modal-instituicao-titulo">
-        <div class="modal-instituicao-icone" aria-hidden="true">
-          <i class="fa-solid fa-building"></i>
-        </div>
-        <div>
-          <span class="modal-instituicao-eyebrow">Cadastro</span>
-          <h2 id="tituloModalInstituicao">Nova instituição</h2>
-        </div>
-      </div>
-      <button
-        type="button"
-        id="btnFecharModalInstituicao"
-        class="modal-instituicao-fechar"
-        aria-label="Fechar formulário"
-      >
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </header>
-
-    <form id="formInstituicao" class="form-instituicao" autocomplete="off">
-      <div class="modal-instituicao-body">
-        <input type="hidden" id="instituicaoId" />
-
-        <section class="form-section">
-          <div class="form-section-header">
-            <div class="form-section-icon">
-              <i class="fa-solid fa-building"></i>
-            </div>
-            <div>
-              <h3>Dados da instituição</h3>
-              <p>Informe os dados principais da instituição parceira.</p>
-            </div>
-          </div>
-          <div class="form-grid">
-            <div class="form-group full">
-              <label for="nome"
-                >Nome da instituição <span class="required">*</span></label
-              ><input type="text" id="nome" maxlength="150" required />
-            </div>
-            <div class="form-group">
-              <label for="cnpj">CNPJ <span class="required">*</span></label
-              ><input
-                type="text"
-                id="cnpj"
-                maxlength="18"
-                inputmode="numeric"
-                placeholder="00.000.000/0000-00"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label for="tipo">Tipo <span class="required">*</span></label
-              ><select id="tipo" required>
-                <option value="">Selecione</option>
-                <option value="ONG">ONG</option>
-                <option value="IGREJA">Igreja</option>
-                <option value="ASSOCIACAO">Associação</option>
-                <option value="OUTRO">Outro</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="responsavel"
-                >Responsável <span class="required">*</span></label
-              ><input type="text" id="responsavel" maxlength="120" required />
-            </div>
-          </div>
-        </section>
-
-        <section class="form-section">
-          <div class="form-section-header">
-            <div class="form-section-icon">
-              <i class="fa-solid fa-address-book"></i>
-            </div>
-            <div>
-              <h3>Contato</h3>
-              <p>Dados utilizados para comunicação e acesso da instituição.</p>
-            </div>
-          </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="email">E-mail <span class="required">*</span></label
-              ><input type="email" id="email" maxlength="255" required />
-            </div>
-            <div class="form-group">
-              <label for="telefone"
-                >Telefone <span class="required">*</span></label
-              ><input
-                type="tel"
-                id="telefone"
-                maxlength="15"
-                inputmode="numeric"
-                required
-              />
-            </div>
-          </div>
-        </section>
-
-        <section class="form-section">
-          <div class="form-section-header">
-            <div class="form-section-icon">
-              <i class="fa-solid fa-location-dot"></i>
-            </div>
-            <div>
-              <h3>Endereço</h3>
-              <p>Informe a localização completa da instituição.</p>
-            </div>
-          </div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="cep">CEP <span class="required">*</span></label
-              ><input
-                type="text"
-                id="cep"
-                maxlength="9"
-                inputmode="numeric"
-                placeholder="00000-000"
-                required
-              /><small class="form-help"
-                >O endereço será preenchido automaticamente quando
-                possível.</small
-              >
-            </div>
-            <div class="form-group">
-              <label for="cidade">Cidade <span class="required">*</span></label
-              ><input type="text" id="cidade" maxlength="100" required />
-            </div>
-            <div class="form-group full">
-              <label for="logradouro"
-                >Logradouro <span class="required">*</span></label
-              ><input type="text" id="logradouro" maxlength="150" required />
-            </div>
-            <div class="form-group">
-              <label for="numero">Número <span class="required">*</span></label
-              ><input type="text" id="numero" maxlength="20" required />
-            </div>
-            <div class="form-group">
-              <label for="complemento">Complemento</label
-              ><input type="text" id="complemento" maxlength="100" />
-            </div>
-            <div class="form-group">
-              <label for="bairro">Bairro <span class="required">*</span></label
-              ><input type="text" id="bairro" maxlength="100" required />
-            </div>
-            <div class="form-group">
-              <label for="uf">UF <span class="required">*</span></label
-              ><select id="uf" required>
-                <option value="">Selecione</option>
-                <option>AC</option>
-                <option>AL</option>
-                <option>AP</option>
-                <option>AM</option>
-                <option>BA</option>
-                <option>CE</option>
-                <option>DF</option>
-                <option>ES</option>
-                <option>GO</option>
-                <option>MA</option>
-                <option>MT</option>
-                <option>MS</option>
-                <option>MG</option>
-                <option>PA</option>
-                <option>PB</option>
-                <option>PR</option>
-                <option>PE</option>
-                <option>PI</option>
-                <option>RJ</option>
-                <option>RN</option>
-                <option>RS</option>
-                <option>RO</option>
-                <option>RR</option>
-                <option>SC</option>
-                <option>SP</option>
-                <option>SE</option>
-                <option>TO</option>
-              </select>
-            </div>
-          </div>
-        </section>
-      </div>
-      <footer class="modal-instituicao-actions">
-        <button
-          type="button"
-          id="btnCancelarInstituicao"
-          class="btn btn-secondary"
-        >
-          Cancelar
-        </button>
-        <button type="submit" id="btnSalvarInstituicao" class="btn btn-primary">
-          <i class="fa-solid fa-floppy-disk"></i
-          ><span id="textoBtnSalvarInstituicao">Salvar instituição</span>
-        </button>
-      </footer>
-    </form>
-  </div>
-</div>
-
-<div
-  id="modalCredenciaisInstituicao"
-  class="modal"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="tituloCredenciaisInstituicao"
-  aria-hidden="true"
-  hidden
->
-  <div
-    class="modal-content modal-instituicao-content modal-credenciais-instituicao"
-  >
-    <header class="modal-instituicao-header">
-      <div class="modal-instituicao-titulo">
-        <div class="modal-instituicao-icone">
-          <i class="fa-solid fa-key"></i>
-        </div>
-        <div>
-          <span class="modal-instituicao-eyebrow">Acesso criado</span>
-          <h2 id="tituloCredenciaisInstituicao">Credenciais temporárias</h2>
-        </div>
-      </div>
-      <button
-        type="button"
-        id="btnFecharCredenciaisInstituicao"
-        class="modal-instituicao-fechar"
-      >
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </header>
-    <div class="modal-instituicao-body">
-      <section class="form-section credenciais-box">
-        <p>
-          Envie estas credenciais ao responsável. A senha deverá ser alterada no
-          primeiro acesso.
-        </p>
-        <div class="form-group">
-          <label for="credencialEmailInstituicao">E-mail</label
-          ><input id="credencialEmailInstituicao" type="text" readonly />
-        </div>
-        <div class="form-group">
-          <label for="credencialSenhaInstituicao">Senha temporária</label
-          ><input id="credencialSenhaInstituicao" type="text" readonly />
-        </div>
-      </section>
     </div>
-    <footer class="modal-instituicao-actions">
-      <button
-        type="button"
-        id="btnCopiarCredenciaisInstituicao"
-        class="btn btn-primary"
-      >
-        <i class="fa-solid fa-copy"></i> Copiar credenciais
-      </button>
-    </footer>
-  </div>
 </div>
+
+<div id="modalEnviarMensagem" class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalMensagem" aria-hidden="true" hidden>
+    <div class="modal-content modal-instituicao-content">
+        <header class="modal-instituicao-header">
+            <div class="modal-instituicao-titulo">
+                <div class="modal-instituicao-icone" aria-hidden="true"><i class="fa-solid fa-envelope"></i></div>
+                <div>
+                    <span class="modal-instituicao-eyebrow">Comunicação</span>
+                    <h2 id="tituloModalMensagem">Enviar mensagem</h2>
+                </div>
+            </div>
+            <button type="button" id="btnFecharModalMensagem" class="modal-instituicao-fechar" aria-label="Fechar mensagem"><i class="fa-solid fa-xmark"></i></button>
+        </header>
+
+        <form id="formEnviarNotificacao" class="form-instituicao" autocomplete="off">
+            <div class="modal-instituicao-body">
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-icon"><i class="fa-solid fa-user-tie"></i></div>
+                        <div>
+                            <h3>Destinatário</h3>
+                            <p>Mensagem direcionada ao administrador geral da plataforma.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="notificacaoDestinatario">Para</label>
+                        <input id="notificacaoDestinatario" type="text" value="Administrador Geral" readonly>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                        <div>
+                            <h3>Mensagem</h3>
+                            <p>Descreva a solicitação, aviso ou orientações.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="notificacaoAssunto">Assunto <span class="required">*</span></label>
+                            <input id="notificacaoAssunto" type="text" maxlength="120" placeholder="Ex.: Solicitação de atualização cadastral" required>
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="notificacaoDescricao">Descrição <span class="required">*</span></label>
+                            <textarea id="notificacaoDescricao" rows="6" maxlength="1000" placeholder="Descreva o motivo da comunicação..." required></textarea>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="modal-instituicao-actions">
+                <button type="button" id="btnCancelarMensagem" class="btn btn-secondary">Cancelar</button>
+                <button type="submit" id="btnEnviarMensagem" class="btn btn-primary">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Enviar mensagem</span>
+                </button>
+            </footer>
+        </form>
+    </div>
+</div>
+
+<div id="modalInstituicao" class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalInstituicao" aria-hidden="true" hidden>
+    <div class="modal-content modal-instituicao-content">
+        <header class="modal-instituicao-header">
+            <div class="modal-instituicao-titulo">
+                <div class="modal-instituicao-icone" aria-hidden="true"><i class="fa-solid fa-building"></i></div>
+                <div><span class="modal-instituicao-eyebrow">Cadastro</span><h2 id="tituloModalInstituicao">Nova instituição</h2></div>
+            </div>
+            <button type="button" id="btnFecharModalInstituicao" class="modal-instituicao-fechar" aria-label="Fechar formulário"><i class="fa-solid fa-xmark"></i></button>
+        </header>
+
+        <form id="formInstituicao" class="form-instituicao" autocomplete="off">
+            <div class="modal-instituicao-body">
+                <input type="hidden" id="instituicaoId">
+
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-icon"><i class="fa-solid fa-building"></i></div>
+                        <div><h3>Dados da instituição</h3><p>Informe os dados principais da instituição parceira.</p></div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group full"><label for="nome">Nome da instituição <span class="required">*</span></label><input type="text" id="nome" maxlength="150" required></div>
+                        <div class="form-group"><label for="cnpj">CNPJ <span class="required">*</span></label><input type="text" id="cnpj" maxlength="18" inputmode="numeric" placeholder="00.000.000/0000-00" required></div>
+                        <div class="form-group"><label for="tipo">Tipo <span class="required">*</span></label><select id="tipo" required>
+                            <option value="">Selecione</option><option value="ONG">ONG</option><option value="IGREJA">Igreja</option><option value="ASSOCIACAO">Associação</option><option value="OUTRO">Outro</option>
+                        </select></div>
+                        <div class="form-group"><label for="responsavel">Responsável <span class="required">*</span></label><input type="text" id="responsavel" maxlength="120" required></div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-icon"><i class="fa-solid fa-address-book"></i></div>
+                        <div><h3>Contato</h3><p>Dados utilizados para comunicação e acesso da instituição.</p></div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label for="email">E-mail <span class="required">*</span></label><input type="email" id="email" maxlength="255" required></div>
+                        <div class="form-group"><label for="telefone">Telefone <span class="required">*</span></label><input type="tel" id="telefone" maxlength="15" inputmode="numeric" required></div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div><h3>Endereço</h3><p>Informe a localização completa da instituição.</p></div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group"><label for="cep">CEP <span class="required">*</span></label><input type="text" id="cep" maxlength="9" inputmode="numeric" placeholder="00000-000" required><small class="form-help">O endereço será preenchido automaticamente quando possível.</small></div>
+                        <div class="form-group"><label for="cidade">Cidade <span class="required">*</span></label><input type="text" id="cidade" maxlength="100" required></div>
+                        <div class="form-group full"><label for="logradouro">Logradouro <span class="required">*</span></label><input type="text" id="logradouro" maxlength="150" required></div>
+                        <div class="form-group"><label for="numero">Número <span class="required">*</span></label><input type="text" id="numero" maxlength="20" required></div>
+                        <div class="form-group"><label for="complemento">Complemento</label><input type="text" id="complemento" maxlength="100"></div>
+                        <div class="form-group"><label for="bairro">Bairro <span class="required">*</span></label><input type="text" id="bairro" maxlength="100" required></div>
+                        <div class="form-group"><label for="uf">UF <span class="required">*</span></label><select id="uf" required>
+                            <option value="">Selecione</option>
+                            <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option>
+                        </select></div>
+                    </div>
+                </section>
+            </div>
+            <footer class="modal-instituicao-actions">
+                <button type="button" id="btnCancelarInstituicao" class="btn btn-secondary">Cancelar</button>
+                <button type="submit" id="btnSalvarInstituicao" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i><span id="textoBtnSalvarInstituicao">Salvar instituição</span></button>
+            </footer>
+        </form>
+    </div>
+</div>
+
+<div id="modalCredenciaisInstituicao" class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloCredenciaisInstituicao" aria-hidden="true" hidden>
+    <div class="modal-content modal-instituicao-content modal-credenciais-instituicao">
+        <header class="modal-instituicao-header">
+            <div class="modal-instituicao-titulo">
+                <div class="modal-instituicao-icone"><i class="fa-solid fa-key"></i></div>
+                <div><span class="modal-instituicao-eyebrow">Acesso criado</span><h2 id="tituloCredenciaisInstituicao">Credenciais temporárias</h2></div>
+            </div>
+            <button type="button" id="btnFecharCredenciaisInstituicao" class="modal-instituicao-fechar"><i class="fa-solid fa-xmark"></i></button>
+        </header>
+        <div class="modal-instituicao-body">
+            <section class="form-section credenciais-box">
+                <p>Envie estas credenciais ao responsável. A senha deverá ser alterada no primeiro acesso.</p>
+                <div class="form-group"><label for="credencialEmailInstituicao">E-mail</label><input id="credencialEmailInstituicao" type="text" readonly></div>
+                <div class="form-group"><label for="credencialSenhaInstituicao">Senha temporária</label><input id="credencialSenhaInstituicao" type="text" readonly></div>
+            </section>
+        </div>
+        <footer class="modal-instituicao-actions">
+            <button type="button" id="btnCopiarCredenciaisInstituicao" class="btn btn-primary"><i class="fa-solid fa-copy"></i> Copiar credenciais</button>
+        </footer>
+    </div>
+</div>
+
+
 
 <!-- =====================================================
      MODAL - SALDO DE CESTAS
 ====================================================== -->
 <div
-  id="modalSaldoCestas"
-  class="modal modal-saldo-cestas"
-  hidden
-  aria-hidden="true"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="tituloSaldoCestas"
+    id="modalSaldoCestas"
+    class="modal modal-saldo-cestas"
+    hidden
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tituloSaldoCestas"
 >
-  <div class="modal-content saldo-cestas-card">
-    <header class="saldo-cestas-header">
-      <div class="saldo-cestas-titulo">
-        <div class="saldo-cestas-icone" aria-hidden="true">
-          <i class="fa-solid fa-boxes-stacked"></i>
-        </div>
-        <div>
-          <span class="saldo-cestas-eyebrow">ESTOQUE</span>
-          <h2 id="tituloSaldoCestas">Saldo de cestas</h2>
-          <p id="nomeInstituicaoSaldoCestas">Instituição</p>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        id="btnFecharSaldoCestas"
-        class="saldo-cestas-fechar"
-        aria-label="Fechar saldo de cestas"
-        title="Fechar"
-      >
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </header>
-
-    <div class="saldo-cestas-body">
-      <section class="saldo-cestas-resumo">
-        <div class="saldo-cestas-resumo-icone" aria-hidden="true">
-          <i class="fa-solid fa-box"></i>
-        </div>
-        <div>
-          <span>Saldo disponível</span>
-          <strong><span id="valorSaldoCestas">—</span> cestas</strong>
-          <small id="atualizacaoSaldoCestas">Carregando saldo...</small>
-        </div>
-        <button type="button" id="btnAtualizarSaldoCestas" class="btn btn-info">
-          <i class="fa-solid fa-rotate"></i>
-          Atualizar
-        </button>
-      </section>
-
-      <section class="saldo-cestas-grid">
-        <form
-          id="formEntradaSaldoCestas"
-          class="saldo-cestas-entrada"
-          autocomplete="off"
-        >
-          <div class="saldo-cestas-section-title">
-            <div class="saldo-cestas-section-icon">
-              <i class="fa-solid fa-arrow-down"></i>
+    <div class="modal-content saldo-cestas-card">
+        <header class="saldo-cestas-header">
+            <div class="saldo-cestas-titulo">
+                <div class="saldo-cestas-icone" aria-hidden="true">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div>
+                    <span class="saldo-cestas-eyebrow">ESTOQUE</span>
+                    <h2 id="tituloSaldoCestas">Saldo de cestas</h2>
+                    <p id="nomeInstituicaoSaldoCestas">Instituição</p>
+                </div>
             </div>
-            <div>
-              <h3>Registrar entrada</h3>
-              <p>Adicione novas cestas ao estoque da instituição.</p>
-            </div>
-          </div>
 
-          <div class="form-group">
-            <label for="quantidadeEntradaSaldoCestas"
-              >Quantidade <span class="required">*</span></label
+            <button
+                type="button"
+                id="btnFecharSaldoCestas"
+                class="saldo-cestas-fechar"
+                aria-label="Fechar saldo de cestas"
+                title="Fechar"
             >
-            <input
-              type="number"
-              id="quantidadeEntradaSaldoCestas"
-              min="1"
-              step="1"
-              inputmode="numeric"
-              placeholder="Ex.: 50"
-              required
-            />
-          </div>
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
 
-          <div class="form-group">
-            <label for="observacaoEntradaSaldoCestas">Observação</label>
-            <textarea
-              id="observacaoEntradaSaldoCestas"
-              maxlength="500"
-              rows="4"
-              placeholder="Ex.: Entrada recebida do estoque central..."
-            ></textarea>
-            <small class="form-help">Máximo de 500 caracteres.</small>
-          </div>
+        <div class="saldo-cestas-body">
+            <section class="saldo-cestas-resumo">
+                <div class="saldo-cestas-resumo-icone" aria-hidden="true">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+                <div>
+                    <span>Saldo disponível</span>
+                    <strong><span id="valorSaldoCestas">—</span> cestas</strong>
+                    <small id="atualizacaoSaldoCestas">Carregando saldo...</small>
+                </div>
+                <button type="button" id="btnAtualizarSaldoCestas" class="btn btn-info">
+                    <i class="fa-solid fa-rotate"></i>
+                    Atualizar
+                </button>
+            </section>
 
-          <button
-            type="submit"
-            id="btnRegistrarEntradaSaldoCestas"
-            class="btn btn-primary saldo-cestas-btn-entrada"
-          >
-            <i class="fa-solid fa-plus"></i>
-            Registrar entrada
-          </button>
-        </form>
+            <section class="saldo-cestas-grid">
+                <form id="formEntradaSaldoCestas" class="saldo-cestas-entrada" autocomplete="off">
+                    <div class="saldo-cestas-section-title">
+                        <div class="saldo-cestas-section-icon">
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </div>
+                        <div>
+                            <h3>Registrar entrada</h3>
+                            <p>Adicione novas cestas ao estoque da instituição.</p>
+                        </div>
+                    </div>
 
-        <section class="saldo-cestas-historico-bloco">
-          <div class="saldo-cestas-historico-topo">
-            <div>
-              <span class="saldo-cestas-eyebrow">MOVIMENTAÇÕES</span>
-              <h3>Histórico do saldo</h3>
-            </div>
+                    <div class="form-group">
+                        <label for="quantidadeEntradaSaldoCestas">Quantidade <span class="required">*</span></label>
+                        <input
+                            type="number"
+                            id="quantidadeEntradaSaldoCestas"
+                            min="1"
+                            step="1"
+                            inputmode="numeric"
+                            placeholder="Ex.: 50"
+                            required
+                        >
+                    </div>
 
-            <select
-              id="filtroHistoricoSaldoCestas"
-              aria-label="Filtrar movimentações de saldo"
-            >
-              <option value="">Todas</option>
-              <option value="ENTRADA">Entradas</option>
-              <option value="SAIDA_DOACAO">Saídas por doação</option>
-              <option value="ESTORNO_DOACAO">Estornos</option>
-            </select>
-          </div>
+                    <div class="form-group">
+                        <label for="observacaoEntradaSaldoCestas">Observação</label>
+                        <textarea
+                            id="observacaoEntradaSaldoCestas"
+                            maxlength="500"
+                            rows="4"
+                            placeholder="Ex.: Entrada recebida do estoque central..."
+                        ></textarea>
+                        <small class="form-help">Máximo de 500 caracteres.</small>
+                    </div>
 
-          <div id="historicoSaldoCestas" class="saldo-cestas-historico">
-            <div class="saldo-historico-estado">
-              <i class="fa-solid fa-spinner fa-spin"></i>
-              <span>Carregando movimentações...</span>
-            </div>
-          </div>
-        </section>
-      </section>
+                    <button type="submit" id="btnRegistrarEntradaSaldoCestas" class="btn btn-primary saldo-cestas-btn-entrada">
+                        <i class="fa-solid fa-plus"></i>
+                        Registrar entrada
+                    </button>
+                </form>
+
+                <section class="saldo-cestas-historico-bloco">
+                    <div class="saldo-cestas-historico-topo">
+                        <div>
+                            <span class="saldo-cestas-eyebrow">MOVIMENTAÇÕES</span>
+                            <h3>Histórico do saldo</h3>
+                        </div>
+
+                        <select id="filtroHistoricoSaldoCestas" aria-label="Filtrar movimentações de saldo">
+                            <option value="">Todas</option>
+                            <option value="ENTRADA">Entradas</option>
+                            <option value="SAIDA_DOACAO">Saídas por doação</option>
+                            <option value="ESTORNO_DOACAO">Estornos</option>
+                        </select>
+                    </div>
+
+                    <div id="historicoSaldoCestas" class="saldo-cestas-historico">
+                        <div class="saldo-historico-estado">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <span>Carregando movimentações...</span>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </div>
+
+        <footer class="saldo-cestas-footer">
+            <button type="button" id="btnCancelarSaldoCestas" class="btn btn-secondary">Fechar</button>
+        </footer>
     </div>
-
-    <footer class="saldo-cestas-footer">
-      <button
-        type="button"
-        id="btnCancelarSaldoCestas"
-        class="btn btn-secondary"
-      >
-        Fechar
-      </button>
-    </footer>
-  </div>
 </div>
 
-<!-- =====================================================
+    <!-- =====================================================
          MODAL DE CONFIRMAÇÃO - PADRÃO SOLIDARE
     ====================================================== -->
-<div
-  id="modalConfirmacaoInstituicao"
-  class="modal modal-confirmacao-solidare"
-  hidden
-  aria-hidden="true"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="tituloConfirmacaoInstituicao"
->
-  <div class="modal-content confirmacao-solidare-card">
-    <div class="confirmacao-solidare-icon" id="iconeConfirmacaoInstituicao">
-      <i class="fa-solid fa-circle-question"></i>
-    </div>
+    <div
+        id="modalConfirmacaoInstituicao"
+        class="modal modal-confirmacao-solidare"
+        hidden
+        aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloConfirmacaoInstituicao"
+    >
+        <div class="modal-content confirmacao-solidare-card">
+            <div class="confirmacao-solidare-icon" id="iconeConfirmacaoInstituicao">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
 
-    <div class="confirmacao-solidare-body">
-      <span class="confirmacao-solidare-eyebrow">CONFIRMAÇÃO</span>
-      <h2 id="tituloConfirmacaoInstituicao">Confirmar ação</h2>
-      <p id="mensagemConfirmacaoInstituicao">
-        Deseja continuar com esta alteração?
-      </p>
-    </div>
+            <div class="confirmacao-solidare-body">
+                <span class="confirmacao-solidare-eyebrow">CONFIRMAÇÃO</span>
+                <h2 id="tituloConfirmacaoInstituicao">Confirmar ação</h2>
+                <p id="mensagemConfirmacaoInstituicao">
+                    Deseja continuar com esta alteração?
+                </p>
+            </div>
 
-    <div class="confirmacao-solidare-footer">
-      <button
-        type="button"
-        class="btn btn-outline"
-        id="btnCancelarConfirmacaoInstituicao"
-      >
-        Cancelar
-      </button>
+            <div class="confirmacao-solidare-footer">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    id="btnCancelarConfirmacaoInstituicao"
+                >
+                    Cancelar
+                </button>
 
-      <button
-        type="button"
-        class="btn btn-primary"
-        id="btnConfirmarConfirmacaoInstituicao"
-      >
-        <i class="fa-solid fa-check"></i>
-        <span>Confirmar</span>
-      </button>
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="btnConfirmarConfirmacaoInstituicao"
+                >
+                    <i class="fa-solid fa-check"></i>
+                    <span>Confirmar</span>
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
