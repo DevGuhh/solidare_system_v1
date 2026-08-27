@@ -170,6 +170,53 @@
     background: #f4f6f8;
 }
 
+/* Estilos específicos para o modal de comunicação (modalEnviarMensagem) */
+#modalEnviarMensagem .modal-instituicao-body {
+    padding: 20px 22px 18px;
+}
+
+#modalEnviarMensagem .form-group.full input,
+#modalEnviarMensagem .form-group.full textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #e6e9ee;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: none;
+    font-size: 14px;
+    color: #1f2937;
+}
+
+#modalEnviarMensagem .form-group.full textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+#modalEnviarMensagem .modal-instituicao-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 18px 22px 22px;
+}
+
+#modalEnviarMensagem .modal-instituicao-eyebrow,
+#modalEnviarMensagem .modal-instituicao-titulo h2 {
+    margin: 0;
+}
+
+#modalEnviarMensagem .modal-instituicao-eyebrow {
+    color: #850013;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 12px;
+}
+
+#modalEnviarMensagem .modal-instituicao-header h2 {
+    font-size: 18px;
+    margin-top: 6px;
+}
+
 /* =====================================================
    BARRA DE PESQUISA
 ===================================================== */

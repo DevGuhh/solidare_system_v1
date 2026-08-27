@@ -20,6 +20,7 @@ import doacoesRoutes from "./routes/doacoesRoutes.js";
 import qrcodeRoutes from "./routes/qrcodeRoutes.js";
 import saldoCestaRoutes from "./routes/saldoCestaRoutes.js";
 import comprovanteRoutes from "./routes/comprovanteRoutes.js";
+import notificacoesRoutes from "./routes/notificacoesRoutes.js";
 
 // ===============================
 // VARIÁVEIS DE AMBIENTE
@@ -84,6 +85,7 @@ app.use("/uploads", (req, res) => {
 });
 
 app.use("/api/comprovantes", comprovanteRoutes);
+app.use("/notificacoes", notificacoesRoutes);
 
 // ===============================
 // RATE LIMIT

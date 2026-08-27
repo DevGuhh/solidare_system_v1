@@ -15,6 +15,9 @@
             <button id="btnAtualizarInstituicoes" class="btn btn-info" type="button">
                 <i class="fa-solid fa-rotate" aria-hidden="true"></i> Atualizar
             </button>
+            <button id="btnNovaMensagemInstituicao" class="btn btn-outline" type="button">
+                <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i> Enviar mensagem
+            </button>
             <button id="btnNovaInstituicao" class="btn btn-primary" type="button">
                 <i class="fa-solid fa-plus" aria-hidden="true"></i> Nova instituição
             </button>
@@ -193,6 +196,73 @@
                 <strong>Carregando documentos...</strong>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="modalEnviarMensagem" class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalMensagem" aria-hidden="true" hidden>
+    <div class="modal-content modal-instituicao-content">
+        <header class="modal-instituicao-header">
+            <div class="modal-instituicao-titulo">
+                <div class="modal-instituicao-icone" aria-hidden="true"><i class="fa-solid fa-envelope"></i></div>
+                <div>
+                    <span class="modal-instituicao-eyebrow">COMUNICAÇÃO</span>
+                    <h2 id="tituloModalMensagem">Enviar mensagem ao Administrador</h2>
+                </div>
+            </div>
+            <button type="button" id="btnFecharModalMensagem" class="modal-instituicao-fechar" aria-label="Fechar mensagem"><i class="fa-solid fa-xmark"></i></button>
+        </header>
+
+        <form id="formEnviarNotificacao" class="form-instituicao" autocomplete="off">
+            <div class="modal-instituicao-body">
+                <div id="notificacaoThread" class="notificacao-thread" style="margin-bottom:12px;">
+                    <!-- Thread de mensagens entre instituição e admin aparecerá aqui -->
+                </div>
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-icon"><i class="fa-solid fa-user-tie"></i></div>
+                        <div>
+                            <h3>Destinatário</h3>
+                            <p>Mensagem direcionada ao administrador geral da plataforma.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="notificacaoDestinatario">Para</label>
+                        <input id="notificacaoDestinatario" type="text" value="Administrador Geral" readonly>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-icon"><i class="fa-solid fa-comment-dots"></i></div>
+                        <div>
+                            <h3>Mensagem</h3>
+                            <p>Descreva a solicitação, aviso ou orientações.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="notificacaoAssunto">Assunto <span class="required">*</span></label>
+                            <input id="notificacaoAssunto" type="text" maxlength="120" placeholder="Ex.: Solicitação de atualização cadastral" required>
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="notificacaoDescricao">Descrição <span class="required">*</span></label>
+                            <textarea id="notificacaoDescricao" rows="6" maxlength="1000" placeholder="Descreva o motivo da comunicação..." required></textarea>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="modal-instituicao-actions">
+                <button type="button" id="btnCancelarMensagem" class="btn btn-secondary">Cancelar</button>
+                <button type="submit" id="btnEnviarMensagem" class="btn btn-primary">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Enviar mensagem</span>
+                </button>
+            </footer>
+        </form>
     </div>
 </div>
 

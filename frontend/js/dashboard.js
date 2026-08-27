@@ -1112,6 +1112,15 @@ async function inicializarDashboard() {
             );
         }
 
+        try {
+            const moduloNotificacoes = await import("./notificacoes.js");
+            if (typeof moduloNotificacoes.inicializarNotificacoes === "function") {
+                moduloNotificacoes.inicializarNotificacoes();
+            }
+        } catch (erro) {
+            console.error("Erro ao inicializar notificações:", erro);
+        }
+
     } catch (erro) {
 
         console.error(

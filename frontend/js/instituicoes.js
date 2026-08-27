@@ -19,6 +19,10 @@ import {
     configurarSaldoInstituicoes
 } from "./instituicoes/instituicoesSaldo.js";
 
+import {
+    initFormNotificacao
+} from "./instituicoes/instituicoesNotificacoes.js";
+
 const estado = {
     lista: [],
     filtrada: [],
@@ -1085,6 +1089,7 @@ export async function inicializarInstituicoes() {
 
         configurarEventos();
         configurarSaldoInstituicoes();
+        initFormNotificacao();
         atualizarBarraSelecao();
         await carregarInstituicoes();
     } catch (erro) {
@@ -1092,7 +1097,3 @@ export async function inicializarInstituicoes() {
         mostrarErro(erro.message || "Não foi possível inicializar a tela de Instituições.");
     }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    initFormNotificacao();
-});

@@ -162,21 +162,40 @@
 
 .painel-notificacoes-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
 
-    gap: 16px;
+    gap: 14px;
 
-    padding: 18px;
+    padding: 18px 18px 16px;
 
     border-bottom: 1px solid #eef0f3;
+    background: linear-gradient(180deg, #fff 0%, #fffdfd 100%);
 }
 
 .painel-notificacoes-header > div {
     display: flex;
+    flex: 1;
     flex-direction: column;
 
     gap: 4px;
+    min-width: 0;
+}
+
+.painel-titulo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.painel-titulo-row strong {
+    font-size: 16px;
+}
+
+.painel-titulo-row #textoContadorNotificacoes {
+    font-size: 13px;
+    color: #8a94a4;
 }
 
 .painel-notificacoes-header strong {
@@ -190,6 +209,7 @@
     color: #8a94a4;
 
     font-size: 12px;
+    line-height: 1.4;
 }
 
 
@@ -198,13 +218,13 @@
 ===================================================== */
 
 .btn-marcar-todas {
-    padding: 4px 0;
+    padding: 7px 10px;
 
-    background: transparent;
-
+    background: rgba(139, 0, 21, 0.05);
     color: #8b0015;
 
-    border: none;
+    border: 1px solid rgba(139, 0, 21, 0.08);
+    border-radius: 999px;
 
     font-size: 11px;
     font-weight: 700;
@@ -212,10 +232,12 @@
     cursor: pointer;
 
     white-space: nowrap;
+    transition: all 0.2s ease;
 }
 
 .btn-marcar-todas:hover {
     color: #a3001d;
+    background: rgba(139, 0, 21, 0.08);
 }
 
 
@@ -224,10 +246,32 @@
 ===================================================== */
 
 .lista-notificacoes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
     max-height: 390px;
 
     overflow-y: auto;
+    background: #f9fafb;
 }
+
+.mensagem-bubble {
+    max-width: 86%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    color: #111827;
+    margin-bottom: 8px;
+}
+.bubble-right { margin-left: auto; background: #7c2d2d; color: #fff; }
+.bubble-left { margin-right: auto; background: #0369a1; color: #fff; }
+.mensagem-topo { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; color:#6b7280; }
+.mensagem-hora { font-size:11px; color:#9ca3af; }
+.mensagem-corpo { margin-top:6px; font-size:13px; }
+
+.thread-item.mensagem-usuario .mensagem-bubble { background:#7c2d2d; color:#fff; }
+.thread-item.mensagem-admin .mensagem-bubble { background:#f3f4f6; color:#111827; }
 
 
 /* =====================================================
@@ -238,32 +282,38 @@
     position: relative;
 
     display: flex;
-
-    gap: 12px;
+    align-items: flex-start;
+    gap: 8px;
 
     width: 100%;
+    box-sizing: border-box;
 
-    padding: 15px 18px;
+    padding: 12px 12px;
 
     background: #ffffff;
 
-    border: none;
-    border-bottom: 1px solid #f0f1f3;
+    border: 1px solid #eef1f4;
+    border-radius: 12px;
 
     text-align: left;
 
     cursor: pointer;
 
     transition:
-        background-color 0.18s ease;
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
 .notificacao-item:hover {
-    background: #faf7f8;
+    background: #fff9fa;
+    border-color: #f1d8dc;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
 }
 
 .notificacao-item.nao-lida {
     background: #fff8f9;
+    border-color: #f2dfe2;
 }
 
 .notificacao-item.nao-lida::before {
@@ -311,7 +361,6 @@
 
 .notificacao-conteudo {
     min-width: 0;
-
     flex: 1;
 }
 
@@ -352,7 +401,7 @@
 
     color: #1f2937;
 
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
 
     text-overflow: ellipsis;
@@ -364,9 +413,9 @@
 
     overflow: hidden;
 
-    color: #7b8492;
+    color: #6b7280;
 
-    font-size: 12px;
+    font-size: 13px;
 
     line-height: 1.45;
 
@@ -519,7 +568,7 @@
         right: 15px;
         left: 15px;
 
-        width: auto;
+        width: 92vw;
         max-width: none;
     }
 
@@ -528,7 +577,28 @@
     }
 
     .notificacao-item {
-        padding: 14px 16px;
+        padding: 12px 14px;
     }
 
+    .notificacao-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .notificacao-icone {
+        margin-bottom: 8px;
+        align-self: center;
+    }
+
+}
+
+/* Hide select if present in compose area (we use conversation header instead) */
+.notificacoes-compose .selectInstituicao {
+    display: none !important;
+}
+
+.notificacoes-compose .compose-selected-name {
+    font-size: 14px;
+    color: #111827;
 }

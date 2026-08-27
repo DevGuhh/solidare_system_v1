@@ -16,7 +16,11 @@ export function listarInstituicoes(parametros = {}) {
         if (valor !== undefined && valor !== null && valor !== "") query.set(chave, String(valor));
     });
     const sufixo = query.toString() ? `?${query}` : "";
-    return fetch(`${API_URL}/instituicoes${sufixo}`, { headers: obterHeaders(false), cache: "no-store" });
+    // timeout wrapper to avoid infinite loading when backend não responde
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    return fetch(`${API_URL}/instituicoes${sufixo}`, { headers: obterHeaders(false), cache: "no-store", signal: controller.signal })
+        .finally(() => clearTimeout(timeout));
 }
 
 export function buscarInstituicao(id) {

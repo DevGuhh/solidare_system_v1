@@ -226,6 +226,24 @@ model Comprovante {
   @@map("comprovantes")
 }
 
+model Notificacao {
+  id          Int      @id @default(autoincrement())
+  instituicao String
+  assunto     String
+  descricao   String
+  mensagem    String?
+  tipo        String   @default("MENSAGEM")
+  destinatario String?
+  remetente   String?
+  lida        Boolean  @default(false)
+  criadoEm    DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([lida, criadoEm])
+  @@index([instituicao, criadoEm])
+  @@map("notificacoes")
+}
+
 enum RoleUsuario {
   ADMIN
   INSTITUICAO
