@@ -21,6 +21,13 @@ router.get(
   comprovanteController.listarPorInstituicao,
 );
 
+router.get(
+  "/:id/arquivo",
+  protect,
+  authorize("ADMIN"),
+  comprovanteController.abrirArquivo,
+);
+
 router.patch(
   "/:id/vincular",
   protect,

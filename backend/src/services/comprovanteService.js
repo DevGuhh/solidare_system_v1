@@ -129,6 +129,127 @@ class ComprovanteService {
     });
   }
 
+  async localizarArquivo(comprovanteId) {
+    const id = Number(comprovanteId);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new Error("ID do comprovante inválido.");
+    }
+
+    const comprovante = await prisma.comprovante.findUnique({
+      where: { id },
+    });
+
+    if (!comprovante) {
+      throw new Error("Comprovante não encontrado.");
+    }
+
+    const pastaUploads = path.resolve("uploads");
+    const pastaComprovantes = path.join(pastaUploads, "comprovantes");
+    const nomeArquivo = path.basename(comprovante.arquivoUrl || "");
+
+    if (!nomeArquivo) {
+      throw new Error("Arquivo do comprovante não informado.");
+    }
+
+    const candidatos = [];
+
+    if (comprovante.arquivoUrl) {
+      candidatos.push(
+        path.resolve(
+          "uploads",
+          comprovante.arquivoUrl.replace(/^\/uploads\//, ""),
+        ),
+      );
+    }
+
+    if (comprovante.instituicaoId) {
+      candidatos.push(
+        path.join(
+          pastaComprovantes,
+          String(comprovante.instituicaoId),
+          nomeArquivo,
+        ),
+      );
+    }
+
+    candidatos.push(
+      path.join(pastaComprovantes, "pendentes", nomeArquivo),
+    );
+
+    let caminhoEncontrado = null;
+
+    for (const candidato of candidatos) {
+      try {
+        const stat = await fs.stat(candidato);
+
+        if (stat.isFile()) {
+          caminhoEncontrado = candidato;
+          break;
+        }
+      } catch {
+        // Continua procurando.
+      }
+    }
+
+    if (!caminhoEncontrado) {
+      try {
+        const entradas = await fs.readdir(
+          pastaComprovantes,
+          { withFileTypes: true },
+        );
+
+        for (const entrada of entradas) {
+          if (!entrada.isDirectory()) continue;
+
+          const candidato = path.join(
+            pastaComprovantes,
+            entrada.name,
+            nomeArquivo,
+          );
+
+          try {
+            const stat = await fs.stat(candidato);
+
+            if (stat.isFile()) {
+              caminhoEncontrado = candidato;
+              break;
+            }
+          } catch {
+            // Continua procurando.
+          }
+        }
+      } catch {
+        // Pasta de comprovantes ainda não existe.
+      }
+    }
+
+    if (!caminhoEncontrado) {
+      throw new Error("Arquivo físico não encontrado.");
+    }
+
+    const relativoUploads = path
+      .relative(pastaUploads, caminhoEncontrado)
+      .split(path.sep)
+      .join("/");
+
+    const arquivoUrlCorreto = `/uploads/${relativoUploads}`;
+
+    if (arquivoUrlCorreto !== comprovante.arquivoUrl) {
+      await prisma.comprovante.update({
+        where: { id },
+        data: {
+          arquivoUrl: arquivoUrlCorreto,
+        },
+      });
+    }
+
+    return {
+      caminhoArquivo: caminhoEncontrado,
+      nomeArquivo,
+    };
+  }
+
   async rejeitar(comprovanteId) {
     const comprovante = await prisma.comprovante.findUnique({
       where: {

@@ -1,36 +1,43 @@
-// =====================================================
-// API DOS RELATÓRIOS
-// =====================================================
-
 import { API_URL } from "../config.js";
 
-/**
- * Monta os cabeçalhos padrão das requisições autenticadas.
- */
-function obterHeaders() {
-    const token =
-        localStorage.getItem("token") ||
-        sessionStorage.getItem("token");
+// =====================================================
+// AUTENTICAÇÃO
+// =====================================================
 
+function obterToken() {
+    return (
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token")
+    );
+}
+
+function criarHeaders() {
     return {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token ?? ""}`
+        Authorization: `Bearer ${obterToken() || ""}`
     };
 }
 
-/**
- * Lista os beneficiários utilizados na tela de relatórios.
- */
-export function listarBeneficiariosRelatorio() {
-    return fetch(`${API_URL}/beneficiarios`, {
+// =====================================================
+// REQUISIÇÃO BASE
+// =====================================================
+
+function get(caminho) {
+    return fetch(`${API_URL}${caminho}`, {
         method: "GET",
-        headers: obterHeaders()
+        headers: criarHeaders(),
+        cache: "no-store"
     });
 }
 
-/**
- * Lista as instituições utilizadas no filtro de relatórios.
- */
+// =====================================================
+// ENDPOINTS DO RELATÓRIO
+// =====================================================
+
+export function listarBeneficiariosRelatorio() {
+    return get("/beneficiarios");
+}
+
 export function listarInstituicoesRelatorio() {
     const parametros = new URLSearchParams({
         page: "1",
@@ -38,9 +45,17 @@ export function listarInstituicoesRelatorio() {
         sort: "nome:asc"
     });
 
-    return fetch(`${API_URL}/instituicoes?${parametros.toString()}`, {
-        method: "GET",
-        headers: obterHeaders(),
-        cache: "no-store"
-    });
+    return get(`/instituicoes?${parametros}`);
+}
+
+export function listarDoacoesRelatorio() {
+    return get("/doacoes");
+}
+
+export function listarSaldosRelatorio() {
+    return get("/saldo-cestas");
+}
+
+export function listarComprovantesPendentesRelatorio() {
+    return get("/api/comprovantes/pendentes");
 }

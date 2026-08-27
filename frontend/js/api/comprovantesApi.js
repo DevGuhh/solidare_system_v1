@@ -39,6 +39,16 @@ export function listarComprovantesInstituicaoAPI(instituicaoId) {
     );
 }
 
+export function abrirArquivoComprovanteAPI(id) {
+    return fetch(
+        `${API_URL}/api/comprovantes/${Number(id)}/arquivo`,
+        {
+            headers: headersAutenticacao(),
+            cache: "no-store",
+        }
+    );
+}
+
 export function vincularComprovanteAPI(id, instituicaoId) {
     return fetch(`${API_URL}/api/comprovantes/${id}/vincular`, {
         method: "PATCH",
