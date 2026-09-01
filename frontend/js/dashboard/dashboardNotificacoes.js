@@ -79,9 +79,9 @@ export async function carregarNotificacoesDashboard(limite = 5) {
       .addEventListener("click", async () => {
         const assunto = compose.querySelector(".inputAssunto").value.trim();
         const descricao = compose.querySelector(".inputDescricao").value.trim();
-        const alvo = compose
-          .querySelector(".compose-selected-name")
-          ?.textContent?.trim();
+        const alvoEl = compose.querySelector(".compose-selected-name");
+        const alvo = alvoEl?.textContent?.trim();
+        const alvoId = Number(alvoEl?.dataset?.instituicaoId) || null;
         if (!alvo) {
           toast.aviso(
             "Selecione uma conversa no painel para definir destinatário.",
@@ -97,7 +97,7 @@ export async function carregarNotificacoesDashboard(limite = 5) {
           destinatario: alvo,
           destinatarioId: null,
           instituicao: alvo,
-          instituicaoId: null,
+          instituicaoId: alvoId,
           remetente: "Administrador Geral",
           remetenteId: null,
           assunto: assunto || "Mensagem do Administrador",
@@ -123,42 +123,53 @@ export async function carregarNotificacoesDashboard(limite = 5) {
         }
       });
 
-    // group conversations by institution-like key
+    // Agrupa por ID da instituição. O nome é apenas para exibição.
+    // Isso evita misturar conversas caso existam instituições com nomes iguais.
     const grupos = {};
     (notificacoes || []).forEach((n) => {
-      const key =
-        n.instituicao || n.remetente || n.destinatario || "SemInstituicao";
-      grupos[key] = grupos[key] || [];
-      grupos[key].push(n);
+      const nome =
+        n.instituicao || n.remetente || n.destinatario || "Sem instituição";
+      const id = Number(n.instituicaoId) || null;
+      const chave = id ? `id:${id}` : `nome:${nome}`;
+
+      if (!grupos[chave]) {
+        grupos[chave] = { id, nome, mensagens: [] };
+      }
+      grupos[chave].mensagens.push(n);
     });
 
-    // set compose-selected-name to first conversation if none selected
+    // Seleciona a primeira conversa disponível para o formulário superior.
     const firstKey = Object.keys(grupos)[0];
     if (firstKey) {
       const label = listaEl.querySelector(".compose-selected-name");
       if (label) {
         label.style.display = "";
-        label.textContent = firstKey;
+        label.textContent = grupos[firstKey].nome;
+        label.dataset.instituicaoId = grupos[firstKey].id || "";
       }
     }
 
     Object.keys(grupos)
       .slice(0, 10)
       .forEach((chave) => {
+        const grupo = grupos[chave];
+        const nomeInstituicao = grupo.nome;
+        const instituicaoId = grupo.id;
+        const mensagens = grupo.mensagens;
         const conv = document.createElement("div");
         conv.className = "conv-grupo";
         conv.style.borderTop = "1px solid #f1f3f6";
         conv.style.padding = "10px";
         conv.innerHTML = `
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                    <div style="font-weight:600;cursor:pointer;" class="conv-header-name">🏢 ${chave}</div>
+                    <div style="font-weight:600;cursor:pointer;" class="conv-header-name">🏢 ${nomeInstituicao}</div>
                     <button class="btnToggleConv btn btn-sm">Ocultar</button>
                 </div>
                 <div class="conv-body" style="max-height:260px;overflow:auto;padding-bottom:6px;"></div>
             `;
         const body = conv.querySelector(".conv-body");
         // render last messages as chat bubbles
-        grupos[chave].slice(-20).forEach((m) => {
+        mensagens.slice(-20).forEach((m) => {
           const isAdmin =
             (m.remetente &&
               String(m.remetente).toLowerCase().includes("administrador")) ||
@@ -194,11 +205,11 @@ export async function carregarNotificacoesDashboard(limite = 5) {
         conv
           .querySelector(".conv-header-name")
           .addEventListener("click", (ev) => {
-            const nome = chave;
             const label = listaEl.querySelector(".compose-selected-name");
             if (label) {
               label.style.display = "";
-              label.textContent = nome;
+              label.textContent = nomeInstituicao;
+              label.dataset.instituicaoId = instituicaoId || "";
             }
             // focus compose input
             const composeInput =
@@ -226,13 +237,13 @@ export async function carregarNotificacoesDashboard(limite = 5) {
           }
           const dados = {
             tipo: "RESPOSTA",
-            destinatario: chave,
-            destinatarioId: null,
-            instituicao: chave,
-            instituicaoId: null,
+            destinatario: nomeInstituicao,
+            destinatarioId: instituicaoId,
+            instituicao: nomeInstituicao,
+            instituicaoId,
             remetente: "Administrador Geral",
             remetenteId: null,
-            assunto: `RE: ${grupos[chave][0].assunto || ""}`,
+            assunto: `RE: ${mensagens[0]?.assunto || ""}`,
             descricao: texto,
             mensagem: texto,
           };

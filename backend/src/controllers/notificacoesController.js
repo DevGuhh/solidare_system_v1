@@ -1,5 +1,56 @@
 import { prisma } from "../config/db.js";
 
+function numeroId(valor) {
+  const id = Number(valor);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+async function buscarInstituicaoDoUsuario(req) {
+  const instituicaoId = numeroId(req.user?.instituicaoId);
+  if (!instituicaoId) return null;
+
+  return prisma.instituicaoParceira.findUnique({
+    where: { id: instituicaoId },
+    select: { id: true, nome: true, ativa: true },
+  });
+}
+
+async function resolverInstituicaoDestino(body = {}) {
+  const idInformado =
+    numeroId(body.instituicaoId) ||
+    numeroId(body.destinatarioId) ||
+    numeroId(body.remetenteId);
+
+  if (idInformado) {
+    return prisma.instituicaoParceira.findUnique({
+      where: { id: idInformado },
+      select: { id: true, nome: true, ativa: true },
+    });
+  }
+
+  const ignorar = new Set(["", "Administrador Geral", "Sistema"]);
+  const nomes = [body.instituicao, body.destinatario, body.remetente]
+    .map((valor) => String(valor || "").trim())
+    .filter((valor, indice, lista) => !ignorar.has(valor) && lista.indexOf(valor) === indice);
+
+  for (const nome of nomes) {
+    const encontradas = await prisma.instituicaoParceira.findMany({
+      where: { nome },
+      select: { id: true, nome: true, ativa: true },
+      take: 2,
+    });
+
+    if (encontradas.length === 1) return encontradas[0];
+    if (encontradas.length > 1) {
+      const erro = new Error("Há mais de uma instituição com esse nome. Informe o ID da instituição.");
+      erro.statusCode = 409;
+      throw erro;
+    }
+  }
+
+  return null;
+}
+
 export function normalizarNotificacao(item = {}) {
   const assunto = item.assunto || item.titulo || "Nova mensagem";
   const descricao =
@@ -8,6 +59,7 @@ export function normalizarNotificacao(item = {}) {
 
   return {
     id: Number(item.id) || Date.now() + Math.random(),
+    instituicaoId: numeroId(item.instituicaoId),
     instituicao,
     assunto,
     descricao,
@@ -24,24 +76,30 @@ class NotificacoesController {
   async listar(req, res) {
     try {
       const limite = Math.min(Math.max(Number(req.query.limite) || 10, 1), 50);
+      const where = {};
+
+      if (req.user.role === "INSTITUICAO") {
+        const instituicao = await buscarInstituicaoDoUsuario(req);
+        if (!instituicao) {
+          return res.status(403).json({
+            ok: false,
+            error: "Usuário não está vinculado a uma instituição válida.",
+          });
+        }
+        where.instituicaoId = instituicao.id;
+      }
 
       const registros = await prisma.notificacao.findMany({
+        where,
         orderBy: { criadoEm: "desc" },
         take: limite,
       });
 
       const dados = registros.map((item) =>
-        normalizarNotificacao({
-          ...item,
-          data: item.criadoEm,
-        }),
+        normalizarNotificacao({ ...item, data: item.criadoEm }),
       );
 
-      return res.status(200).json({
-        ok: true,
-        dados,
-        total: dados.length,
-      });
+      return res.status(200).json({ ok: true, dados, total: dados.length });
     } catch (error) {
       console.error("Erro ao listar notificações:", error);
       return res.status(500).json({
@@ -54,30 +112,40 @@ class NotificacoesController {
   async criar(req, res) {
     try {
       const body = req.body || {};
+      let instituicao = null;
+
+      if (req.user.role === "INSTITUICAO") {
+        instituicao = await buscarInstituicaoDoUsuario(req);
+        if (!instituicao) {
+          return res.status(403).json({
+            ok: false,
+            error: "Usuário não está vinculado a uma instituição válida.",
+          });
+        }
+      } else {
+        instituicao = await resolverInstituicaoDestino(body);
+      }
+
+      const descricao = String(
+        body.descricao || body.mensagem || "Mensagem registrada pelo sistema.",
+      ).trim();
 
       const payload = {
-        instituicao: String(
-          body.instituicao || body.remetente || "Sistema",
-        ).trim(),
+        instituicaoId: instituicao?.id ?? null,
+        instituicao: instituicao?.nome || String(body.instituicao || body.remetente || "Sistema").trim(),
         assunto: String(body.assunto || "Nova mensagem").trim(),
-        descricao: String(
-          body.descricao ||
-            body.mensagem ||
-            "Mensagem registrada pelo sistema.",
-        ).trim(),
-        mensagem: String(
-          body.mensagem ||
-            body.descricao ||
-            "Mensagem registrada pelo sistema.",
-        ).trim(),
+        descricao,
+        mensagem: String(body.mensagem || body.descricao || descricao).trim(),
         tipo: String(body.tipo || "MENSAGEM").trim(),
-        destinatario: body.destinatario
-          ? String(body.destinatario).trim()
-          : "Administrador Geral",
-        remetente: body.remetente
-          ? String(body.remetente).trim()
-          : body.instituicao || "Sistema",
-        lida: Boolean(body.lida),
+        destinatario:
+          req.user.role === "INSTITUICAO"
+            ? "Administrador Geral"
+            : String(body.destinatario || instituicao?.nome || "Administrador Geral").trim(),
+        remetente:
+          req.user.role === "INSTITUICAO"
+            ? instituicao.nome
+            : String(body.remetente || "Administrador Geral").trim(),
+        lida: false,
       };
 
       if (!payload.instituicao || !payload.assunto || !payload.descricao) {
@@ -87,34 +155,60 @@ class NotificacoesController {
         });
       }
 
-      const registro = await prisma.notificacao.create({
-        data: payload,
-      });
+      if (req.user.role === "ADMIN" && !payload.instituicaoId) {
+        return res.status(400).json({
+          ok: false,
+          error: "Não foi possível identificar a instituição destinatária da notificação.",
+        });
+      }
+
+      const registro = await prisma.notificacao.create({ data: payload });
 
       return res.status(201).json({
         ok: true,
+        sucesso: true,
         mensagem: "Notificação criada com sucesso.",
-        dados: normalizarNotificacao({
-          ...registro,
-          data: registro.criadoEm,
-        }),
+        dados: normalizarNotificacao({ ...registro, data: registro.criadoEm }),
       });
     } catch (error) {
       console.error("Erro ao criar notificação:", error);
-      return res.status(500).json({
+      return res.status(error.statusCode || 500).json({
         ok: false,
-        error: "Erro interno ao criar notificação.",
+        error: error.statusCode
+          ? error.message
+          : "Erro interno ao criar notificação.",
       });
     }
   }
 
   async marcarComoLida(req, res) {
     try {
-      const id = Number(req.params.id);
-      if (!Number.isInteger(id) || id <= 0) {
-        return res
-          .status(400)
-          .json({ ok: false, error: "ID da notificação inválido." });
+      const id = numeroId(req.params.id);
+      if (!id) {
+        return res.status(400).json({
+          ok: false,
+          error: "ID da notificação inválido.",
+        });
+      }
+
+      const where = { id };
+      if (req.user.role === "INSTITUICAO") {
+        const instituicao = await buscarInstituicaoDoUsuario(req);
+        if (!instituicao) {
+          return res.status(403).json({
+            ok: false,
+            error: "Usuário não está vinculado a uma instituição válida.",
+          });
+        }
+        where.instituicaoId = instituicao.id;
+      }
+
+      const existente = await prisma.notificacao.findFirst({ where });
+      if (!existente) {
+        return res.status(404).json({
+          ok: false,
+          error: "Notificação não encontrada.",
+        });
       }
 
       const registro = await prisma.notificacao.update({
@@ -125,16 +219,13 @@ class NotificacoesController {
       return res.status(200).json({
         ok: true,
         mensagem: "Notificação marcada como lida.",
-        dados: normalizarNotificacao({
-          ...registro,
-          data: registro.criadoEm,
-        }),
+        dados: normalizarNotificacao({ ...registro, data: registro.criadoEm }),
       });
     } catch (error) {
       console.error("Erro ao marcar notificação como lida:", error);
-      return res.status(404).json({
+      return res.status(500).json({
         ok: false,
-        error: "Notificação não encontrada.",
+        error: "Erro interno ao marcar a notificação como lida.",
       });
     }
   }

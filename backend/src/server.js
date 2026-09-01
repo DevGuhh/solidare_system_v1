@@ -50,21 +50,44 @@ const allowedOrigins = [
   "https://solidare-login-v4.vercel.app",
   "https://solidare-system-v1.vercel.app",
   "https://solidare-login-v4-jihy0l9fa-devguhhs-projects.vercel.app",
-  "http://127.0.0.1:5500",
 ];
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Origin não permitida"));
-      }
-    },
-    credentials: true,
-  }),
-);
+function origemLocalPermitida(origin) {
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  try {
+    const url = new URL(origin);
+
+    return (
+      ["localhost", "127.0.0.1"].includes(url.hostname) &&
+      ["http:", "https:"].includes(url.protocol)
+    );
+  } catch {
+    return false;
+  }
+}
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      origemLocalPermitida(origin)
+    ) {
+      return callback(null, true);
+    }
+
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 
 // ===============================
 // MIDDLEWARES

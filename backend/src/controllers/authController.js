@@ -1,10 +1,7 @@
 import { prisma } from "../config/db.js";
 import bcrypt from "bcrypt";
 import crypto from "node:crypto";
-import nodemailer from "nodemailer";
 import { generateToken } from "../utils/generateToken.js";
-import { PrismaClient } from "@prisma/client";
-import { use } from "react";
 import { sendMail } from "../config/mailer.js";
 import { resetPasswordEmail } from "../templates/resetPasswordEmail.js";
 

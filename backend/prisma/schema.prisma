@@ -54,8 +54,9 @@ model InstituicaoParceira {
   doacoes       Doacao[]
   saldoCesta    SaldoCesta?
   usuario       Usuario?
-  cnpj          String?          @unique
+  cnpj          String?        @unique
   comprovantes  Comprovante[]
+  notificacoes  Notificacao[]
 
   @@map("instituicoes_parceiras")
 }
@@ -134,7 +135,8 @@ model Doacao {
   usuario            Usuario             @relation(fields: [usuarioId], references: [id])
   movimentacoesSaldo MovimentacaoSaldo[]
   comprovanteEntrega ComprovanteEntrega?
-  comprovantes  Comprovante[]
+  comprovantes       Comprovante[]
+  notificacoes       Notificacao[]
 
   @@index([beneficiarioId])
   @@index([instituicaoId])
@@ -144,15 +146,14 @@ model Doacao {
   @@map("doacoes")
 }
 
-
 model ComprovanteEntrega {
-  id        Int      @id @default(autoincrement())
-  doacaoId  Int      @unique
-  foto      Bytes
-  mimeType  String
-  tamanho   Int
-  criadoEm  DateTime @default(now())
-  expiraEm  DateTime
+  id       Int      @id @default(autoincrement())
+  doacaoId Int      @unique
+  foto     Bytes
+  mimeType String
+  tamanho  Int
+  criadoEm DateTime @default(now())
+  expiraEm DateTime
 
   doacao Doacao @relation(fields: [doacaoId], references: [id], onDelete: Cascade)
 
@@ -209,16 +210,16 @@ model QRCode {
 }
 
 model Comprovante {
-  id            Int                 @id @default(autoincrement())
+  id            Int                  @id @default(autoincrement())
   arquivoUrl    String
   tipoDoc       String
   cnpjExtraido  String?
-  status        StatusComprovante   @default(PENDENTE_REVISAO)
+  status        StatusComprovante    @default(PENDENTE_REVISAO)
   instituicaoId Int?
   instituicao   InstituicaoParceira? @relation(fields: [instituicaoId], references: [id])
   doacaoId      Int?
-  doacao        Doacao?             @relation(fields: [doacaoId], references: [id])
-  criadoEm      DateTime            @default(now())
+  doacao        Doacao?              @relation(fields: [doacaoId], references: [id])
+  criadoEm      DateTime             @default(now())
   revisadoEm    DateTime?
 
   @@index([instituicaoId])
@@ -227,18 +228,23 @@ model Comprovante {
 }
 
 model Notificacao {
-  id          Int      @id @default(autoincrement())
-  instituicao String
-  assunto     String
-  descricao   String
-  mensagem    String?
-  tipo        String   @default("MENSAGEM")
-  destinatario String?
-  remetente   String?
-  lida        Boolean  @default(false)
-  criadoEm    DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
+  id             Int                  @id @default(autoincrement())
+  instituicaoId  Int?
+  instituicao    String
+  assunto        String
+  descricao      String
+  mensagem       String?
+  tipo           String               @default("MENSAGEM")
+  destinatario   String?
+  remetente      String?
+  lida           Boolean              @default(false)
+  criadoEm       DateTime             @default(now())
+  atualizadoEm   DateTime             @updatedAt
+  instituicaoRef InstituicaoParceira? @relation(fields: [instituicaoId], references: [id], onDelete: SetNull)
+  doacao         Doacao?              @relation(fields: [doacaoId], references: [id])
+  doacaoId       Int?
 
+  @@index([instituicaoId, criadoEm])
   @@index([lida, criadoEm])
   @@index([instituicao, criadoEm])
   @@map("notificacoes")

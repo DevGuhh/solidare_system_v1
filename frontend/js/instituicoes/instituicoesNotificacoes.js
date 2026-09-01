@@ -73,21 +73,10 @@ export function initFormNotificacao() {
       document.getElementById("emailUsuario")?.textContent?.trim() ||
       document.querySelector(".usuario-info small")?.textContent?.trim();
     try {
-      const notas = (await listarNotificacoes(50)) || [];
-      const relacionados = notas.filter((n) => {
-        if (
-          userId &&
-          (String(n.instituicaoId) === String(userId) ||
-            String(n.remetenteId) === String(userId) ||
-            String(n.destinatarioId) === String(userId))
-        )
-          return true;
-        return (
-          String(n.destinatario) === String(userEmail) ||
-          String(n.remetente) === String(userEmail) ||
-          String(n.instituicao) === String(userEmail)
-        );
-      });
+      // O backend já devolve somente as notificações da instituição autenticada.
+      // Não fazemos filtragem por nome/e-mail no navegador, pois isso era frágil
+      // e poderia ocultar mensagens legítimas.
+      const relacionados = (await listarNotificacoes(50)) || [];
 
       if (!relacionados || relacionados.length === 0) {
         threadEl.innerHTML = `<div class="notificacoes-vazio"><div class="notificacoes-vazio-icone"><i class="fa-solid fa-envelope-open-text"></i></div><strong>Nenhuma conversa</strong><span>Aqui aparecerão as respostas do Administrador.</span></div>`;
