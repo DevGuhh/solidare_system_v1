@@ -3,6 +3,7 @@ import {
     listarInstituicoesRelatorio,
     listarDoacoesRelatorio,
     listarSaldosRelatorio,
+    obterSaldoInstituicaoRelatorio,
     listarComprovantesPendentesRelatorio
 } from "./api/relatoriosApi.js";
 
@@ -43,6 +44,7 @@ let paginaAtual = 1;
 let porPagina = 10;
 let graficos = {};
 let abortador = null;
+let usuarioRelatorio = null;
 
 // =====================================================
 // HELPERS
@@ -74,6 +76,27 @@ const formatarData = (valor) => {
     const data = dataValida(valor);
     return data ? data.toLocaleDateString("pt-BR") : "-";
 };
+
+function obterUsuarioRelatorio() {
+    try {
+        return JSON.parse(
+            sessionStorage.getItem("usuarioLogado") || "null"
+        );
+    } catch {
+        return null;
+    }
+}
+
+function perfilAtual() {
+    return String(usuarioRelatorio?.role || "")
+        .trim()
+        .toUpperCase();
+}
+
+function usuarioInstituicao() {
+    return perfilAtual() === "INSTITUICAO";
+}
+
 
 async function jsonSeguro(resposta) {
     try {
@@ -126,6 +149,21 @@ function atualizarGraficoBeneficios() {
         }
     });
 
+    const total = Object.values(beneficios)
+        .reduce((soma, quantidade) => soma + quantidade, 0);
+
+    $("perfilCestaResumo").textContent =
+        `${formatarNumero(beneficios.CESTA)} • ${pct(beneficios.CESTA, total)}%`;
+
+    $("perfilGranelResumo").textContent =
+        `${formatarNumero(beneficios.GRANEL)} • ${pct(beneficios.GRANEL, total)}%`;
+
+    $("perfilAmbosResumo").textContent =
+        `${formatarNumero(beneficios.AMBOS)} • ${pct(beneficios.AMBOS, total)}%`;
+
+    $("perfilTotalResumo").textContent =
+        `${formatarNumero(total)} beneficiários`;
+
     criarGrafico("graficoRelatorioBeneficios", {
         type: "doughnut",
         data: {
@@ -140,10 +178,24 @@ function atualizarGraficoBeneficios() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: "68%",
+            cutout: "64%",
             plugins: {
                 legend: {
-                    position: "bottom"
+                    position: "bottom",
+                    labels: {
+                        boxWidth: 12,
+                        padding: 14
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label(context) {
+                            const quantidade = num(context.raw);
+                            const percentual = pct(quantidade, total);
+
+                            return `${context.label}: ${formatarNumero(quantidade)} (${percentual}%)`;
+                        }
+                    }
                 }
             }
         }
@@ -236,56 +288,271 @@ function atualizarGraficoEstoque() {
 }
 
 function atualizarGraficoEvolucaoDoacoes() {
-    const meses = [];
-    const hoje = new Date();
+    const filtros = filtrosAtuais();
 
-    for (let i = 5; i >= 0; i -= 1) {
-        const data = new Date(
-            hoje.getFullYear(),
-            hoje.getMonth() - i,
-            1
+    const instituicaoId = usuarioInstituicao()
+        ? String(usuarioRelatorio.instituicaoId)
+        : filtros.instituicaoId;
+
+    const doacoesBase = dados.doacoes.filter((doacao) => {
+        return (
+            !instituicaoId ||
+            String(doacao.instituicaoId) === instituicaoId
         );
-
-        meses.push({
-            key: `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, "0")}`,
-            label: data.toLocaleDateString("pt-BR", {
-                month: "short"
-            })
-        });
-    }
-
-    const acumulado = Object.fromEntries(
-        meses.map((mes) => [mes.key, { quantidade: 0, itens: 0 }])
-    );
-
-    dados.doacoes.forEach((doacao) => {
-        const data = dataValida(doacao.dataDoacao);
-        if (!data) return;
-
-        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, "0")}`;
-
-        if (!acumulado[chave]) return;
-
-        acumulado[chave].quantidade += 1;
-        acumulado[chave].itens += num(doacao.quantidade);
     });
 
+    const datasDisponiveis = doacoesBase
+        .map((doacao) =>
+            dataValida(doacao.dataDoacao || doacao.criadoEm)
+        )
+        .filter(Boolean)
+        .sort((a, b) => a - b);
+
+    let inicio = filtros.inicio
+        ? new Date(`${filtros.inicio}T00:00:00`)
+        : null;
+
+    let fim = filtros.fim
+        ? new Date(`${filtros.fim}T23:59:59`)
+        : null;
+
+    if (!inicio && datasDisponiveis.length) {
+        inicio = new Date(datasDisponiveis[0]);
+    }
+
+    if (!fim && datasDisponiveis.length) {
+        fim = new Date(
+            datasDisponiveis[datasDisponiveis.length - 1]
+        );
+    }
+
+    if (!inicio && !fim) {
+        const anoAtual = new Date().getFullYear();
+
+        inicio = new Date(anoAtual, 0, 1);
+        fim = new Date(
+            anoAtual,
+            11,
+            31,
+            23,
+            59,
+            59
+        );
+    } else if (!inicio) {
+        inicio = new Date(fim.getFullYear(), 0, 1);
+    } else if (!fim) {
+        fim = new Date(
+            inicio.getFullYear(),
+            11,
+            31,
+            23,
+            59,
+            59
+        );
+    }
+
+    const anoInicial = inicio.getFullYear();
+    const anoFinal = fim.getFullYear();
+    const titulo = $("tituloGraficoEvolucao");
+
+    /*
+     * Quando o período está dentro de um único ano,
+     * apresenta janeiro a dezembro daquele ano.
+     */
+    if (anoInicial === anoFinal) {
+        const meses = Array.from(
+            { length: 12 },
+            (_, indice) => {
+                const data = new Date(
+                    anoInicial,
+                    indice,
+                    1
+                );
+
+                return {
+                    key:
+                        `${anoInicial}-${String(
+                            indice + 1
+                        ).padStart(2, "0")}`,
+                    label: data
+                        .toLocaleDateString(
+                            "pt-BR",
+                            { month: "short" }
+                        )
+                        .replace(".", "")
+                };
+            }
+        );
+
+        const acumulado = Object.fromEntries(
+            meses.map((mes) => [
+                mes.key,
+                {
+                    quantidade: 0,
+                    itens: 0
+                }
+            ])
+        );
+
+        doacoesBase.forEach((doacao) => {
+            const data = dataValida(
+                doacao.dataDoacao || doacao.criadoEm
+            );
+
+            if (
+                !data ||
+                data < inicio ||
+                data > fim ||
+                data.getFullYear() !== anoInicial
+            ) {
+                return;
+            }
+
+            const chave =
+                `${anoInicial}-${String(
+                    data.getMonth() + 1
+                ).padStart(2, "0")}`;
+
+            acumulado[chave].quantidade += 1;
+            acumulado[chave].itens +=
+                num(doacao.quantidade);
+        });
+
+        if (titulo) {
+            titulo.textContent =
+                `Doações no ano de ${anoInicial}`;
+        }
+
+        criarGrafico("graficoEvolucaoDoacoes", {
+            type: "line",
+            data: {
+                labels: meses.map(
+                    (mes) => mes.label
+                ),
+                datasets: [
+                    {
+                        label: "Doações",
+                        data: meses.map(
+                            (mes) =>
+                                acumulado[mes.key]
+                                    .quantidade
+                        ),
+                        tension: 0.32,
+                        fill: false
+                    },
+                    {
+                        label: "Itens distribuídos",
+                        data: meses.map(
+                            (mes) =>
+                                acumulado[mes.key]
+                                    .itens
+                        ),
+                        tension: 0.32,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: "index",
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        return;
+    }
+
+    /*
+     * Quando o filtro atravessa mais de um ano,
+     * o gráfico compara os totais anuais.
+     */
+    const anos = [];
+
+    for (
+        let ano = anoInicial;
+        ano <= anoFinal;
+        ano += 1
+    ) {
+        anos.push(ano);
+    }
+
+    const acumuladoAnual = Object.fromEntries(
+        anos.map((ano) => [
+            ano,
+            {
+                quantidade: 0,
+                itens: 0
+            }
+        ])
+    );
+
+    doacoesBase.forEach((doacao) => {
+        const data = dataValida(
+            doacao.dataDoacao || doacao.criadoEm
+        );
+
+        if (
+            !data ||
+            data < inicio ||
+            data > fim
+        ) {
+            return;
+        }
+
+        const ano = data.getFullYear();
+
+        if (!acumuladoAnual[ano]) {
+            return;
+        }
+
+        acumuladoAnual[ano].quantidade += 1;
+        acumuladoAnual[ano].itens +=
+            num(doacao.quantidade);
+    });
+
+    if (titulo) {
+        titulo.textContent =
+            `Doações de ${anoInicial} a ${anoFinal}`;
+    }
+
     criarGrafico("graficoEvolucaoDoacoes", {
-        type: "line",
+        type: "bar",
         data: {
-            labels: meses.map((mes) => mes.label),
+            labels: anos.map(String),
             datasets: [
                 {
                     label: "Doações",
-                    data: meses.map((mes) => acumulado[mes.key].quantidade),
-                    tension: 0.35,
-                    fill: false
+                    data: anos.map(
+                        (ano) =>
+                            acumuladoAnual[ano]
+                                .quantidade
+                    ),
+                    borderWidth: 1
                 },
                 {
-                    label: "Itens",
-                    data: meses.map((mes) => acumulado[mes.key].itens),
-                    tension: 0.35,
-                    fill: false
+                    label: "Itens distribuídos",
+                    data: anos.map(
+                        (ano) =>
+                            acumuladoAnual[ano]
+                                .itens
+                    ),
+                    borderWidth: 1
                 }
             ]
         },
@@ -295,6 +562,11 @@ function atualizarGraficoEvolucaoDoacoes() {
             interaction: {
                 mode: "index",
                 intersect: false
+            },
+            plugins: {
+                legend: {
+                    position: "bottom"
+                }
             },
             scales: {
                 y: {
@@ -314,22 +586,152 @@ function atualizarGraficoEvolucaoDoacoes() {
 
 function preencherInstituicoes() {
     const select = $("filtroInstituicao");
+    const campo = $("campoFiltroInstituicao");
+
     if (!select) return;
 
-    select.innerHTML = '<option value="">Todas as instituições</option>';
+    if (usuarioInstituicao()) {
+        const instituicao = dados.instituicoes[0];
+        const nome = instituicao?.nome || "Sua instituição";
+
+        select.innerHTML =
+            `<option value="${usuarioRelatorio.instituicaoId}">${nome}</option>`;
+
+        select.value = String(usuarioRelatorio.instituicaoId);
+        select.disabled = true;
+
+        if (campo) {
+            campo.classList.add(
+                "filtro-instituicao-bloqueado"
+            );
+        }
+
+        return;
+    }
+
+    select.disabled = false;
+    select.innerHTML =
+        '<option value="">Todas as instituições</option>';
 
     dados.instituicoes.forEach((instituicao) => {
         const option = document.createElement("option");
+
         option.value = instituicao.id;
         option.textContent = instituicao.nome;
+
         select.appendChild(option);
+    });
+}
+
+function aplicarMascaraData(valor) {
+    const numeros = String(valor || "")
+        .replace(/\D/g, "")
+        .slice(0, 8);
+
+    if (numeros.length <= 2) {
+        return numeros;
+    }
+
+    if (numeros.length <= 4) {
+        return `${numeros.slice(0, 2)}/${numeros.slice(2)}`;
+    }
+
+    return (
+        `${numeros.slice(0, 2)}/` +
+        `${numeros.slice(2, 4)}/` +
+        numeros.slice(4, 8)
+    );
+}
+
+function converterDataFiltroParaIso(valor) {
+    const texto = String(valor || "").trim();
+
+    if (!texto) {
+        return "";
+    }
+
+    const partes = texto.split("/");
+
+    if (
+        partes.length !== 3 ||
+        partes[0].length !== 2 ||
+        partes[1].length !== 2 ||
+        partes[2].length !== 4
+    ) {
+        return null;
+    }
+
+    const dia = Number(partes[0]);
+    const mes = Number(partes[1]);
+    const ano = Number(partes[2]);
+
+    if (
+        !Number.isInteger(dia) ||
+        !Number.isInteger(mes) ||
+        !Number.isInteger(ano) ||
+        ano < 1 ||
+        mes < 1 ||
+        mes > 12 ||
+        dia < 1 ||
+        dia > 31
+    ) {
+        return null;
+    }
+
+    const data = new Date(ano, mes - 1, dia);
+
+    if (
+        data.getFullYear() !== ano ||
+        data.getMonth() !== mes - 1 ||
+        data.getDate() !== dia
+    ) {
+        return null;
+    }
+
+    return (
+        `${String(ano).padStart(4, "0")}-` +
+        `${String(mes).padStart(2, "0")}-` +
+        `${String(dia).padStart(2, "0")}`
+    );
+}
+
+function configurarCamposDataRelatorio(signal) {
+    [
+        $("filtroDataInicial"),
+        $("filtroDataFinal")
+    ].forEach((campo) => {
+        if (!campo) return;
+
+        campo.addEventListener(
+            "input",
+            (event) => {
+                event.target.value =
+                    aplicarMascaraData(event.target.value);
+            },
+            { signal }
+        );
+
+        campo.addEventListener(
+            "paste",
+            () => {
+                window.setTimeout(() => {
+                    campo.value =
+                        aplicarMascaraData(campo.value);
+                }, 0);
+            },
+            { signal }
+        );
     });
 }
 
 function filtrosAtuais() {
     return {
-        inicio: $("filtroDataInicial").value,
-        fim: $("filtroDataFinal").value,
+        inicio: converterDataFiltroParaIso(
+            $("filtroDataInicial").value
+        ),
+        fim: converterDataFiltroParaIso(
+            $("filtroDataFinal").value
+        ),
         instituicaoId: $("filtroInstituicao").value,
         beneficio: $("filtroBeneficio").value,
         ativo: $("filtroAtivo").value,
@@ -355,6 +757,26 @@ function dentroPeriodo(valor, filtros) {
 
 function aplicarFiltros() {
     const filtros = filtrosAtuais();
+
+    if (
+        $("filtroDataInicial").value &&
+        filtros.inicio === null
+    ) {
+        mostrarAviso(
+            "Informe a data inicial no formato dd/mm/aaaa."
+        );
+        return;
+    }
+
+    if (
+        $("filtroDataFinal").value &&
+        filtros.fim === null
+    ) {
+        mostrarAviso(
+            "Informe a data final no formato dd/mm/aaaa."
+        );
+        return;
+    }
 
     if (
         filtros.inicio &&
@@ -400,7 +822,10 @@ function aplicarFiltros() {
 function limparFiltros() {
     $("filtroDataInicial").value = "";
     $("filtroDataFinal").value = "";
-    $("filtroInstituicao").value = "";
+    $("filtroInstituicao").value =
+        usuarioInstituicao()
+            ? String(usuarioRelatorio.instituicaoId)
+            : "";
     $("filtroBeneficio").value = "";
     $("filtroAtivo").value = "";
     $("pesquisaRelatorio").value = "";
@@ -474,9 +899,11 @@ function atualizarKpis() {
             .filter(Boolean)
     );
 
-    const instituicoesAtivas = dados.instituicoes.filter(
-        (instituicao) => instituicao.ativa
-    ).length;
+    const instituicoesAtivas = usuarioInstituicao()
+        ? 1
+        : dados.instituicoes.filter(
+            (instituicao) => instituicao.ativa
+        ).length;
 
     const doacoes = doacoesFiltradas();
 
@@ -526,9 +953,13 @@ function atualizarKpis() {
     $("resumoBeneficiariosAtivos").textContent = `${formatarNumero(ativos)} ativos`;
 
     $("totalRelatorioInstituicoes").textContent = formatarNumero(
-        filtroInstituicaoAtivo
-            ? instituicoesFiltradas.size
-            : dados.instituicoes.length
+        usuarioInstituicao()
+            ? 1
+            : (
+                filtroInstituicaoAtivo
+                    ? instituicoesFiltradas.size
+                    : dados.instituicoes.length
+            )
     );
 
     $("resumoInstituicoesAtivas").textContent =
@@ -745,6 +1176,33 @@ function atualizarTudo() {
 }
 
 // =====================================================
+// AJUSTES POR PERFIL
+// =====================================================
+
+function configurarVisaoPorPerfil() {
+    const instituicao = usuarioInstituicao();
+
+    const kpiPendencias = $("kpiDocumentosPendentes");
+    const painelRanking = $("painelRankingInstituicoes");
+
+    if (kpiPendencias) {
+        kpiPendencias.hidden = instituicao;
+    }
+
+    if (painelRanking) {
+        painelRanking.hidden = instituicao;
+    }
+
+    const heroTexto =
+        document.querySelector(".relatorios-hero p");
+
+    if (heroTexto && instituicao) {
+        heroTexto.textContent =
+            "Visão exclusiva dos beneficiários, entregas e estoque da sua instituição.";
+    }
+}
+
+// =====================================================
 // CARREGAMENTO DE DADOS
 // =====================================================
 
@@ -752,49 +1210,136 @@ async function carregarDados() {
     mostrarLoading("Carregando relatório...");
 
     try {
-        const respostas = await Promise.all([
-            listarBeneficiariosRelatorio(),
-            listarInstituicoesRelatorio(),
-            listarDoacoesRelatorio(),
-            listarSaldosRelatorio(),
-            listarComprovantesPendentesRelatorio()
-        ]);
+        if (usuarioInstituicao()) {
+            const instituicaoId =
+                Number(usuarioRelatorio?.instituicaoId);
 
-        const payloads = await Promise.all(
-            respostas.map((resposta) => jsonSeguro(resposta))
-        );
+            if (
+                !Number.isInteger(instituicaoId) ||
+                instituicaoId <= 0
+            ) {
+                throw new Error(
+                    "Usuário de instituição sem instituição vinculada."
+                );
+            }
 
-        const indiceErro = respostas.findIndex(
-            (resposta) => !resposta.ok
-        );
+            /*
+             * Segurança:
+             * - /beneficiarios já é filtrado no backend por req.user.instituicaoId.
+             * - /doacoes também é filtrado no backend.
+             * - /saldo-cestas/:id valida se o id pertence ao usuário.
+             *
+             * A instituição não chama endpoints administrativos
+             * de listagem geral.
+             */
+            const respostas = await Promise.all([
+                listarBeneficiariosRelatorio(),
+                listarDoacoesRelatorio(),
+                obterSaldoInstituicaoRelatorio(instituicaoId)
+            ]);
 
-        if (indiceErro >= 0) {
-            throw new Error(
-                payloads[indiceErro]?.error ||
-                payloads[indiceErro]?.message ||
-                "Não foi possível carregar os dados."
+            const payloads = await Promise.all(
+                respostas.map(
+                    (resposta) => jsonSeguro(resposta)
+                )
             );
+
+            const indiceErro = respostas.findIndex(
+                (resposta) => !resposta.ok
+            );
+
+            if (indiceErro >= 0) {
+                throw new Error(
+                    payloads[indiceErro]?.error ||
+                    payloads[indiceErro]?.message ||
+                    "Não foi possível carregar os dados da instituição."
+                );
+            }
+
+            dados.beneficiarios = Array.isArray(payloads[0])
+                ? payloads[0]
+                : [];
+
+            dados.doacoes = Array.isArray(payloads[1])
+                ? payloads[1]
+                : [];
+
+            const nomeInstituicao =
+                dados.beneficiarios[0]?.instituicao?.nome ||
+                dados.doacoes[0]?.instituicao?.nome ||
+                "Sua instituição";
+
+            dados.instituicoes = [
+                {
+                    id: instituicaoId,
+                    nome: nomeInstituicao,
+                    ativa: true
+                }
+            ];
+
+            const saldo = payloads[2] || {
+                instituicaoId,
+                saldoAtual: 0
+            };
+
+            dados.saldos = [
+                {
+                    ...saldo,
+                    instituicao: {
+                        id: instituicaoId,
+                        nome: nomeInstituicao
+                    }
+                }
+            ];
+
+            dados.pendentes = [];
+        } else {
+            const respostas = await Promise.all([
+                listarBeneficiariosRelatorio(),
+                listarInstituicoesRelatorio(),
+                listarDoacoesRelatorio(),
+                listarSaldosRelatorio(),
+                listarComprovantesPendentesRelatorio()
+            ]);
+
+            const payloads = await Promise.all(
+                respostas.map(
+                    (resposta) => jsonSeguro(resposta)
+                )
+            );
+
+            const indiceErro = respostas.findIndex(
+                (resposta) => !resposta.ok
+            );
+
+            if (indiceErro >= 0) {
+                throw new Error(
+                    payloads[indiceErro]?.error ||
+                    payloads[indiceErro]?.message ||
+                    "Não foi possível carregar os dados."
+                );
+            }
+
+            dados.beneficiarios = Array.isArray(payloads[0])
+                ? payloads[0]
+                : [];
+
+            dados.instituicoes = Array.isArray(payloads[1])
+                ? payloads[1]
+                : payloads[1]?.dados || [];
+
+            dados.doacoes = Array.isArray(payloads[2])
+                ? payloads[2]
+                : [];
+
+            dados.saldos = Array.isArray(payloads[3])
+                ? payloads[3]
+                : [];
+
+            dados.pendentes = Array.isArray(payloads[4])
+                ? payloads[4]
+                : [];
         }
-
-        dados.beneficiarios = Array.isArray(payloads[0])
-            ? payloads[0]
-            : [];
-
-        dados.instituicoes = Array.isArray(payloads[1])
-            ? payloads[1]
-            : payloads[1]?.dados || [];
-
-        dados.doacoes = Array.isArray(payloads[2])
-            ? payloads[2]
-            : [];
-
-        dados.saldos = Array.isArray(payloads[3])
-            ? payloads[3]
-            : [];
-
-        dados.pendentes = Array.isArray(payloads[4])
-            ? payloads[4]
-            : [];
 
         filtrados = [...dados.beneficiarios];
 
@@ -807,9 +1352,14 @@ async function carregarDados() {
                 timeStyle: "short"
             });
     } catch (erro) {
-        console.error("Erro ao carregar relatórios:", erro);
+        console.error(
+            "Erro ao carregar relatórios:",
+            erro
+        );
+
         mostrarErro(
-            erro.message || "Erro ao carregar relatórios."
+            erro.message ||
+            "Erro ao carregar relatórios."
         );
     } finally {
         esconderLoading();
@@ -825,6 +1375,8 @@ function configurarEventos() {
     abortador = new AbortController();
 
     const { signal } = abortador;
+
+    configurarCamposDataRelatorio(signal);
 
     $("btnAtualizarRelatorio").addEventListener(
         "click",
@@ -936,7 +1488,11 @@ function configurarEventos() {
 // =====================================================
 
 export async function inicializarRelatorios() {
+    usuarioRelatorio = obterUsuarioRelatorio();
+
     destruirGraficos();
+    configurarVisaoPorPerfil();
     configurarEventos();
+
     await carregarDados();
 }

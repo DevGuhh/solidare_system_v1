@@ -56,6 +56,10 @@ export function listarSaldosRelatorio() {
     return get("/saldo-cestas");
 }
 
+export function obterSaldoInstituicaoRelatorio(instituicaoId) {
+    return get(`/saldo-cestas/${Number(instituicaoId)}`);
+}
+
 export function listarComprovantesPendentesRelatorio() {
     return get("/api/comprovantes/pendentes");
 }

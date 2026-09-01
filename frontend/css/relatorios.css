@@ -899,3 +899,125 @@
         font-size: 8px !important;
     }
 }
+
+
+/* =====================================================
+   PERFIL DE BENEFÍCIOS - RESUMO ANALÍTICO
+===================================================== */
+
+.perfil-beneficios-resumo {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 0 18px 18px;
+}
+
+.perfil-beneficio-item,
+.perfil-beneficio-total {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 10px;
+    border: 1px solid #e7ebf0;
+    border-radius: 10px;
+    background: #fafbfc;
+}
+
+.perfil-beneficio-item > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.perfil-beneficio-item small,
+.perfil-beneficio-total small {
+    color: #7b8797;
+    font-size: 10px;
+}
+
+.perfil-beneficio-item strong,
+.perfil-beneficio-total strong {
+    margin-top: 2px;
+    color: #253047;
+    font-size: 12px;
+}
+
+.perfil-beneficio-marcador {
+    width: 10px;
+    height: 10px;
+    flex: 0 0 10px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.perfil-beneficio-marcador.cesta {
+    color: #3ca0dc;
+}
+
+.perfil-beneficio-marcador.granel {
+    color: #f35679;
+}
+
+.perfil-beneficio-marcador.ambos {
+    color: #f39a31;
+}
+
+.perfil-beneficio-total {
+    grid-column: 1 / -1;
+    flex-direction: column;
+    align-items: flex-start;
+    background: #fff7f8;
+    border-color: #f0d9de;
+}
+
+/* Campo fica visível, mas travado na instituição autenticada. */
+.filtro-instituicao-bloqueado select {
+    cursor: not-allowed;
+    background: #f4f6f8;
+    color: #596579;
+}
+
+@media (max-width: 560px) {
+    .perfil-beneficios-resumo {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil-beneficio-total {
+        grid-column: auto;
+    }
+}
+
+/* Impressão: mantém números do gráfico legíveis no papel/PDF. */
+@media print {
+    .perfil-beneficios-resumo {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 4px !important;
+        padding: 0 8px 8px !important;
+    }
+
+    .perfil-beneficio-item,
+    .perfil-beneficio-total {
+        padding: 5px 6px !important;
+        border-radius: 6px !important;
+    }
+
+    .perfil-beneficio-item small,
+    .perfil-beneficio-total small {
+        font-size: 6.5px !important;
+    }
+
+    .perfil-beneficio-item strong,
+    .perfil-beneficio-total strong {
+        font-size: 7.5px !important;
+    }
+
+    .perfil-beneficio-total {
+        grid-column: 1 / -1 !important;
+    }
+
+    [hidden] {
+        display: none !important;
+    }
+}

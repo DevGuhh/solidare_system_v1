@@ -57,7 +57,8 @@ const paginasPermitidasPorPerfil = {
         "beneficiarios.html",
         "qrcode.html",
         "doacoes.html",
-        "comprovantes.html"
+        "comprovantes.html",
+        "relatorios.html"
     ]
 
 };

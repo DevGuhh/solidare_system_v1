@@ -119,7 +119,7 @@
     </span>
    </div>
   </article>
-  <article class="relatorio-kpi kpi-pendencias">
+  <article class="relatorio-kpi kpi-pendencias" id="kpiDocumentosPendentes">
    <span class="relatorio-kpi-icone">
     <i class="fa-solid fa-file-circle-exclamation">
     </i>
@@ -204,7 +204,14 @@
     <div class="input-com-icone">
      <i class="fa-regular fa-calendar">
      </i>
-     <input id="filtroDataInicial" type="date"/>
+     <input
+      id="filtroDataInicial"
+      type="text"
+      inputmode="numeric"
+      maxlength="10"
+      placeholder="dd/mm/aaaa"
+      autocomplete="off"
+     />
     </div>
    </div>
    <div class="campo-formulario">
@@ -214,11 +221,18 @@
     <div class="input-com-icone">
      <i class="fa-regular fa-calendar-check">
      </i>
-     <input id="filtroDataFinal" type="date"/>
+     <input
+      id="filtroDataFinal"
+      type="text"
+      inputmode="numeric"
+      maxlength="10"
+      placeholder="dd/mm/aaaa"
+      autocomplete="off"
+     />
     </div>
    </div>
-   <div class="campo-formulario">
-    <label for="filtroInstituicao">
+   <div class="campo-formulario" id="campoFiltroInstituicao">
+     <label for="filtroInstituicao">
      Instituição
     </label>
     <div class="input-com-icone">
@@ -309,10 +323,10 @@
        Evolução
       </span>
       <h2>
-       Doações nos últimos 6 meses
+       <span id="tituloGraficoEvolucao">Evolução das doações</span>
       </h2>
       <p>
-       Quantidade de entregas e itens distribuídos por mês.
+       Evolução mensal das entregas e dos itens distribuídos ao longo do ano.
       </p>
      </div>
     </div>
@@ -346,10 +360,37 @@
     <canvas id="graficoRelatorioBeneficios">
     </canvas>
    </div>
+   <div class="perfil-beneficios-resumo" id="resumoGraficoBeneficios" aria-label="Resumo do perfil dos benefícios">
+    <div class="perfil-beneficio-item">
+     <span class="perfil-beneficio-marcador cesta"></span>
+     <div>
+      <small>Cesta</small>
+      <strong id="perfilCestaResumo">0 • 0%</strong>
+     </div>
+    </div>
+    <div class="perfil-beneficio-item">
+     <span class="perfil-beneficio-marcador granel"></span>
+     <div>
+      <small>Granel</small>
+      <strong id="perfilGranelResumo">0 • 0%</strong>
+     </div>
+    </div>
+    <div class="perfil-beneficio-item">
+     <span class="perfil-beneficio-marcador ambos"></span>
+     <div>
+      <small>Ambos</small>
+      <strong id="perfilAmbosResumo">0 • 0%</strong>
+     </div>
+    </div>
+    <div class="perfil-beneficio-total">
+     <small>Total analisado</small>
+     <strong id="perfilTotalResumo">0 beneficiários</strong>
+    </div>
+   </div>
   </article>
  </section>
  <section class="relatorios-grid-graficos">
-  <article class="painel-relatorio">
+  <article class="painel-relatorio" id="painelRankingInstituicoes">
    <header class="painel-relatorio-cabecalho">
     <div class="painel-relatorio-titulo">
      <span class="painel-relatorio-icone">

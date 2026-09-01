@@ -248,81 +248,152 @@ function resumoSaldos(saldos, usuario) {
 
 function criarGraficoDoacoesMensais(doacoes) {
     const canvas = $("graficoDoacoesMensaisDashboard");
-    if (!canvas || typeof Chart === "undefined") return;
 
-    const meses = [];
-    const registros = [];
-    const itens = [];
-    const agora = new Date();
-
-    for (let deslocamento = 5; deslocamento >= 0; deslocamento--) {
-        const ref = new Date(agora.getFullYear(), agora.getMonth() - deslocamento, 1);
-        const mes = ref.getMonth();
-        const ano = ref.getFullYear();
-
-        meses.push(
-            new Intl.DateTimeFormat("pt-BR", { month: "short" })
-                .format(ref)
-                .replace(".", "")
-        );
-
-        const listaMes = doacoes.filter((d) => {
-            const data = new Date(d?.dataDoacao || d?.criadoEm);
-            return !Number.isNaN(data.getTime()) &&
-                data.getMonth() === mes &&
-                data.getFullYear() === ano;
-        });
-
-        registros.push(listaMes.length);
-        itens.push(listaMes.reduce((soma, d) => soma + numero(d?.quantidade), 0));
+    if (!canvas || typeof Chart === "undefined") {
+        return;
     }
 
+    const anoAtual = new Date().getFullYear();
+
+    const meses = Array.from(
+        { length: 12 },
+        (_, indice) => {
+            const data = new Date(
+                anoAtual,
+                indice,
+                1
+            );
+
+            return {
+                indice,
+                label: new Intl.DateTimeFormat(
+                    "pt-BR",
+                    { month: "short" }
+                )
+                    .format(data)
+                    .replace(".", "")
+            };
+        }
+    );
+
+    const registros = Array(12).fill(0);
+    const itens = Array(12).fill(0);
+
+    doacoes.forEach((doacao) => {
+        const data = new Date(
+            doacao?.dataDoacao ||
+            doacao?.criadoEm
+        );
+
+        if (
+            Number.isNaN(data.getTime()) ||
+            data.getFullYear() !== anoAtual
+        ) {
+            return;
+        }
+
+        const mes = data.getMonth();
+
+        registros[mes] += 1;
+        itens[mes] += numero(doacao?.quantidade);
+    });
+
+    setTexto(
+        "anoGraficoEvolucaoDashboard",
+        anoAtual
+    );
+
     const grafico = new Chart(canvas, {
-        type: "bar",
+        type: "line",
         data: {
-            labels: meses,
+            labels: meses.map(
+                (mes) => mes.label
+            ),
             datasets: [
                 {
                     label: "Doações",
                     data: registros,
-                    backgroundColor: "rgba(133, 0, 19, .84)",
-                    borderRadius: 7,
-                    maxBarThickness: 34,
+                    borderColor:
+                        "rgba(133, 0, 19, .88)",
+                    backgroundColor:
+                        "rgba(133, 0, 19, .10)",
+                    pointBackgroundColor:
+                        "rgba(133, 0, 19, .88)",
+                    pointBorderColor: "#ffffff",
+                    pointBorderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    tension: .32,
+                    fill: false
                 },
                 {
-                    label: "Itens",
+                    label: "Itens distribuídos",
                     data: itens,
-                    type: "line",
                     borderColor: "#16885f",
-                    backgroundColor: "rgba(22, 136, 95, .12)",
-                    pointBackgroundColor: "#16885f",
+                    backgroundColor:
+                        "rgba(22, 136, 95, .10)",
+                    pointBackgroundColor:
+                        "#16885f",
+                    pointBorderColor: "#ffffff",
+                    pointBorderWidth: 2,
                     pointRadius: 3,
-                    tension: .35,
-                    yAxisID: "y",
-                },
-            ],
+                    pointHoverRadius: 5,
+                    tension: .32,
+                    fill: false
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: { mode: "index", intersect: false },
+            interaction: {
+                mode: "index",
+                intersect: false
+            },
             plugins: {
                 legend: {
                     position: "top",
                     align: "end",
-                    labels: { usePointStyle: true, boxWidth: 8, font: { size: 11 } },
+                    labels: {
+                        usePointStyle: true,
+                        boxWidth: 8,
+                        font: {
+                            size: 11
+                        }
+                    }
                 },
-                tooltip: { displayColors: true },
+                tooltip: {
+                    displayColors: true
+                }
             },
             scales: {
-                x: { grid: { display: false }, ticks: { color: "#7b8794", font: { size: 10 } } },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: "#7b8794",
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
                 y: {
                     beginAtZero: true,
-                    grid: { color: "rgba(148, 163, 184, .14)" },
-                    ticks: { precision: 0, color: "#7b8794", font: { size: 10 } },
-                },
-            },
-        },
+                    grid: {
+                        color:
+                            "rgba(148, 163, 184, .14)"
+                    },
+                    ticks: {
+                        precision: 0,
+                        color: "#7b8794",
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
     });
 
     graficos.push(grafico);
