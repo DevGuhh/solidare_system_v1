@@ -16,6 +16,18 @@ import { listarInstituicoes } from "../api/instituicoesApi.js";
 import toast from "../components/toast.js";
 import { loading } from "../components/loading.js";
 
+function obterUsuarioLogado() {
+  try {
+    return JSON.parse(sessionStorage.getItem("usuarioLogado") || "null");
+  } catch {
+    return null;
+  }
+}
+
+function ehInstituicao() {
+  return String(obterUsuarioLogado()?.role || "").toUpperCase() === "INSTITUICAO";
+}
+
 function formatTempo(iso) {
   if (!iso) return "";
   const t = new Date(iso).getTime();
@@ -45,25 +57,24 @@ export async function carregarNotificacoesDashboard(limite = 5) {
   try {
     const notificacoes = (await listarNotificacoes(limite)) || [];
 
-    if (!notificacoes || notificacoes.length === 0) {
-      listaEl.innerHTML = `<div class="text-muted text-center py-3"><i class="fas fa-bell-slash"></i> Nenhuma notificação recente.</div>`;
-      atualizarBadgeEHeader([]);
-      return;
-    }
+    const usuarioInstituicao = ehInstituicao();
+    const semNotificacoes = !notificacoes || notificacoes.length === 0;
 
-    // render compose form + grouped conversations
+    // O formulário precisa existir mesmo quando a instituição ainda não tem
+    // nenhuma mensagem. Caso contrário ela nunca consegue iniciar a conversa.
     listaEl.innerHTML = "";
+
     // compose area
     const compose = document.createElement("div");
     compose.className = "notificacoes-compose";
     compose.style.padding = "12px";
     compose.style.borderBottom = "1px solid #eef0f3";
     compose.innerHTML = `
-            <div style="font-weight:700;margin-bottom:8px;">Enviar nova mensagem</div>
-            <div class="compose-selected-name" style="margin-bottom:6px;color:#374151;font-weight:600;display:none;"></div>
+            <div style="font-weight:700;margin-bottom:8px;">${usuarioInstituicao ? "Enviar mensagem ao administrador" : "Enviar nova mensagem"}</div>
+            <div class="compose-selected-name" style="margin-bottom:6px;color:#374151;font-weight:600;display:${usuarioInstituicao ? "block" : "none"};">${usuarioInstituicao ? "Administrador Geral" : ""}</div>
             <div style="display:grid;gap:8px;">
                 <input class="inputAssunto" placeholder="Assunto" style="width:100%;padding:8px;border-radius:6px;border:1px solid #e6e9ee;" />
-                <textarea class="inputDescricao" placeholder="Descrição" style="width:100%;height:80px;padding:8px;border-radius:6px;border:1px solid #e6e9ee;"></textarea>
+                <textarea class="inputDescricao" placeholder="${usuarioInstituicao ? "Escreva sua mensagem para o administrador" : "Descrição"}" style="width:100%;height:80px;padding:8px;border-radius:6px;border:1px solid #e6e9ee;"></textarea>
                 <div style="display:flex;justify-content:flex-end;"><button class="btnEnviarNova btn btn-sm btn-primary">Enviar mensagem</button></div>
             </div>
         `;
@@ -80,8 +91,12 @@ export async function carregarNotificacoesDashboard(limite = 5) {
         const assunto = compose.querySelector(".inputAssunto").value.trim();
         const descricao = compose.querySelector(".inputDescricao").value.trim();
         const alvoEl = compose.querySelector(".compose-selected-name");
-        const alvo = alvoEl?.textContent?.trim();
-        const alvoId = Number(alvoEl?.dataset?.instituicaoId) || null;
+        const alvo = usuarioInstituicao
+          ? "Administrador Geral"
+          : alvoEl?.textContent?.trim();
+        const alvoId = usuarioInstituicao
+          ? null
+          : Number(alvoEl?.dataset?.instituicaoId) || null;
         if (!alvo) {
           toast.aviso(
             "Selecione uma conversa no painel para definir destinatário.",
@@ -96,11 +111,15 @@ export async function carregarNotificacoesDashboard(limite = 5) {
           tipo: "MENSAGEM",
           destinatario: alvo,
           destinatarioId: null,
-          instituicao: alvo,
-          instituicaoId: alvoId,
-          remetente: "Administrador Geral",
+          instituicao: usuarioInstituicao ? undefined : alvo,
+          instituicaoId: usuarioInstituicao ? undefined : alvoId,
+          remetente: usuarioInstituicao
+            ? obterUsuarioLogado()?.nome || "Instituição"
+            : "Administrador Geral",
           remetenteId: null,
-          assunto: assunto || "Mensagem do Administrador",
+          assunto:
+            assunto ||
+            (usuarioInstituicao ? "Mensagem para o Administrador" : "Mensagem do Administrador"),
           descricao,
           mensagem: descricao,
         };
@@ -123,6 +142,15 @@ export async function carregarNotificacoesDashboard(limite = 5) {
         }
       });
 
+    if (semNotificacoes) {
+      const vazio = document.createElement("div");
+      vazio.className = "text-muted text-center py-3";
+      vazio.innerHTML = `<i class="fas fa-bell-slash"></i> ${usuarioInstituicao ? "Nenhuma mensagem na conversa ainda." : "Nenhuma notificação recente."}`;
+      listaEl.appendChild(vazio);
+      atualizarBadgeEHeader([]);
+      return;
+    }
+
     // Agrupa por ID da instituição. O nome é apenas para exibição.
     // Isso evita misturar conversas caso existam instituições com nomes iguais.
     const grupos = {};
@@ -140,7 +168,7 @@ export async function carregarNotificacoesDashboard(limite = 5) {
 
     // Seleciona a primeira conversa disponível para o formulário superior.
     const firstKey = Object.keys(grupos)[0];
-    if (firstKey) {
+    if (firstKey && !usuarioInstituicao) {
       const label = listaEl.querySelector(".compose-selected-name");
       if (label) {
         label.style.display = "";
@@ -206,7 +234,7 @@ export async function carregarNotificacoesDashboard(limite = 5) {
           .querySelector(".conv-header-name")
           .addEventListener("click", (ev) => {
             const label = listaEl.querySelector(".compose-selected-name");
-            if (label) {
+            if (label && !usuarioInstituicao) {
               label.style.display = "";
               label.textContent = nomeInstituicao;
               label.dataset.instituicaoId = instituicaoId || "";
