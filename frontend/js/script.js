@@ -22,7 +22,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
             },
             body: JSON.stringify({
                 email,
-                senhaHash: senha
+                senha: senha
             })
         });
 

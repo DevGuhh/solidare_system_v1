@@ -2,7 +2,31 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
-const connectionString = `${process.env.DATABASE_URL}`;
+function normalizarDatabaseUrl(databaseUrl) {
+    if (!databaseUrl) {
+        throw new Error("DATABASE_URL não configurada.");
+    }
+
+    try {
+        const url = new URL(databaseUrl);
+        const sslMode = url.searchParams.get("sslmode");
+
+        // pg-connection-string avisa que estes modos terão semântica diferente
+        // em versões futuras. "verify-full" mantém explicitamente o
+        // comportamento seguro utilizado atualmente.
+        if (["prefer", "require", "verify-ca"].includes(sslMode)) {
+            url.searchParams.set("sslmode", "verify-full");
+        }
+
+        return url.toString();
+    } catch {
+        // Mantém a mensagem de conexão original caso a URL seja inválida;
+        // não expõe credenciais no log.
+        throw new Error("DATABASE_URL inválida.");
+    }
+}
+
+const connectionString = normalizarDatabaseUrl(process.env.DATABASE_URL);
 
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ 

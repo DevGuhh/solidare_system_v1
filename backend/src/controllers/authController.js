@@ -8,15 +8,32 @@ import { resetPasswordEmail } from "../templates/resetPasswordEmail.js";
 class AuthController {
   async login(req, res) {
     try {
-      const { email, senha, senhaHash } = req.body;
+      const { email, senha } = req.body;
 
-      const senhaRecebida = senha || senhaHash;
-
-      const emailNormalizado = email ? email.trim().toLowerCase() : "";
-
-      if (!emailNormalizado || !senhaRecebida) {
+      if (
+        typeof email !== "string" ||
+        typeof senha !== "string" ||
+        !email.trim() ||
+        !senha
+      ) {
         return res.status(400).json({
           error: "E-mail e senha são obrigatórios.",
+        });
+      }
+
+      const emailNormalizado = email.trim().toLowerCase();
+      const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!regexEmail.test(emailNormalizado) || emailNormalizado.length > 254) {
+        return res.status(400).json({
+          error: "Informe um e-mail válido.",
+        });
+      }
+
+      // Evita payloads anormalmente grandes antes do bcrypt.
+      if (senha.length > 256) {
+        return res.status(400).json({
+          error: "E-mail ou senha inválidos.",
         });
       }
 
@@ -60,7 +77,7 @@ class AuthController {
       }
 
       const senhaValida = await bcrypt.compare(
-        senhaRecebida,
+        senha,
         usuario.senhaHash,
       );
 
@@ -104,6 +121,7 @@ class AuthController {
     try {
       res.cookie("jwt", "", {
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
         expires: new Date(0),
         sameSite: "lax",
       });

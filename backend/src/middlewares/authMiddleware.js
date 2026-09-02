@@ -68,15 +68,17 @@ const protect = async (req, res, next) => {
 
         console.error(error);
 
-        if (error instanceof jwt.JsonWebTokenError) {
-            return res.status(401).json({
-                error: "Token inválido."
-            });
-        }
-
+        // TokenExpiredError herda de JsonWebTokenError.
+        // Por isso, token expirado precisa ser tratado primeiro.
         if (error instanceof jwt.TokenExpiredError) {
             return res.status(401).json({
                 error: "Token expirado."
+            });
+        }
+
+        if (error instanceof jwt.JsonWebTokenError) {
+            return res.status(401).json({
+                error: "Token inválido."
             });
         }
 
