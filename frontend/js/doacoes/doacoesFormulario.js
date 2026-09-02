@@ -293,7 +293,7 @@ export async function carregarBeneficiariosDoacao(
     try {
 
         const resposta =
-            await listarBeneficiarios();
+            await listarBeneficiarios({ modo: "selecao" });
 
         const dados =
             await lerRespostaJson(

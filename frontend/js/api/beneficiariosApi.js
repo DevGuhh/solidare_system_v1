@@ -83,10 +83,15 @@ function validarId(id) {
 // LISTAR BENEFICIÁRIOS
 // =====================================================
 
-export async function listarBeneficiarios() {
+export async function listarBeneficiarios(opcoes = {}) {
+
+    const modo =
+        opcoes?.modo === "selecao"
+            ? "?modo=selecao"
+            : "";
 
     return await fetch(
-        `${API_URL}/beneficiarios`,
+        `${API_URL}/beneficiarios${modo}`,
         {
             method: "GET",
 

@@ -266,7 +266,7 @@
 
         async function carregarBeneficiarios() {
             try {
-                const resposta = await listarBeneficiarios();
+                const resposta = await listarBeneficiarios({ modo: "selecao" });
                 const dados = await resposta.json().catch(() => ({}));
 
                 if (!resposta.ok) {

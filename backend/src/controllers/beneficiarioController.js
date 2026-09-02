@@ -118,7 +118,33 @@ class BeneficiarioController {
         });
       }
 
-      // Busca beneficiários no banco.
+      // Modo leve para seletores/autocomplete. Evita carregar endereço,
+      // observações e outros campos quando a tela precisa apenas identificar
+      // o beneficiário. O modo padrão permanece inalterado para relatórios,
+      // dashboard e tabela de beneficiários.
+      if (req.query.modo === "selecao") {
+        const beneficiarios = await prisma.beneficiario.findMany({
+          where,
+          select: {
+            id: true,
+            nomeCompleto: true,
+            cpf: true,
+            ativo: true,
+            instituicaoId: true,
+            tipoBeneficio: true,
+            instituicao: {
+              select: {
+                id: true,
+                nome: true,
+              },
+            },
+          },
+          orderBy: { nomeCompleto: "asc" },
+        });
+
+        return res.status(200).json(beneficiarios);
+      }
+
       const beneficiarios = await prisma.beneficiario.findMany({
         where,
         omit: { fotoPerfil: true },
