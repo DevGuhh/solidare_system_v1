@@ -4,7 +4,7 @@ import {
     enviarComprovanteAPI,
     listarComprovantesPendentesAPI,
     vincularComprovanteAPI,
-    montarUrlArquivoComprovante,
+    abrirArquivoComprovanteAPI,
 } from "./api/comprovantesApi.js";
 
 let usuarioAtual = null;
@@ -98,8 +98,6 @@ function renderizarResultadoUpload(comprovante) {
     const container = document.getElementById("resultadoUploadComprovante");
     if (!container) return;
 
-    const url = montarUrlArquivoComprovante(comprovante.arquivoUrl);
-
     container.className = "resultado-upload-preenchido";
     container.innerHTML = `
         <div class="resultado-upload-status">
@@ -128,15 +126,18 @@ function renderizarResultadoUpload(comprovante) {
             </div>
         </dl>
 
-        <a
-            class="btn btn-secondary link-arquivo-processado"
-            href="${escaparHtml(url)}"
-            target="_blank"
-            rel="noopener noreferrer"
-        >
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            Abrir arquivo
-        </a>
+        ${comprovante.status === "VINCULADO" ? `
+            <button type="button" class="btn btn-secondary link-arquivo-processado"
+                data-abrir-comprovante="${comprovante.id}">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                Abrir arquivo
+            </button>
+        ` : `
+            <div class="aviso-arquivo-protegido">
+                <i class="fa-solid fa-lock"></i>
+                Documento protegido e aguardando revisão do administrador.
+            </div>
+        `}
     `;
 }
 
@@ -177,21 +178,31 @@ function opcoesInstituicoes() {
 }
 
 function renderizarPreviewArquivo(comprovante) {
-    const url = montarUrlArquivoComprovante(comprovante.arquivoUrl);
     const imagem = ehImagem(comprovante.arquivoUrl);
-
     return `
-        <a
-            class="preview-comprovante preview-arquivo-manual"
-            href="${escaparHtml(url)}"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="${imagem ? "Abrir imagem" : "Abrir PDF"}"
-        >
+        <button type="button" class="preview-comprovante preview-arquivo-manual"
+            data-abrir-comprovante="${comprovante.id}"
+            title="${imagem ? "Abrir imagem" : "Abrir PDF"}">
             <i class="fa-solid ${imagem ? "fa-file-image" : "fa-file-pdf"}"></i>
             <span>${imagem ? "Abrir imagem" : "Abrir PDF"}</span>
-        </a>
+        </button>
     `;
+}
+
+async function abrirComprovanteProtegido(id) {
+    const resposta = await abrirArquivoComprovanteAPI(id);
+    if (!resposta.ok) {
+        const dados = await lerJsonSeguro(resposta);
+        throw new Error(dados.message || dados.error || "Não foi possível abrir o documento.");
+    }
+    const blob = await resposta.blob();
+    const urlTemporaria = URL.createObjectURL(blob);
+    const novaJanela = window.open(urlTemporaria, "_blank", "noopener,noreferrer");
+    if (!novaJanela) {
+        URL.revokeObjectURL(urlTemporaria);
+        throw new Error("O navegador bloqueou a abertura do documento.");
+    }
+    setTimeout(() => URL.revokeObjectURL(urlTemporaria), 60000);
 }
 
 function renderizarPendentes(pendentes) {
@@ -495,6 +506,20 @@ function configurarEventos() {
             }
         }, { signal });
 
+    document.addEventListener("click", async (event) => {
+        const botaoAbrir = event.target.closest("[data-abrir-comprovante]");
+        if (!botaoAbrir) return;
+        event.preventDefault();
+        const id = Number(botaoAbrir.dataset.abrirComprovante);
+        if (!Number.isInteger(id) || id <= 0) return;
+        try {
+            await abrirComprovanteProtegido(id);
+        } catch (erro) {
+            console.error("Erro ao abrir comprovante:", erro);
+            toast.erro(erro.message);
+        }
+    }, { signal });
+
     const listaPendentes =
         document.getElementById("listaComprovantesPendentes");
 
@@ -509,7 +534,6 @@ function configurarEventos() {
                 return;
             }
 
-            // Links de arquivo são abertos diretamente pelo navegador.
         }, { signal });
 }
 

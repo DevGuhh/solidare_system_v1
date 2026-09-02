@@ -46,48 +46,44 @@ app.set("trust proxy", 1);
 // CORS
 // ===============================
 
-const allowedOrigins = [
+const allowedOrigins = new Set([
   "https://solidare-login-v4.vercel.app",
   "https://solidare-system-v1.vercel.app",
   "https://solidare-login-v4-jihy0l9fa-devguhhs-projects.vercel.app",
-];
+]);
 
-function origemLocalPermitida(origin) {
-  if (process.env.NODE_ENV === "production") {
-    return false;
-  }
+function origemPermitida(origin) {
+  // Requisições sem Origin (Postman, servidor-servidor, health checks).
+  if (!origin) return true;
 
+  if (allowedOrigins.has(origin)) return true;
+
+  // Ambiente local: aceita Live Server em localhost/127.0.0.1,
+  // independentemente da porta escolhida pelo VS Code.
   try {
     const url = new URL(origin);
 
     return (
-      ["localhost", "127.0.0.1"].includes(url.hostname) &&
-      ["http:", "https:"].includes(url.protocol)
+      url.protocol === "http:" &&
+      (url.hostname === "127.0.0.1" || url.hostname === "localhost")
     );
   } catch {
     return false;
   }
 }
 
-const corsOptions = {
-  origin(origin, callback) {
-    if (
-      !origin ||
-      allowedOrigins.includes(origin) ||
-      origemLocalPermitida(origin)
-    ) {
-      return callback(null, true);
-    }
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (origemPermitida(origin)) {
+        return callback(null, true);
+      }
 
-    return callback(null, false);
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 204,
-};
-
-app.use(cors(corsOptions));
+      return callback(new Error(`Origin não permitida: ${origin}`));
+    },
+    credentials: true,
+  }),
+);
 
 // ===============================
 // MIDDLEWARES
@@ -96,36 +92,46 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json({ limit: "8mb" }));
 app.use(express.urlencoded({ extended: true, limit: "8mb" }));
-// Rotas
-app.use("/uploads", express.static("uploads"));
-
-// Se o arquivo físico não existir, encerra aqui.
-// Isso impede que /uploads caia no rate limit global.
-app.use("/uploads", (req, res) => {
-  return res.status(404).json({
-    error: "Arquivo não encontrado.",
-  });
-});
-
-app.use("/api/comprovantes", comprovanteRoutes);
-app.use("/notificacoes", notificacoesRoutes);
+// Arquivos de comprovantes não são públicos. O acesso ocorre somente
+// pela rota autenticada /api/comprovantes/:id/arquivo.
 
 // ===============================
 // RATE LIMIT
 // ===============================
 
+// O limitador precisa ser registrado antes de TODAS as rotas.
+// OPTIONS é ignorado para não penalizar o preflight do CORS.
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === "OPTIONS",
+  message: {
+    error: "Muitas requisições. Tente novamente em alguns minutos.",
+  },
 });
 
 app.use(limiter);
 
+// Limite adicional para operações de comprovantes/OCR, que são mais pesadas.
+const comprovantesLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.method === "OPTIONS",
+  message: {
+    error: "Muitas operações com comprovantes. Tente novamente em alguns minutos.",
+  },
+});
+
 // ===============================
 // ROTAS
 // ===============================
+
+app.use("/api/comprovantes", comprovantesLimiter, comprovanteRoutes);
+app.use("/notificacoes", notificacoesRoutes);
 
 app.use("/auth", authRoutes);
 

@@ -24,7 +24,7 @@ router.get(
 router.get(
   "/:id/arquivo",
   protect,
-  authorize("ADMIN"),
+  authorize("ADMIN", "INSTITUICAO"),
   comprovanteController.abrirArquivo,
 );
 
@@ -43,4 +43,3 @@ router.patch(
 
 export default router;
 
-//asdfghjklç

@@ -2,14 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { OcrService } from "./coreOcrService.js";
 import validarTexto from "../validators/cnpjValidator.js";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const prisma = new PrismaClient({ adapter });
+import { prisma } from "../config/db.js";
 
 class ComprovanteService {
   async processar({
@@ -18,6 +11,7 @@ class ComprovanteService {
     nomeArquivo,
     tipoDoc,
     doacaoId = null,
+    usuario = null,
   }) {
     let cnpjEncontrado = null;
     let instituicao = null;
@@ -44,10 +38,14 @@ class ComprovanteService {
       cnpjEncontrado = candidatosCnpj[0] ?? null;
 
       if (cnpjEncontrado) {
+        const whereInstituicao = { cnpj: cnpjEncontrado };
+
+        if (usuario?.role === "INSTITUICAO") {
+          whereInstituicao.id = Number(usuario.instituicaoId);
+        }
+
         instituicao = await prisma.instituicaoParceira.findFirst({
-          where: {
-            cnpj: cnpjEncontrado,
-          },
+          where: whereInstituicao,
         });
       }
     } catch (error) {
@@ -247,6 +245,7 @@ class ComprovanteService {
     return {
       caminhoArquivo: caminhoEncontrado,
       nomeArquivo,
+      comprovante,
     };
   }
 

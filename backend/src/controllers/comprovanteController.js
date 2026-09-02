@@ -102,6 +102,7 @@ class ComprovanteController {
         caminhoArquivo: caminhoTemporario,
         nomeArquivo,
         tipoDoc: tipo_doc,
+        usuario: req.user,
       });
 
       return res.status(201).json(comprovante);
@@ -148,6 +149,15 @@ class ComprovanteController {
       const { id } = req.params;
 
       const resultado = await comprovanteService.localizarArquivo(id);
+
+      if (
+        req.user?.role === "INSTITUICAO" &&
+        Number(resultado.comprovante.instituicaoId) !== Number(req.user.instituicaoId)
+      ) {
+        return res.status(403).json({
+          message: "Você não possui permissão para acessar este documento.",
+        });
+      }
 
       res.setHeader(
         "Content-Disposition",
