@@ -6,6 +6,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { config } from "dotenv";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import { connectDB, disconnectDB } from "./config/db.js";
 import { iniciarLimpezaAutomaticaComprovantes } from "./services/limpezaComprovantesService.js";
 
@@ -41,6 +42,13 @@ connectDB();
 const app = express();
 
 app.set("trust proxy", 1);
+
+// Cabeçalhos HTTP de segurança. Como este backend expõe uma API JSON,
+// a política padrão do Helmet pode ser aplicada sem alterar o frontend.
+app.use(helmet());
+
+// Evita divulgar a tecnologia do servidor no cabeçalho X-Powered-By.
+app.disable("x-powered-by");
 
 // ===============================
 // CORS

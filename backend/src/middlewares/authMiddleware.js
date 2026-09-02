@@ -41,6 +41,13 @@ const protect = async (req, res, next) => {
                 ativo: true,
                 instituicaoId: true,
                 senhaProvisoria: true,
+                instituicao: {
+                    select: {
+                        id: true,
+                        ativa: true,
+                        deletedAt: true,
+                    },
+                },
             },
          });
 
@@ -58,8 +65,28 @@ const protect = async (req, res, next) => {
             });
         }
 
+        // Usuários de instituição só podem continuar se o vínculo ainda
+        // existir e a instituição estiver ativa. Isso evita acesso residual
+        // caso o usuário e a instituição fiquem inconsistentes no banco.
+        if (usuario.role === "INSTITUICAO") {
+            if (
+                !usuario.instituicaoId ||
+                !usuario.instituicao ||
+                !usuario.instituicao.ativa ||
+                usuario.instituicao.deletedAt
+            ) {
+                return res.status(403).json({
+                    error: "Instituição vinculada indisponível ou inativa."
+                });
+            }
+        }
+
+        // A relação foi usada apenas para validar o vínculo e não precisa
+        // ficar exposta aos controllers.
+        const { instituicao, ...usuarioAutenticado } = usuario;
+
         // Salva os dados do usuário na requisição
-        req.user = usuario;
+        req.user = usuarioAutenticado;
         req.userId = usuario.id;
 
         next();

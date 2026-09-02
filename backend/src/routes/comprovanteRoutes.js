@@ -7,7 +7,13 @@ import { authorize, protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", protect, uploadMiddleware, comprovanteController.enviar);
+router.post(
+  "/",
+  protect,
+  authorize("ADMIN", "INSTITUICAO"),
+  uploadMiddleware,
+  comprovanteController.enviar,
+);
 router.get(
   "/pendentes",
   protect,
