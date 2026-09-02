@@ -29,11 +29,23 @@ function normalizarDatabaseUrl(databaseUrl) {
 const connectionString = normalizarDatabaseUrl(process.env.DATABASE_URL);
 
 const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ 
+
+// Consultas SQL detalhadas ficam desativadas por padrão, inclusive em
+// desenvolvimento. Para diagnóstico pontual, use PRISMA_LOG_QUERIES=true.
+// Erros continuam sendo registrados normalmente.
+const logPrisma = ["error"];
+
+if (process.env.NODE_ENV === "development") {
+    logPrisma.push("warn");
+
+    if (process.env.PRISMA_LOG_QUERIES === "true") {
+        logPrisma.push("query");
+    }
+}
+
+const prisma = new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development"
-    ? ["query", "error", "warn"]
-    : ["error"]
+    log: logPrisma,
 });
 
 const connectDB = async () => {

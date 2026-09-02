@@ -6,7 +6,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { config } from "dotenv";
 import rateLimit from "express-rate-limit";
-import helmet from "helmet";
 import { connectDB, disconnectDB } from "./config/db.js";
 import { iniciarLimpezaAutomaticaComprovantes } from "./services/limpezaComprovantesService.js";
 
@@ -42,13 +41,6 @@ connectDB();
 const app = express();
 
 app.set("trust proxy", 1);
-
-// Cabeçalhos HTTP de segurança. Como este backend expõe uma API JSON,
-// a política padrão do Helmet pode ser aplicada sem alterar o frontend.
-app.use(helmet());
-
-// Evita divulgar a tecnologia do servidor no cabeçalho X-Powered-By.
-app.disable("x-powered-by");
 
 // ===============================
 // CORS
@@ -169,30 +161,58 @@ const server = app.listen(PORT, () => {
 });
 
 // ===============================
-// TRATAMENTO DE ERROS
+// TRATAMENTO DE ERROS / ENCERRAMENTO
 // ===============================
+
+let encerrando = false;
+
+async function encerrarAplicacao(motivo, codigoSaida = 0) {
+  if (encerrando) return;
+  encerrando = true;
+
+  console.log(`${motivo} Encerrando aplicação...`);
+
+  // Impede que o processo fique preso indefinidamente caso alguma conexão
+  // HTTP não seja encerrada dentro do tempo esperado.
+  const timeoutForcado = setTimeout(() => {
+    console.error("Tempo limite de encerramento excedido. Finalizando processo.");
+    process.exit(1);
+  }, 10_000);
+
+  timeoutForcado.unref?.();
+
+  server.close(async (erroServidor) => {
+    if (erroServidor) {
+      console.error("Erro ao encerrar o servidor HTTP:", erroServidor);
+      codigoSaida = 1;
+    }
+
+    try {
+      await disconnectDB();
+    } catch (erroBanco) {
+      console.error("Erro ao desconectar do banco de dados:", erroBanco);
+      codigoSaida = 1;
+    } finally {
+      clearTimeout(timeoutForcado);
+      process.exit(codigoSaida);
+    }
+  });
+}
 
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Rejection:", err);
-
-  server.close(async () => {
-    await disconnectDB();
-    process.exit(1);
-  });
+  void encerrarAplicacao("Falha assíncrona não tratada.", 1);
 });
 
-process.on("uncaughtException", async (err) => {
+process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
-
-  await disconnectDB();
-  process.exit(1);
+  void encerrarAplicacao("Exceção não tratada.", 1);
 });
 
-process.on("SIGTERM", async () => {
-  console.log("SIGTERM recebido. Encerrando aplicação...");
+process.on("SIGTERM", () => {
+  void encerrarAplicacao("SIGTERM recebido.", 0);
+});
 
-  server.close(async () => {
-    await disconnectDB();
-    process.exit(0);
-  });
+process.on("SIGINT", () => {
+  void encerrarAplicacao("SIGINT recebido.", 0);
 });

@@ -230,7 +230,6 @@ class QrCodeController {
       return res.status(500).json({
         ok: false,
         message: "Erro interno ao listar QR Codes.",
-        error: erro.message,
       });
     }
   }
@@ -325,7 +324,6 @@ class QrCodeController {
       return res.status(500).json({
         ok: false,
         message: "Erro interno ao criar QR Code.",
-        error: erro.message,
       });
     }
   }
@@ -395,7 +393,6 @@ class QrCodeController {
       return res.status(500).json({
         ok: false,
         message: "Erro interno ao gerar a imagem do QR Code.",
-        error: erro.message,
       });
     }
   }
@@ -502,7 +499,6 @@ class QrCodeController {
         ok: false,
         valido: false,
         message: "Erro interno ao validar QR Code.",
-        error: erro.message,
       });
     }
   }
@@ -705,7 +701,6 @@ class QrCodeController {
       return res.status(500).json({
         ok: false,
         message: "Erro interno ao confirmar a entrega da cesta.",
-        error: erro.message,
       });
     }
   }
@@ -767,7 +762,6 @@ class QrCodeController {
       return res.status(500).json({
         ok: false,
         message: "Erro interno ao buscar QR Code.",
-        error: erro.message,
       });
     }
   }
@@ -829,7 +823,6 @@ class QrCodeController {
       return res.status(500).json({
         ok: false,
         message: "Erro interno ao desativar QR Code.",
-        error: erro.message,
       });
     }
   }

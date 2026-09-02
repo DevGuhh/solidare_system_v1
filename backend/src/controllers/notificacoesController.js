@@ -5,6 +5,11 @@ function numeroId(valor) {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
+function textoLimitado(valor, maximo) {
+  const texto = String(valor ?? "").trim();
+  return texto.length <= maximo ? texto : null;
+}
+
 async function buscarInstituicaoDoUsuario(req) {
   const instituicaoId = numeroId(req.user?.instituicaoId);
   if (!instituicaoId) return null;
@@ -126,34 +131,60 @@ class NotificacoesController {
         instituicao = await resolverInstituicaoDestino(body);
       }
 
-      const descricao = String(
+      const assunto = textoLimitado(body.assunto || "Nova mensagem", 150);
+      const descricao = textoLimitado(
         body.descricao || body.mensagem || "Mensagem registrada pelo sistema.",
-      ).trim();
+        2000,
+      );
+      const mensagem = textoLimitado(
+        body.mensagem || body.descricao || descricao,
+        2000,
+      );
+      const tipo = textoLimitado(body.tipo || "MENSAGEM", 50);
+
+      const instituicaoTexto = instituicao?.nome ||
+        textoLimitado(body.instituicao || body.remetente || "Sistema", 150);
+
+      const destinatario =
+        req.user.role === "INSTITUICAO"
+          ? "Administrador Geral"
+          : textoLimitado(
+              body.destinatario || instituicao?.nome || "Administrador Geral",
+              150,
+            );
+
+      const remetente =
+        req.user.role === "INSTITUICAO"
+          ? instituicao.nome
+          : textoLimitado(body.remetente || "Administrador Geral", 150);
+
+      if (
+        !instituicaoTexto ||
+        !assunto ||
+        !descricao ||
+        !mensagem ||
+        !tipo ||
+        !destinatario ||
+        !remetente
+      ) {
+        return res.status(400).json({
+          ok: false,
+          error:
+            "Os campos da notificação são obrigatórios e devem respeitar os limites de tamanho.",
+        });
+      }
 
       const payload = {
         instituicaoId: instituicao?.id ?? null,
-        instituicao: instituicao?.nome || String(body.instituicao || body.remetente || "Sistema").trim(),
-        assunto: String(body.assunto || "Nova mensagem").trim(),
+        instituicao: instituicaoTexto,
+        assunto,
         descricao,
-        mensagem: String(body.mensagem || body.descricao || descricao).trim(),
-        tipo: String(body.tipo || "MENSAGEM").trim(),
-        destinatario:
-          req.user.role === "INSTITUICAO"
-            ? "Administrador Geral"
-            : String(body.destinatario || instituicao?.nome || "Administrador Geral").trim(),
-        remetente:
-          req.user.role === "INSTITUICAO"
-            ? instituicao.nome
-            : String(body.remetente || "Administrador Geral").trim(),
+        mensagem,
+        tipo,
+        destinatario,
+        remetente,
         lida: false,
       };
-
-      if (!payload.instituicao || !payload.assunto || !payload.descricao) {
-        return res.status(400).json({
-          ok: false,
-          error: "Instituição, assunto e descrição são obrigatórios.",
-        });
-      }
 
       if (req.user.role === "ADMIN" && !payload.instituicaoId) {
         return res.status(400).json({

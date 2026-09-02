@@ -59,10 +59,9 @@ export const uploadMiddleware = (req, res, next) => {
       }
 
       return res.status(400).json({
-        message: "Erro no upload",
-        code: err.code,
+        message: "Não foi possível receber o arquivo enviado.",
+        code: err.code || "UPLOAD_ERROR",
         field: err.field,
-        error: err.message,
       });
     }
 
@@ -107,9 +106,9 @@ class ComprovanteController {
 
       return res.status(201).json(comprovante);
     } catch (error) {
+      console.error("Erro ao processar comprovante:", error);
       return res.status(500).json({
-        message: "Erro ao processar comprovante",
-        error: error.message,
+        message: "Erro interno ao processar comprovante.",
       });
     }
   }
@@ -119,9 +118,10 @@ class ComprovanteController {
       const pendentes = await comprovanteService.listarPendentes();
       return res.status(200).json(pendentes);
     } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "Erro ao listar pendentes", error: error.message });
+      console.error("Erro ao listar comprovantes pendentes:", error);
+      return res.status(500).json({
+        message: "Erro interno ao listar comprovantes pendentes.",
+      });
     }
   }
 
@@ -134,12 +134,15 @@ class ComprovanteController {
 
       return res.status(200).json(documentos);
     } catch (error) {
-      const status =
-        error.message === "ID da instituição inválido." ? 400 : 500;
+      if (error.message === "ID da instituição inválido.") {
+        return res.status(400).json({
+          message: "ID da instituição inválido.",
+        });
+      }
 
-      return res.status(status).json({
-        message: "Erro ao listar documentos da instituição",
-        error: error.message,
+      console.error("Erro ao listar documentos da instituição:", error);
+      return res.status(500).json({
+        message: "Erro interno ao listar documentos da instituição.",
       });
     }
   }
@@ -181,9 +184,9 @@ class ComprovanteController {
         });
       }
 
+      console.error("Erro ao abrir o documento:", error);
       return res.status(500).json({
-        message: "Erro ao abrir o documento",
-        error: error.message,
+        message: "Erro interno ao abrir o documento.",
       });
     }
   }
@@ -201,9 +204,9 @@ class ComprovanteController {
       );
       return res.status(200).json(comprovante);
     } catch (error) {
+      console.error("Erro ao vincular comprovante:", error);
       return res.status(500).json({
-        message: "Erro ao vincular comprovante",
-        error: error.message,
+        message: "Erro interno ao vincular comprovante.",
       });
     }
   }
@@ -219,9 +222,9 @@ class ComprovanteController {
         return res.status(404).json({ message: error.message });
       }
 
+      console.error("Erro ao rejeitar comprovante:", error);
       return res.status(500).json({
-        message: "Erro ao rejeitar comprovante",
-        error: error.message,
+        message: "Erro interno ao rejeitar comprovante.",
       });
     }
   }

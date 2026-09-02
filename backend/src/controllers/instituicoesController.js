@@ -525,6 +525,9 @@ class InstituicaoController {
           id,
           deletedAt: null,
         },
+        select: {
+          id: true,
+        },
       });
 
       if (!instituicao) {
@@ -536,6 +539,10 @@ class InstituicaoController {
       const beneficiarios = await prisma.beneficiario.findMany({
         where: {
           instituicaoId: id,
+          deletedAt: null,
+        },
+        omit: {
+          fotoPerfil: true,
         },
         orderBy: {
           nomeCompleto: "asc",
