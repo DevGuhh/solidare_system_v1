@@ -1,14 +1,17 @@
-import fs from "fs/promises";
-import path from "path";
 import { OcrService } from "./coreOcrService.js";
 import validarTexto from "../validators/cnpjValidator.js";
 import { prisma } from "../config/db.js";
+import {
+  uploadFile,
+  getFile,
+  moveFile,
+} from "../config/r2.js";
 
 class ComprovanteService {
   async processar({
     buffer,
-    caminhoArquivo,
     nomeArquivo,
+    mimeType,
     tipoDoc,
     doacaoId = null,
     usuario = null,
@@ -18,39 +21,45 @@ class ComprovanteService {
     let ocrProcessado = true;
     let erroOcr = null;
 
-    /*
-     * O arquivo já foi recebido e salvo pelo controller.
-     * Uma indisponibilidade do Azure OCR não pode fazer o upload ser perdido.
-     * Nessa situação o comprovante segue para revisão manual.
-     */
     try {
       const ocrResult = await OcrService.sendBuffer(buffer);
 
       const texts = (ocrResult.regions ?? [])
         .flatMap((region) =>
           (region.lines ?? []).map((line) =>
-            (line.words ?? []).map((word) => word.text).join(" "),
+            (line.words ?? [])
+              .map((word) => word.text)
+              .join(" "),
           ),
         )
         .filter(Boolean);
 
-      const candidatosCnpj = validarTexto.extrairCandidatos(texts);
+      const candidatosCnpj =
+        validarTexto.extrairCandidatos(texts);
+
       cnpjEncontrado = candidatosCnpj[0] ?? null;
 
       if (cnpjEncontrado) {
-        const whereInstituicao = { cnpj: cnpjEncontrado };
+        const whereInstituicao = {
+          cnpj: cnpjEncontrado,
+        };
 
         if (usuario?.role === "INSTITUICAO") {
-          whereInstituicao.id = Number(usuario.instituicaoId);
+          whereInstituicao.id = Number(
+            usuario.instituicaoId,
+          );
         }
 
-        instituicao = await prisma.instituicaoParceira.findFirst({
-          where: whereInstituicao,
-        });
+        instituicao =
+          await prisma.instituicaoParceira.findFirst({
+            where: whereInstituicao,
+          });
       }
     } catch (error) {
       ocrProcessado = false;
-      erroOcr = error?.message || "Falha desconhecida no OCR.";
+      erroOcr =
+        error?.message ||
+        "Falha desconhecida no OCR.";
 
       console.error(
         "OCR indisponível. Comprovante será enviado para revisão manual:",
@@ -58,36 +67,29 @@ class ComprovanteService {
       );
     }
 
-    let arquivoUrl = `/uploads/comprovantes/pendentes/${nomeArquivo}`;
+    const arquivoKey = instituicao
+      ? `comprovantes/${instituicao.id}/${nomeArquivo}`
+      : `comprovantes/pendentes/${nomeArquivo}`;
 
-    if (instituicao) {
-      const pastaInstituicao = path.join(
-        "uploads",
-        "comprovantes",
-        String(instituicao.id),
-      );
-
-      await fs.mkdir(pastaInstituicao, {
-        recursive: true,
-      });
-
-      const caminhoFinal = path.join(pastaInstituicao, nomeArquivo);
-
-      await fs.rename(caminhoArquivo, caminhoFinal);
-
-      arquivoUrl = `/uploads/comprovantes/${instituicao.id}/${nomeArquivo}`;
-    }
-
-    const comprovante = await prisma.comprovante.create({
-      data: {
-        arquivoUrl,
-        tipoDoc,
-        cnpjExtraido: cnpjEncontrado,
-        instituicaoId: instituicao?.id ?? null,
-        doacaoId,
-        status: instituicao ? "VINCULADO" : "PENDENTE_REVISAO",
-      },
+    await uploadFile({
+      fileBuffer: buffer,
+      key: arquivoKey,
+      contentType: mimeType,
     });
+
+    const comprovante =
+      await prisma.comprovante.create({
+        data: {
+          arquivoUrl: arquivoKey,
+          tipoDoc,
+          cnpjExtraido: cnpjEncontrado,
+          instituicaoId: instituicao?.id ?? null,
+          doacaoId,
+          status: instituicao
+            ? "VINCULADO"
+            : "PENDENTE_REVISAO",
+        },
+      });
 
     return {
       ...comprovante,
@@ -113,7 +115,9 @@ class ComprovanteService {
     const id = Number(instituicaoId);
 
     if (!Number.isInteger(id) || id <= 0) {
-      throw new Error("ID da instituição inválido.");
+      throw new Error(
+        "ID da instituição inválido.",
+      );
     }
 
     return prisma.comprovante.findMany({
@@ -131,138 +135,78 @@ class ComprovanteService {
     const id = Number(comprovanteId);
 
     if (!Number.isInteger(id) || id <= 0) {
-      throw new Error("ID do comprovante inválido.");
+      const error = new Error(
+        "ID do comprovante inválido.",
+      );
+      error.statusCode = 400;
+      throw error;
     }
 
-    const comprovante = await prisma.comprovante.findUnique({
-      where: { id },
-    });
+    const comprovante =
+      await prisma.comprovante.findUnique({
+        where: { id },
+      });
 
     if (!comprovante) {
-      throw new Error("Comprovante não encontrado.");
-    }
-
-    const pastaUploads = path.resolve("uploads");
-    const pastaComprovantes = path.join(pastaUploads, "comprovantes");
-    const nomeArquivo = path.basename(comprovante.arquivoUrl || "");
-
-    if (!nomeArquivo) {
-      throw new Error("Arquivo do comprovante não informado.");
-    }
-
-    const candidatos = [];
-
-    if (comprovante.arquivoUrl) {
-      candidatos.push(
-        path.resolve(
-          "uploads",
-          comprovante.arquivoUrl.replace(/^\/uploads\//, ""),
-        ),
+      const error = new Error(
+        "Comprovante não encontrado.",
       );
+      error.statusCode = 404;
+      throw error;
     }
 
-    if (comprovante.instituicaoId) {
-      candidatos.push(
-        path.join(
-          pastaComprovantes,
-          String(comprovante.instituicaoId),
-          nomeArquivo,
-        ),
+    try {
+      const arquivo = await getFile(
+        comprovante.arquivoUrl,
       );
-    }
 
-    candidatos.push(
-      path.join(pastaComprovantes, "pendentes", nomeArquivo),
-    );
-
-    let caminhoEncontrado = null;
-
-    for (const candidato of candidatos) {
-      try {
-        const stat = await fs.stat(candidato);
-
-        if (stat.isFile()) {
-          caminhoEncontrado = candidato;
-          break;
-        }
-      } catch {
-        // Continua procurando.
-      }
-    }
-
-    if (!caminhoEncontrado) {
-      try {
-        const entradas = await fs.readdir(
-          pastaComprovantes,
-          { withFileTypes: true },
+      return {
+        comprovante,
+        arquivo,
+      };
+    } catch (error) {
+      if (
+        error.name === "NoSuchKey" ||
+        error.$metadata?.httpStatusCode === 404
+      ) {
+        const notFound = new Error(
+          "Arquivo não encontrado no armazenamento.",
         );
 
-        for (const entrada of entradas) {
-          if (!entrada.isDirectory()) continue;
+        notFound.statusCode = 404;
 
-          const candidato = path.join(
-            pastaComprovantes,
-            entrada.name,
-            nomeArquivo,
-          );
-
-          try {
-            const stat = await fs.stat(candidato);
-
-            if (stat.isFile()) {
-              caminhoEncontrado = candidato;
-              break;
-            }
-          } catch {
-            // Continua procurando.
-          }
-        }
-      } catch {
-        // Pasta de comprovantes ainda não existe.
+        throw notFound;
       }
+
+      throw error;
     }
-
-    if (!caminhoEncontrado) {
-      throw new Error("Arquivo físico não encontrado.");
-    }
-
-    const relativoUploads = path
-      .relative(pastaUploads, caminhoEncontrado)
-      .split(path.sep)
-      .join("/");
-
-    const arquivoUrlCorreto = `/uploads/${relativoUploads}`;
-
-    if (arquivoUrlCorreto !== comprovante.arquivoUrl) {
-      await prisma.comprovante.update({
-        where: { id },
-        data: {
-          arquivoUrl: arquivoUrlCorreto,
-        },
-      });
-    }
-
-    return {
-      caminhoArquivo: caminhoEncontrado,
-      nomeArquivo,
-      comprovante,
-    };
   }
 
   async rejeitar(comprovanteId) {
-    const comprovante = await prisma.comprovante.findUnique({
-      where: {
-        id: Number(comprovanteId),
-      },
-    });
+    const id = Number(comprovanteId);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new Error(
+        "ID do comprovante inválido.",
+      );
+    }
+
+    const comprovante =
+      await prisma.comprovante.findUnique({
+        where: {
+          id,
+        },
+      });
 
     if (!comprovante) {
-      throw new Error("Comprovante não encontrado.");
+      throw new Error(
+        "Comprovante não encontrado.",
+      );
     }
 
     return prisma.comprovante.update({
       where: {
-        id: Number(comprovanteId),
+        id,
       },
       data: {
         status: "REJEITADO",
@@ -271,59 +215,94 @@ class ComprovanteService {
     });
   }
 
-  async vincularManualmente(comprovanteId, instituicaoId) {
-    const comprovante = await prisma.comprovante.findUnique({
-      where: {
-        id: Number(comprovanteId),
-      },
-    });
+  async vincularManualmente(
+    comprovanteId,
+    instituicaoId,
+  ) {
+    const idComprovante = Number(
+      comprovanteId,
+    );
+    const idInstituicao = Number(
+      instituicaoId,
+    );
+
+    if (
+      !Number.isInteger(idComprovante) ||
+      idComprovante <= 0
+    ) {
+      throw new Error(
+        "ID do comprovante inválido.",
+      );
+    }
+
+    if (
+      !Number.isInteger(idInstituicao) ||
+      idInstituicao <= 0
+    ) {
+      throw new Error(
+        "ID da instituição inválido.",
+      );
+    }
+
+    const comprovante =
+      await prisma.comprovante.findUnique({
+        where: {
+          id: idComprovante,
+        },
+      });
 
     if (!comprovante) {
-      throw new Error("Comprovante não encontrado.");
+      throw new Error(
+        "Comprovante não encontrado.",
+      );
     }
 
-    const instituicao = await prisma.instituicaoParceira.findUnique({
-      where: {
-        id: Number(instituicaoId),
-      },
-    });
+    const instituicao =
+      await prisma.instituicaoParceira.findUnique({
+        where: {
+          id: idInstituicao,
+        },
+      });
 
     if (!instituicao) {
-      throw new Error("Instituição não encontrada.");
+      throw new Error(
+        "Instituição não encontrada.",
+      );
     }
 
-    const nomeArquivo = path.basename(comprovante.arquivoUrl);
+    const nomeArquivo =
+      comprovante.arquivoUrl
+        .split("/")
+        .pop();
 
-    const caminhoAtual = path.join(
-      "uploads",
-      comprovante.arquivoUrl.replace(/^\/uploads\//, ""),
-    );
+    if (!nomeArquivo) {
+      throw new Error(
+        "Nome do arquivo inválido.",
+      );
+    }
 
-    const pastaInstituicao = path.join(
-      "uploads",
-      "comprovantes",
-      String(instituicao.id),
-    );
+    const keyAtual =
+      comprovante.arquivoUrl;
 
-    await fs.mkdir(pastaInstituicao, {
-      recursive: true,
-    });
+    const novaKey =
+      `comprovantes/${instituicao.id}/${nomeArquivo}`;
 
-    const caminhoFinal = path.join(pastaInstituicao, nomeArquivo);
-
-    await fs.rename(caminhoAtual, caminhoFinal);
-
-    const arquivoUrl = `/uploads/comprovantes/${instituicao.id}/${nomeArquivo}`;
+    if (keyAtual !== novaKey) {
+      await moveFile({
+        sourceKey: keyAtual,
+        destinationKey: novaKey,
+      });
+    }
 
     return prisma.comprovante.update({
       where: {
-        id: Number(comprovanteId),
+        id: idComprovante,
       },
       data: {
-        instituicaoId: Number(instituicaoId),
+        instituicaoId: idInstituicao,
         status: "VINCULADO",
         revisadoEm: new Date(),
-        arquivoUrl,
+        arquivoUrl: novaKey,
       },
     });
   }

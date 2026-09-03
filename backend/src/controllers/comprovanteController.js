@@ -1,7 +1,5 @@
 // backend/src/controllers/comprovanteController.js
 import multer from "multer";
-import fs from "fs/promises";
-import path from "path";
 import { randomUUID } from "crypto";
 import comprovanteService from "../services/comprovanteService.js";
 
@@ -140,20 +138,10 @@ class ComprovanteController {
       const extensao = EXTENSAO_POR_MIME[req.file.mimetype];
       const nomeArquivo = `${randomUUID()}${extensao}`;
 
-      const caminhoTemporario = path.join(
-        "uploads",
-        "comprovantes",
-        "pendentes",
-        nomeArquivo,
-      );
-
-      await fs.mkdir(path.dirname(caminhoTemporario), { recursive: true });
-      await fs.writeFile(caminhoTemporario, req.file.buffer);
-
       const comprovante = await comprovanteService.processar({
         buffer: req.file.buffer,
-        caminhoArquivo: caminhoTemporario,
         nomeArquivo,
+        mimeType: req.file.mimetype,
         tipoDoc: tipo_doc,
         usuario: req.user,
       });
@@ -205,11 +193,13 @@ class ComprovanteController {
     try {
       const { id } = req.params;
 
-      const resultado = await comprovanteService.localizarArquivo(id);
+      const { comprovante, arquivo } =
+        await comprovanteService.localizarArquivo(id);
 
+      // Mantém sua regra de autorização
       if (
         req.user?.role === "INSTITUICAO" &&
-        Number(resultado.comprovante.instituicaoId) !== Number(req.user.instituicaoId)
+        Number(comprovante.instituicaoId) !== Number(req.user.instituicaoId)
       ) {
         return res.status(403).json({
           message: "Você não possui permissão para acessar este documento.",
@@ -217,30 +207,25 @@ class ComprovanteController {
       }
 
       res.setHeader(
-        "Content-Disposition",
-        `inline; filename*=UTF-8''${encodeURIComponent(resultado.nomeArquivo)}`,
+        "Content-Type",
+        arquivo.ContentType || "application/octet-stream",
       );
 
-      return res.sendFile(resultado.caminhoArquivo);
+      if (arquivo.ContentLength) {
+        res.setHeader("Content-Length", arquivo.ContentLength);
+      }
+
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename="comprovante-${comprovante.id}"`,
+      );
+
+      arquivo.Body.pipe(res);
     } catch (error) {
-      if (
-        error.message === "Comprovante não encontrado." ||
-        error.message === "Arquivo físico não encontrado."
-      ) {
-        return res.status(404).json({
-          message: error.message,
-        });
-      }
+      console.error("Erro ao abrir comprovante:", error);
 
-      if (error.message === "ID do comprovante inválido.") {
-        return res.status(400).json({
-          message: error.message,
-        });
-      }
-
-      console.error("Erro ao abrir o documento:", error);
       return res.status(500).json({
-        message: "Erro interno ao abrir o documento.",
+        message: error.message || "Erro ao abrir comprovante.",
       });
     }
   }
