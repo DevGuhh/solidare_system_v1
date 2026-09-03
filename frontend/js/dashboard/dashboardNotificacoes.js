@@ -323,27 +323,45 @@ function _computeSnapshot(notificacoes) {
   }
 }
 
-function startNotificacoesPolling(intervalMs = 8000) {
-  if (_notificacoesPollingTimer) return;
-  _notificacoesPollingTimer = setInterval(async () => {
-    try {
-      const latest = (await listarNotificacoes(10)) || [];
-      const snap = _computeSnapshot(latest);
-      if (_notificacoesSnapshot && snap !== _notificacoesSnapshot) {
-        // notificações mudaram — atualizar badge e mostrar aviso leve
-        atualizarBadgeEHeader(latest);
-        // se veio nova não-lida, avisar
-        const hadUnreadBefore = (_notificacoesSnapshot || "").includes(":0");
-        const hasUnreadNow = latest.some((n) => !n.lida);
-        if (!hadUnreadBefore && hasUnreadNow) {
-          toast.informacao("Você tem novas notificações");
-        }
+let _notificacoesPollingEmAndamento = false;
+
+async function atualizarNotificacoesPolling() {
+  // Não consulta o backend enquanto a aba está em segundo plano e evita
+  // sobreposição caso uma requisição demore mais que o intervalo do polling.
+  if (document.hidden || _notificacoesPollingEmAndamento) return;
+
+  _notificacoesPollingEmAndamento = true;
+
+  try {
+    const latest = (await listarNotificacoes(10)) || [];
+    const snap = _computeSnapshot(latest);
+
+    if (_notificacoesSnapshot && snap !== _notificacoesSnapshot) {
+      atualizarBadgeEHeader(latest);
+
+      const hadUnreadBefore = _notificacoesSnapshot.includes(":0");
+      const hasUnreadNow = latest.some((n) => !n.lida);
+
+      if (!hadUnreadBefore && hasUnreadNow) {
+        toast.informacao("Você tem novas notificações");
       }
-      _notificacoesSnapshot = snap;
-    } catch (e) {
-      // silencioso — polling não deve poluir console
     }
-  }, intervalMs);
+
+    _notificacoesSnapshot = snap;
+  } catch (e) {
+    // Polling é auxiliar e não deve interromper a navegação.
+  } finally {
+    _notificacoesPollingEmAndamento = false;
+  }
+}
+
+function startNotificacoesPolling(intervalMs = 30000) {
+  if (_notificacoesPollingTimer) return;
+
+  _notificacoesPollingTimer = setInterval(
+    atualizarNotificacoesPolling,
+    intervalMs,
+  );
 }
 
 function stopNotificacoesPolling() {
@@ -458,7 +476,13 @@ export function initNotificacoesDashboard() {
 
   // refresh immediately when tab/window regains focus
   window.addEventListener("focus", () => {
-    carregarNotificacoesDashboard().catch(() => {});
+    atualizarNotificacoesPolling().catch(() => {});
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      atualizarNotificacoesPolling().catch(() => {});
+    }
   });
 
   // toggle painel ao clicar no sino

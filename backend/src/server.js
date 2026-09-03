@@ -6,6 +6,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { config } from "dotenv";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import { connectDB, disconnectDB } from "./config/db.js";
 import { iniciarLimpezaAutomaticaComprovantes } from "./services/limpezaComprovantesService.js";
 
@@ -41,6 +42,8 @@ connectDB();
 const app = express();
 
 app.set("trust proxy", 1);
+app.use(helmet());
+app.disable("x-powered-by");
 
 // ===============================
 // CORS
@@ -96,6 +99,19 @@ app.use(express.urlencoded({ extended: true, limit: "8mb" }));
 // pela rota autenticada /api/comprovantes/:id/arquivo.
 
 // ===============================
+// HEALTH CHECK
+// ===============================
+
+// Endpoint leve para monitoramento do Render/infraestrutura.
+// Não consulta o banco e não expõe dados internos da aplicação.
+app.get("/health", (req, res) => {
+  return res.status(200).json({
+    ok: true,
+    status: "online",
+  });
+});
+
+// ===============================
 // RATE LIMIT
 // ===============================
 
@@ -144,6 +160,39 @@ app.use("/doacoes", doacoesRoutes);
 app.use("/qrcodes", qrcodeRoutes);
 
 app.use("/saldo-cestas", saldoCestaRoutes);
+
+// ===============================
+// 404 E ERROS DA API
+// ===============================
+
+// Mantém respostas de rotas inexistentes em JSON, sem devolver a página HTML
+// padrão do Express nem detalhes internos da aplicação.
+app.use((req, res) => {
+  return res.status(404).json({
+    error: "Rota não encontrada.",
+  });
+});
+
+// Handler final do Express. Erros conhecidos de CORS recebem resposta 403;
+// demais falhas inesperadas são registradas no servidor e retornam mensagem
+// genérica ao cliente.
+app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  if (err?.message?.startsWith("Origin não permitida:")) {
+    return res.status(403).json({
+      error: "Origem não permitida.",
+    });
+  }
+
+  console.error("Erro não tratado na API:", err);
+
+  return res.status(500).json({
+    error: "Erro interno do servidor.",
+  });
+});
 
 // ===============================
 // PORTA
