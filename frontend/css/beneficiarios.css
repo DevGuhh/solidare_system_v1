@@ -2664,6 +2664,7 @@
 }
 
 .btn-carteirinha-foto,
+.btn-carteirinha-gerar-qr,
 .btn-carteirinha-imprimir {
     min-height: 42px;
     padding: 0 16px;
@@ -2673,6 +2674,8 @@
 }
 
 .btn-carteirinha-foto { border: 1px solid #d0d5dd; background: #fff; color: #344054; }
+.btn-carteirinha-gerar-qr { border: 0; background: #a3001b; color: #fff; }
+.btn-carteirinha-gerar-qr:disabled { opacity: .6; cursor: wait; }
 .btn-carteirinha-imprimir { border: 0; background: #a3001b; color: #fff; }
 .btn-carteirinha-imprimir:disabled { opacity: .5; cursor: not-allowed; }
 

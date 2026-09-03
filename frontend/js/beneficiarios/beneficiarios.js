@@ -26,7 +26,7 @@ import {
     salvarFotoBeneficiarioAPI
 } from "../api/beneficiariosApi.js";
 
-import { obterImagemQRCode } from "../api/qrcodeApi.js";
+import { criarQRCode, obterImagemQRCode } from "../api/qrcodeApi.js";
 
 import {
     renderizarTabela
@@ -3249,6 +3249,7 @@ async function abrirCarteirinhaBeneficiario(id) {
             </div>
             <div class="carteirinha-acoes-modal">
               <input type="file" accept="image/jpeg,image/png,image/webp" data-foto-carteirinha hidden>
+              ${!dados.qrCode ? `<button type="button" class="btn-carteirinha-gerar-qr" data-gerar-qr-carteirinha><i class="fa-solid fa-qrcode"></i> Gerar QR Code</button>` : ""}
               <button type="button" class="btn-carteirinha-foto btn-carteirinha-camera" data-abrir-camera-carteirinha><i class="fa-solid fa-camera"></i> Abrir câmera</button>
               <button type="button" class="btn-carteirinha-foto" data-selecionar-foto-carteirinha><i class="fa-solid fa-image"></i> Selecionar arquivo</button>
               <button type="button" class="btn-carteirinha-imprimir" data-imprimir-carteirinha ${!dados.qrCode ? "disabled" : ""}><i class="fa-solid fa-print"></i> Imprimir carteirinha</button>
@@ -3270,6 +3271,44 @@ async function abrirCarteirinhaBeneficiario(id) {
                 document.body.style.overflow = "";
             }
         }, { once: true });
+        modal.querySelector("[data-gerar-qr-carteirinha]")?.addEventListener("click", async (event) => {
+            const botao = event.currentTarget;
+
+            try {
+                botao.disabled = true;
+                mostrarLoading();
+
+                const respostaCriar = await criarQRCode(Number(id));
+                const retorno = await lerRespostaJson(respostaCriar);
+
+                if (!respostaCriar.ok) {
+                    throw new Error(
+                        retorno.message ||
+                        retorno.error ||
+                        "Não foi possível gerar o QR Code."
+                    );
+                }
+
+                mostrarSucesso("QR Code gerado com sucesso!");
+
+                modal.hidden = true;
+                document.body.style.overflow = "";
+
+                // Reabre a carteirinha para exibir imediatamente
+                // o QR Code recém-criado e liberar a impressão.
+                await abrirCarteirinhaBeneficiario(id);
+            } catch (erro) {
+                console.error("Erro ao gerar QR Code pela carteirinha:", erro);
+                mostrarErro(
+                    erro.message ||
+                    "Não foi possível gerar o QR Code."
+                );
+                botao.disabled = false;
+            } finally {
+                esconderLoading();
+            }
+        });
+
         modal.querySelector("[data-imprimir-carteirinha]")?.addEventListener("click", imprimirCarteirinhaAtual);
 
         modal.querySelector("[data-abrir-camera-carteirinha]")?.addEventListener("click", async () => {
