@@ -1087,9 +1087,9 @@ function configurarEventos() {
     el.modalConfirmacao?.addEventListener("click", (e) => {
         if (e.target === el.modalConfirmacao) fecharConfirmacaoInstituicao(false);
     }, op);
-    el.modal.addEventListener("click", (e) => {
-        if (e.target === el.modal) fecharModal();
-    }, op);
+    // O modal de cadastro/edição só deve ser fechado pelos controles
+    // explícitos (X, Cancelar ou Escape). Clicar no fundo não fecha o modal,
+    // evitando perda acidental dos dados preenchidos.
     el.modalCredenciais.addEventListener("click", (e) => {
         if (e.target === el.modalCredenciais) fecharCredenciais();
     }, op);

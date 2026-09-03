@@ -847,8 +847,13 @@
                             </label>
 
                             <input
-                                type="date"
+                                type="text"
                                 id="dataNascimento"
+                                inputmode="numeric"
+                                maxlength="10"
+                                placeholder="dd/mm/aaaa"
+                                pattern="\d{2}/\d{2}/\d{4}"
+                                autocomplete="off"
                                 required
                             >
 
@@ -1220,9 +1225,7 @@
                                 <option value="AMBOS">
                                     Ambos
                                 </option>
-                                <option value="OUTROS">
-                                    Outros
-                                </option>
+                                <option value="OUTROS">Outros</option>
 
                             </select>
 

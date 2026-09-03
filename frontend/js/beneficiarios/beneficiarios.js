@@ -2286,6 +2286,15 @@ function fecharModalBeneficiario() {
 
 function montarDadosFormulario() {
 
+    if (!validarDataNascimentoCampo(campos.dataNascimento)) {
+        campos.dataNascimento.reportValidity();
+        campos.dataNascimento.focus();
+
+        throw new Error(
+            "Informe uma data de nascimento válida."
+        );
+    }
+
     const dados = {
 
         nomeCompleto:
@@ -2297,7 +2306,9 @@ function montarDadosFormulario() {
                 .replace(/\D/g, ""),
 
         dataNascimento:
-            campos.dataNascimento.value,
+            converterDataBrasileiraParaISO(
+                campos.dataNascimento.value
+            ),
 
         logradouro:
             campos.logradouro.value
@@ -2589,10 +2600,9 @@ async function editarBeneficiario(id) {
             formatarCPF(beneficiario.cpf ?? "");
 
         campos.dataNascimento.value =
-            beneficiario.dataNascimento
-                ? beneficiario.dataNascimento
-                    .substring(0, 10)
-                : "";
+            converterDataISOParaBrasileira(
+                beneficiario.dataNascimento
+            );
 
         // Permissões de edição:
         // ADMIN: CPF e data de nascimento editáveis.
@@ -3681,6 +3691,142 @@ function configurarEventos() {
 
 
 // =====================================================
+// DATA DE NASCIMENTO
+// =====================================================
+
+function aplicarMascaraDataNascimento(campo) {
+
+    campo.addEventListener("input", () => {
+
+        const numeros =
+            campo.value
+                .replace(/\D/g, "")
+                .slice(0, 8);
+
+        const partes = [];
+
+        if (numeros.length > 0) {
+            partes.push(numeros.slice(0, 2));
+        }
+
+        if (numeros.length > 2) {
+            partes.push(numeros.slice(2, 4));
+        }
+
+        if (numeros.length > 4) {
+            partes.push(numeros.slice(4, 8));
+        }
+
+        campo.value = partes.join("/");
+
+        validarDataNascimentoCampo(campo);
+
+    });
+
+    campo.addEventListener("blur", () => {
+        validarDataNascimentoCampo(campo);
+    });
+
+}
+
+function converterDataBrasileiraParaISO(valor) {
+
+    const correspondencia =
+        String(valor ?? "")
+            .trim()
+            .match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+
+    if (!correspondencia) {
+        return null;
+    }
+
+    const [, diaTexto, mesTexto, anoTexto] = correspondencia;
+
+    const dia = Number(diaTexto);
+    const mes = Number(mesTexto);
+    const ano = Number(anoTexto);
+
+    const data = new Date(
+        Date.UTC(
+            ano,
+            mes - 1,
+            dia
+        )
+    );
+
+    if (
+        data.getUTCFullYear() !== ano ||
+        data.getUTCMonth() !== mes - 1 ||
+        data.getUTCDate() !== dia
+    ) {
+        return null;
+    }
+
+    const hoje = new Date();
+
+    const hojeUTC = new Date(
+        Date.UTC(
+            hoje.getFullYear(),
+            hoje.getMonth(),
+            hoje.getDate()
+        )
+    );
+
+    if (data > hojeUTC) {
+        return null;
+    }
+
+    return (
+        `${anoTexto}-${mesTexto}-${diaTexto}`
+    );
+
+}
+
+function converterDataISOParaBrasileira(valor) {
+
+    const texto =
+        String(valor ?? "")
+            .substring(0, 10);
+
+    const correspondencia =
+        texto.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+    if (!correspondencia) {
+        return "";
+    }
+
+    const [, ano, mes, dia] = correspondencia;
+
+    return `${dia}/${mes}/${ano}`;
+
+}
+
+function validarDataNascimentoCampo(campo) {
+
+    if (!campo.value) {
+        campo.setCustomValidity("");
+        return true;
+    }
+
+    const dataISO =
+        converterDataBrasileiraParaISO(
+            campo.value
+        );
+
+    if (!dataISO) {
+        campo.setCustomValidity(
+            "Informe uma data válida no formato dd/mm/aaaa."
+        );
+        return false;
+    }
+
+    campo.setCustomValidity("");
+    return true;
+
+}
+
+
+// =====================================================
 // CONFIGURAR MÁSCARAS
 // =====================================================
 
@@ -3688,6 +3834,10 @@ function configurarMascaras() {
 
     aplicarMascaraCPF(
         campos.cpf
+    );
+
+    aplicarMascaraDataNascimento(
+        campos.dataNascimento
     );
 
     aplicarMascaraCEP(
