@@ -140,7 +140,8 @@ function atualizarGraficoBeneficios() {
     const beneficios = {
         CESTA: 0,
         GRANEL: 0,
-        AMBOS: 0
+        AMBOS: 0,
+        OUTROS: 0
     };
 
     filtrados.forEach((beneficiario) => {
@@ -167,7 +168,7 @@ function atualizarGraficoBeneficios() {
     criarGrafico("graficoRelatorioBeneficios", {
         type: "doughnut",
         data: {
-            labels: ["Cesta", "Granel", "Ambos"],
+            labels: ["Cesta", "Granel", "Ambos", "Outros"],
             datasets: [
                 {
                     data: Object.values(beneficios),

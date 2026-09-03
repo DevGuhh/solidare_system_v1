@@ -271,6 +271,7 @@ enum TipoBeneficio {
   CESTA
   GRANEL
   AMBOS
+  OUTROS
 }
 
 enum TipoEventoHistorico {

@@ -111,7 +111,8 @@ export const criarBeneficiarioSchema = z.object({
     tipoBeneficio: z.enum([
         "CESTA",
         "GRANEL",
-        "AMBOS"
+        "AMBOS",
+        "OUTROS"
     ]),
 
     // Campo opcional para descrever a situação da família.

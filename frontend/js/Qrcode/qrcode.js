@@ -560,7 +560,8 @@
             const rotulos = {
                 CESTA: "Cesta básica",
                 GRANEL: "Granel",
-                AMBOS: "Cesta + granel"
+                AMBOS: "Cesta + granel",
+                OUTROS: "Outros"
             };
 
             return rotulos[String(tipo ?? "").toUpperCase()] || tipo || "-";

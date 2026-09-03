@@ -714,7 +714,8 @@ function selecionarFiltro({
             "TODAS",
             "CESTA",
             "GRANEL",
-            "AMBOS"
+            "AMBOS",
+            "OUTROS"
         ].includes(filtro)
     ) {
 
