@@ -3645,3 +3645,43 @@ body.modal-documentos-aberto {
   flex: 0 0 auto;
   font-size: 9px;
 }
+
+
+/* =====================================================
+   ACESSO PROVISÓRIO DA INSTITUIÇÃO
+===================================================== */
+.acesso-provisorio-instituicao[hidden] { display: none !important; }
+
+.campo-senha-provisoria {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.campo-senha-provisoria input { min-width: 0; }
+
+.btn-ver-senha-provisoria {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    border: 1px solid #dfe3e8;
+    border-radius: 10px;
+    background: #fff;
+    color: #667085;
+    cursor: pointer;
+    transition: .18s ease;
+}
+
+.btn-ver-senha-provisoria:hover:not(:disabled) {
+    border-color: #b00020;
+    color: #9f0018;
+    background: #fff7f8;
+}
+
+.btn-ver-senha-provisoria:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+}

@@ -77,3 +77,10 @@ export function listarBeneficiariosDaInstituicao(id) {
     cache: "no-store",
   });
 }
+
+export function buscarSenhaProvisoriaInstituicao(id) {
+  return fetch(`${API_URL}/instituicoes/${id}/senha-provisoria`, {
+    headers: obterHeaders(false),
+    cache: "no-store",
+  });
+}

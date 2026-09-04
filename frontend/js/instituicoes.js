@@ -4,7 +4,8 @@ import {
     cadastrarInstituicaoAPI,
     editarInstituicaoAPI,
     alterarStatusInstituicaoAPI,
-    alterarSituacaoInstituicaoAPI
+    alterarSituacaoInstituicaoAPI,
+    buscarSenhaProvisoriaInstituicao
 } from "./api/instituicoesApi.js";
 
 import {
@@ -74,6 +75,10 @@ function capturarElementos() {
         modalCredenciais: document.getElementById("modalCredenciaisInstituicao"),
         credencialEmail: document.getElementById("credencialEmailInstituicao"),
         credencialSenha: document.getElementById("credencialSenhaInstituicao"),
+        grupoSenhaProvisoria: document.getElementById("grupoSenhaProvisoriaInstituicao"),
+        senhaProvisoria: document.getElementById("senhaProvisoriaInstituicao"),
+        btnVerSenhaProvisoria: document.getElementById("btnVerSenhaProvisoriaInstituicao"),
+        statusSenhaProvisoria: document.getElementById("statusSenhaProvisoriaInstituicao"),
         btnFecharCredenciais: document.getElementById("btnFecharCredenciaisInstituicao"),
         btnCopiarCredenciais: document.getElementById("btnCopiarCredenciaisInstituicao"),
         modalConfirmacao: document.getElementById("modalConfirmacaoInstituicao"),
@@ -483,6 +488,8 @@ function novaInstituicao() {
     estado.editandoId = null;
     el.formulario.reset();
     campos.id.value = "";
+    if (el.grupoSenhaProvisoria) el.grupoSenhaProvisoria.hidden = true;
+    if (el.senhaProvisoria) { el.senhaProvisoria.value = ""; el.senhaProvisoria.type = "password"; }
     el.tituloModal.textContent = "Nova instituição";
     el.textoBtnSalvar.textContent = "Salvar instituição";
     abrirModal();
@@ -727,6 +734,27 @@ async function editarInstituicao(id) {
         campos.id.value = i.id || id;
         campos.nome.value = i.nome || "";
         campos.cnpj.value = formatarCNPJ(i.cnpj || "");
+
+        if (el.grupoSenhaProvisoria) {
+            el.grupoSenhaProvisoria.hidden = false;
+            el.senhaProvisoria.value = "";
+            el.senhaProvisoria.type = "password";
+            const ativa = i?.acesso?.senhaProvisoriaAtiva === true;
+            const disponivel = i?.acesso?.senhaProvisoriaDisponivel === true;
+            el.btnVerSenhaProvisoria.disabled = !disponivel;
+            el.btnVerSenhaProvisoria.dataset.instituicaoId = String(id);
+            el.btnVerSenhaProvisoria.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            if (!ativa) {
+                el.senhaProvisoria.placeholder = "Senha já alterada pela instituição";
+                el.statusSenhaProvisoria.textContent = "A instituição já substituiu a senha provisória.";
+            } else if (!disponivel) {
+                el.senhaProvisoria.placeholder = "Senha provisória indisponível";
+                el.statusSenhaProvisoria.textContent = "Cadastro antigo: a senha provisória não foi armazenada para consulta.";
+            } else {
+                el.senhaProvisoria.placeholder = "Clique no olho para visualizar";
+                el.statusSenhaProvisoria.textContent = "Disponível somente enquanto a instituição ainda não tiver alterado a senha inicial.";
+            }
+        }
         campos.tipo.value = i.tipo || "";
         campos.responsavel.value = i.responsavel || "";
         campos.email.value = i.email || "";
@@ -744,6 +772,42 @@ async function editarInstituicao(id) {
     } catch (erro) {
         mostrarErro(erro.message || "Não foi possível abrir a instituição.");
     } finally { esconderLoading(); }
+}
+
+async function alternarSenhaProvisoria() {
+    if (!el.btnVerSenhaProvisoria || !el.senhaProvisoria) return;
+
+    if (el.senhaProvisoria.value) {
+        const exibindo = el.senhaProvisoria.type === "text";
+        el.senhaProvisoria.type = exibindo ? "password" : "text";
+        el.btnVerSenhaProvisoria.innerHTML = `<i class="fa-solid ${exibindo ? "fa-eye" : "fa-eye-slash"}"></i>`;
+        el.btnVerSenhaProvisoria.title = exibindo ? "Visualizar senha provisória" : "Ocultar senha provisória";
+        return;
+    }
+
+    const id = Number(el.btnVerSenhaProvisoria.dataset.instituicaoId);
+    if (!Number.isInteger(id) || id <= 0) return;
+
+    el.btnVerSenhaProvisoria.disabled = true;
+    const iconeOriginal = el.btnVerSenhaProvisoria.innerHTML;
+    el.btnVerSenhaProvisoria.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    try {
+        const resposta = await buscarSenhaProvisoriaInstituicao(id);
+        const dados = await jsonSeguro(resposta);
+        if (!resposta.ok) throw new Error(mensagemErro(dados, "Não foi possível consultar a senha provisória."));
+
+        el.senhaProvisoria.value = dados?.senhaTemporaria || "";
+        el.senhaProvisoria.type = "text";
+        el.btnVerSenhaProvisoria.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+        el.btnVerSenhaProvisoria.title = "Ocultar senha provisória";
+        el.statusSenhaProvisoria.textContent = "Senha provisória disponível. Evite compartilhá-la por canais inseguros.";
+    } catch (erro) {
+        el.btnVerSenhaProvisoria.innerHTML = iconeOriginal;
+        mostrarErro(erro.message || "Não foi possível consultar a senha provisória.");
+    } finally {
+        el.btnVerSenhaProvisoria.disabled = false;
+    }
 }
 
 function montarDados() {
@@ -1105,14 +1169,15 @@ function configurarEventos() {
     // O modal de cadastro/edição só deve ser fechado pelos controles
     // explícitos (X, Cancelar ou Escape). Clicar no fundo não fecha o modal,
     // evitando perda acidental dos dados preenchidos.
-    el.modalCredenciais.addEventListener("click", (e) => {
-        if (e.target === el.modalCredenciais) fecharCredenciais();
-    }, op);
+    // O modal de credenciais não fecha ao clicar no fundo.
+    // Isso evita perder a senha antes de copiá-la ou enviá-la ao responsável.
     el.btnCopiarCredenciais.addEventListener("click", async () => {
         const texto = `E-mail: ${el.credencialEmail.value}\nSenha temporária: ${el.credencialSenha.value}`;
         try { await navigator.clipboard.writeText(texto); mostrarSucesso("Credenciais copiadas com sucesso."); }
         catch { mostrarErro("Não foi possível copiar as credenciais."); }
     }, op);
+
+    el.btnVerSenhaProvisoria?.addEventListener("click", alternarSenhaProvisoria, op);
 
     campos.cnpj.addEventListener("input", mascaraCNPJ, op);
     campos.telefone.addEventListener("input", mascaraTelefone, op);

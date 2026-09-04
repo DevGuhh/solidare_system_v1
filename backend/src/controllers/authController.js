@@ -202,6 +202,7 @@ class AuthController {
         data: {
           senhaHash: novaSenhaHash,
           senhaProvisoria: false,
+          senhaProvisoriaCriptografada: null,
           resetTokenHash: null,
           resetTokenExpiresAt: null,
         },
@@ -382,6 +383,7 @@ class AuthController {
         data: {
           senhaHash: hashedPassword,
           senhaProvisoria: false,
+          senhaProvisoriaCriptografada: null,
           resetTokenHash: null,
           resetTokenExpiresAt: null,
         },

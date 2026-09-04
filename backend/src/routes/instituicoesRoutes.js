@@ -17,6 +17,12 @@ router.get(
   instituicoesController.detalheDaInstituicao,
 );
 router.get(
+  "/:id/senha-provisoria",
+  protect,
+  authorize("ADMIN"),
+  instituicoesController.visualizarSenhaProvisoria,
+);
+router.get(
   "/:id/beneficiarios",
   protect,
   authorize("ADMIN"),

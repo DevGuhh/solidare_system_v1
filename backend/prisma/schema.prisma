@@ -17,6 +17,7 @@ model Usuario {
   atualizadoEm        DateTime    @updatedAt
   instituicaoId       Int?        @unique
   senhaProvisoria     Boolean     @default(false)
+  senhaProvisoriaCriptografada String?
   resetTokenHash      String?
   resetTokenExpiresAt DateTime?
 

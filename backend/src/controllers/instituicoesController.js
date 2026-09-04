@@ -4,6 +4,10 @@ import { createPassword } from "../utils/generatePassword.js";
 import { criarInstituicaoSchema } from "../validators/instituicaoValidator.js";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
+import {
+  criptografarSenhaProvisoria,
+  descriptografarSenhaProvisoria,
+} from "../utils/provisionalPasswordCrypto.js";
 
 function idValido(id) {
   return Number.isInteger(id) && id > 0;
@@ -172,6 +176,7 @@ class InstituicaoController {
 
           // A instituição precisará trocar a senha no primeiro acesso
           senhaProvisoria: true,
+          senhaProvisoriaCriptografada: criptografarSenhaProvisoria(senhaGerada),
 
           role: "INSTITUICAO",
 
@@ -258,6 +263,16 @@ class InstituicaoController {
           id,
           deletedAt: null,
         },
+        include: {
+          usuario: {
+            select: {
+              id: true,
+              email: true,
+              senhaProvisoria: true,
+              senhaProvisoriaCriptografada: true,
+            },
+          },
+        },
       });
 
       if (!instituicao) {
@@ -266,12 +281,87 @@ class InstituicaoController {
         });
       }
 
-      return res.status(200).json(instituicao);
+      const { usuario, ...dadosInstituicao } = instituicao;
+
+      return res.status(200).json({
+        ...dadosInstituicao,
+        acesso: {
+          email: usuario?.email || instituicao.email,
+          senhaProvisoriaAtiva: Boolean(usuario?.senhaProvisoria),
+          senhaProvisoriaDisponivel: Boolean(
+            usuario?.senhaProvisoria && usuario?.senhaProvisoriaCriptografada,
+          ),
+        },
+      });
     } catch (error) {
       console.error(`GET /instituicoes/${id} error:`, error);
 
       return res.status(500).json({
         error: "Erro interno ao buscar a instituição.",
+      });
+    }
+  }
+
+  async visualizarSenhaProvisoria(req, res) {
+    const id = Number(req.params.id);
+
+    if (!idValido(id)) {
+      return res.status(400).json({
+        error: "ID inválido. Informe um número inteiro positivo.",
+      });
+    }
+
+    try {
+      const instituicao = await prisma.instituicaoParceira.findFirst({
+        where: { id, deletedAt: null },
+        select: {
+          id: true,
+          email: true,
+          usuario: {
+            select: {
+              email: true,
+              senhaProvisoria: true,
+              senhaProvisoriaCriptografada: true,
+            },
+          },
+        },
+      });
+
+      if (!instituicao) {
+        return res.status(404).json({ error: "Instituição não encontrada." });
+      }
+
+      if (!instituicao.usuario) {
+        return res.status(404).json({
+          error: "A instituição não possui usuário de acesso vinculado.",
+        });
+      }
+
+      if (!instituicao.usuario.senhaProvisoria) {
+        return res.status(409).json({
+          error: "A instituição já alterou a senha provisória.",
+        });
+      }
+
+      if (!instituicao.usuario.senhaProvisoriaCriptografada) {
+        return res.status(404).json({
+          error: "A senha provisória deste cadastro antigo não está disponível para consulta.",
+        });
+      }
+
+      const senhaTemporaria = descriptografarSenhaProvisoria(
+        instituicao.usuario.senhaProvisoriaCriptografada,
+      );
+
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(200).json({
+        email: instituicao.usuario.email || instituicao.email,
+        senhaTemporaria,
+      });
+    } catch (error) {
+      console.error(`GET /instituicoes/${id}/senha-provisoria error:`, error);
+      return res.status(500).json({
+        error: "Não foi possível consultar a senha provisória.",
       });
     }
   }
