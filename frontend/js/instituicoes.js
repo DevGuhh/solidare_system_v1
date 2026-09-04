@@ -145,6 +145,17 @@ function formatarCEP(valor) {
     return n.length === 8 ? n.replace(/(\d{5})(\d{3})/, "$1-$2") : (valor || "-");
 }
 
+function formatarCNPJ(valor) {
+    const n = String(valor ?? "").replace(/\D/g, "").slice(0, 14);
+
+    if (n.length <= 2) return n;
+    if (n.length <= 5) return n.replace(/(\d{2})(\d+)/, "$1.$2");
+    if (n.length <= 8) return n.replace(/(\d{2})(\d{3})(\d+)/, "$1.$2.$3");
+    if (n.length <= 12) return n.replace(/(\d{2})(\d{3})(\d{3})(\d+)/, "$1.$2.$3/$4");
+
+    return n.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, "$1.$2.$3/$4-$5");
+}
+
 function formatarTipo(tipo) {
     return ({ ONG: "ONG", IGREJA: "Igreja", ASSOCIACAO: "Associação", OUTRO: "Outro" })[tipo] || tipo || "-";
 }
@@ -715,7 +726,7 @@ async function editarInstituicao(id) {
         estado.editandoId = Number(id);
         campos.id.value = i.id || id;
         campos.nome.value = i.nome || "";
-        campos.cnpj.value = i.cnpj || "";
+        campos.cnpj.value = formatarCNPJ(i.cnpj || "");
         campos.tipo.value = i.tipo || "";
         campos.responsavel.value = i.responsavel || "";
         campos.email.value = i.email || "";
@@ -738,7 +749,7 @@ async function editarInstituicao(id) {
 function montarDados() {
     return {
         nome: campos.nome.value.trim(),
-        cnpj: campos.cnpj.value.trim(),
+        cnpj: campos.cnpj.value.replace(/\D/g, ""),
         tipo: campos.tipo.value,
         responsavel: campos.responsavel.value.trim(),
         email: campos.email.value.trim().toLowerCase(),
@@ -974,6 +985,10 @@ function mascaraTelefone(event) {
     event.target.value = n;
 }
 
+function mascaraCNPJ(event) {
+    event.target.value = formatarCNPJ(event.target.value);
+}
+
 function mascaraCEP(event) {
     let n = event.target.value.replace(/\D/g, "").slice(0, 8);
     if (n.length > 5) n = n.replace(/(\d{5})(\d+)/, "$1-$2");
@@ -1099,6 +1114,7 @@ function configurarEventos() {
         catch { mostrarErro("Não foi possível copiar as credenciais."); }
     }, op);
 
+    campos.cnpj.addEventListener("input", mascaraCNPJ, op);
     campos.telefone.addEventListener("input", mascaraTelefone, op);
     campos.cep.addEventListener("input", mascaraCEP, op);
     campos.cep.addEventListener("blur", buscarCEP, op);
