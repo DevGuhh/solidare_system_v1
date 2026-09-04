@@ -374,8 +374,8 @@
     aria-modal="true"
     aria-labelledby="tituloSaldoCestas"
 >
-    <div class="modal-content saldo-cestas-card">
-        <header class="saldo-cestas-header">
+    <div class="modal-content saldo-cestas-card saldo-cestas-card-etapas">
+        <header class="saldo-cestas-header saldo-cestas-header-etapas">
             <div class="saldo-cestas-titulo">
                 <div class="saldo-cestas-icone" aria-hidden="true">
                     <i class="fa-solid fa-boxes-stacked"></i>
@@ -398,80 +398,133 @@
             </button>
         </header>
 
-        <div class="saldo-cestas-body">
-            <section class="saldo-cestas-resumo">
-                <div class="saldo-cestas-resumo-icone" aria-hidden="true">
-                    <i class="fa-solid fa-box"></i>
+        <nav class="saldo-cestas-etapas" aria-label="Etapas do saldo de cestas">
+            <button type="button" class="saldo-cestas-etapa ativo" data-saldo-etapa="saldo" aria-selected="true">
+                <span class="saldo-cestas-etapa-numero">1</span>
+                <span>
+                    <strong>Saldo de cestas</strong>
+                    <small>Estoque, necessidade e entrada</small>
+                </span>
+            </button>
+            <button type="button" class="saldo-cestas-etapa" data-saldo-etapa="historico" aria-selected="false">
+                <span class="saldo-cestas-etapa-numero">2</span>
+                <span>
+                    <strong>Histórico de cestas</strong>
+                    <small>Entradas, doações e estornos</small>
+                </span>
+            </button>
+        </nav>
+
+        <div class="saldo-cestas-body saldo-cestas-body-etapas">
+            <section class="saldo-cestas-painel-etapa ativo" data-saldo-painel="saldo">
+                <section class="saldo-cestas-resumo saldo-cestas-resumo-etapas">
+                    <div class="saldo-cestas-resumo-icone" aria-hidden="true">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+                    <div class="saldo-cestas-resumo-texto">
+                        <span>Saldo disponível</span>
+                        <strong><span id="valorSaldoCestas">—</span> cestas</strong>
+                        <small id="atualizacaoSaldoCestas">Carregando saldo...</small>
+                    </div>
+                    <button type="button" id="btnAtualizarSaldoCestas" class="btn btn-info saldo-cestas-atualizar">
+                        <i class="fa-solid fa-rotate"></i>
+                        Atualizar
+                    </button>
+                </section>
+
+                <div class="saldo-cestas-etapa-conteudo">
+                    <section class="saldo-cestas-bloco saldo-cestas-bloco-sugestao">
+                        <div class="saldo-cestas-section-title">
+                            <div class="saldo-cestas-section-icon">
+                                <i class="fa-solid fa-calculator"></i>
+                            </div>
+                            <div>
+                                <h3>Sugestão de envio</h3>
+                                <p>Cálculo com base nos beneficiários, composição familiar e estoque atual.</p>
+                            </div>
+                        </div>
+
+                        <section id="recomendacaoCestas" class="saldo-cestas-recomendacao saldo-cestas-recomendacao-etapas" aria-live="polite">
+                            <div class="saldo-cestas-recomendacao-topo">
+                                <div>
+                                    <span class="saldo-cestas-recomendacao-eyebrow">SUGESTÃO AUTOMÁTICA</span>
+                                    <strong id="recomendacaoCestasStatus">Calculando sugestão...</strong>
+                                </div>
+                                <div class="saldo-cestas-recomendacao-destaque">
+                                    <span>Enviar</span>
+                                    <strong id="recomendacaoEnvio">—</strong>
+                                </div>
+                            </div>
+
+                            <div class="saldo-cestas-recomendacao-grid saldo-cestas-recomendacao-grid-etapas">
+                                <div><span>Beneficiários elegíveis</span><strong id="recomendacaoBeneficiarios">—</strong></div>
+                                <div><span>Já atendidos no mês</span><strong id="recomendacaoAtendidos">—</strong></div>
+                                <div><span>Aguardando entrega</span><strong id="recomendacaoPendentes">—</strong></div>
+                                <div><span>Cestas ainda necessárias</span><strong id="recomendacaoNecessidade">—</strong></div>
+                                <div><span>Estoque atual</span><strong id="recomendacaoSaldo">—</strong></div>
+                                <div class="recomendacao-card-faltam"><span>Faltam para atender o mês</span><strong id="recomendacaoFaltam">—</strong></div>
+                            </div>
+
+                            <p class="saldo-cestas-recomendacao-regra">
+                                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                Cálculo: <strong id="recomendacaoRegra">1 cesta a cada 3 pessoas</strong>. A sugestão não é obrigatória e pode ser alterada pelo administrador.
+                            </p>
+                        </section>
+                    </section>
+
+                    <form id="formEntradaSaldoCestas" class="saldo-cestas-bloco saldo-cestas-entrada saldo-cestas-entrada-etapas" autocomplete="off">
+                        <div class="saldo-cestas-section-title">
+                            <div class="saldo-cestas-section-icon">
+                                <i class="fa-solid fa-arrow-down"></i>
+                            </div>
+                            <div>
+                                <h3>Registrar entrada</h3>
+                                <p>Informe a quantidade que será enviada para a instituição.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantidadeEntradaSaldoCestas">Quantidade a enviar <span class="required">*</span></label>
+                            <input type="number" id="quantidadeEntradaSaldoCestas" min="1" step="1" inputmode="numeric" placeholder="Calculando sugestão..." required>
+                            <small class="form-help">O valor sugerido é preenchido automaticamente, mas continua editável.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="observacaoEntradaSaldoCestas">Observação</label>
+                            <textarea id="observacaoEntradaSaldoCestas" maxlength="500" rows="4" placeholder="Ex.: Entrada recebida do estoque central..."></textarea>
+                            <small class="form-help">Máximo de 500 caracteres.</small>
+                        </div>
+
+                        <button type="submit" id="btnRegistrarEntradaSaldoCestas" class="btn btn-primary saldo-cestas-btn-entrada">
+                            <i class="fa-solid fa-plus"></i>
+                            Registrar entrada
+                        </button>
+                    </form>
                 </div>
-                <div>
-                    <span>Saldo disponível</span>
-                    <strong><span id="valorSaldoCestas">—</span> cestas</strong>
-                    <small id="atualizacaoSaldoCestas">Carregando saldo...</small>
-                </div>
-                <button type="button" id="btnAtualizarSaldoCestas" class="btn btn-info">
-                    <i class="fa-solid fa-rotate"></i>
-                    Atualizar
-                </button>
             </section>
 
-            <section class="saldo-cestas-grid">
-                <form id="formEntradaSaldoCestas" class="saldo-cestas-entrada" autocomplete="off">
-                    <div class="saldo-cestas-section-title">
-                        <div class="saldo-cestas-section-icon">
-                            <i class="fa-solid fa-arrow-down"></i>
-                        </div>
-                        <div>
-                            <h3>Registrar entrada</h3>
-                            <p>Adicione novas cestas ao estoque da instituição.</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="quantidadeEntradaSaldoCestas">Quantidade <span class="required">*</span></label>
-                        <input
-                            type="number"
-                            id="quantidadeEntradaSaldoCestas"
-                            min="1"
-                            step="1"
-                            inputmode="numeric"
-                            placeholder="Ex.: 50"
-                            required
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="observacaoEntradaSaldoCestas">Observação</label>
-                        <textarea
-                            id="observacaoEntradaSaldoCestas"
-                            maxlength="500"
-                            rows="4"
-                            placeholder="Ex.: Entrada recebida do estoque central..."
-                        ></textarea>
-                        <small class="form-help">Máximo de 500 caracteres.</small>
-                    </div>
-
-                    <button type="submit" id="btnRegistrarEntradaSaldoCestas" class="btn btn-primary saldo-cestas-btn-entrada">
-                        <i class="fa-solid fa-plus"></i>
-                        Registrar entrada
-                    </button>
-                </form>
-
-                <section class="saldo-cestas-historico-bloco">
-                    <div class="saldo-cestas-historico-topo">
-                        <div>
-                            <span class="saldo-cestas-eyebrow">MOVIMENTAÇÕES</span>
-                            <h3>Histórico do saldo</h3>
+            <section class="saldo-cestas-painel-etapa" data-saldo-painel="historico" hidden>
+                <section class="saldo-cestas-historico-bloco saldo-cestas-historico-etapas">
+                    <div class="saldo-cestas-historico-topo saldo-cestas-historico-topo-etapas">
+                        <div class="saldo-cestas-section-title saldo-cestas-section-title-historico">
+                            <div class="saldo-cestas-section-icon">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                            <div>
+                                <h3>Histórico de cestas</h3>
+                                <p>Acompanhe todas as entradas, entregas e estornos da instituição.</p>
+                            </div>
                         </div>
 
                         <select id="filtroHistoricoSaldoCestas" aria-label="Filtrar movimentações de saldo">
-                            <option value="">Todas</option>
+                            <option value="">Todas as movimentações</option>
                             <option value="ENTRADA">Entradas</option>
                             <option value="SAIDA_DOACAO">Saídas por doação</option>
                             <option value="ESTORNO_DOACAO">Estornos</option>
                         </select>
                     </div>
 
-                    <div id="historicoSaldoCestas" class="saldo-cestas-historico">
+                    <div id="historicoSaldoCestas" class="saldo-cestas-historico saldo-cestas-historico-lista-etapas">
                         <div class="saldo-historico-estado">
                             <i class="fa-solid fa-spinner fa-spin"></i>
                             <span>Carregando movimentações...</span>
@@ -481,7 +534,7 @@
             </section>
         </div>
 
-        <footer class="saldo-cestas-footer">
+        <footer class="saldo-cestas-footer saldo-cestas-footer-etapas">
             <button type="button" id="btnCancelarSaldoCestas" class="btn btn-secondary">Fechar</button>
         </footer>
     </div>

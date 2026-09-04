@@ -1,5 +1,6 @@
 import {
     buscarSaldoCestasAPI,
+    buscarRecomendacaoCestasAPI,
     registrarEntradaSaldoCestasAPI,
     listarHistoricoSaldoCestasAPI
 } from "../api/saldoCestasApi.js";
@@ -88,8 +89,41 @@ function obterElementos() {
         btnFechar: document.getElementById("btnFecharSaldoCestas"),
         btnCancelar: document.getElementById("btnCancelarSaldoCestas"),
         btnAtualizar: document.getElementById("btnAtualizarSaldoCestas"),
-        btnSalvar: document.getElementById("btnRegistrarEntradaSaldoCestas")
+        btnSalvar: document.getElementById("btnRegistrarEntradaSaldoCestas"),
+        recomendacao: document.getElementById("recomendacaoCestas"),
+        recomendacaoStatus: document.getElementById("recomendacaoCestasStatus"),
+        recomendacaoBeneficiarios: document.getElementById("recomendacaoBeneficiarios"),
+        recomendacaoAtendidos: document.getElementById("recomendacaoAtendidos"),
+        recomendacaoPendentes: document.getElementById("recomendacaoPendentes"),
+        recomendacaoNecessidade: document.getElementById("recomendacaoNecessidade"),
+        recomendacaoSaldo: document.getElementById("recomendacaoSaldo"),
+        recomendacaoEnvio: document.getElementById("recomendacaoEnvio"),
+        recomendacaoRegra: document.getElementById("recomendacaoRegra"),
+        recomendacaoFaltam: document.getElementById("recomendacaoFaltam"),
+        saldoAtualTopo: document.getElementById("saldoCestasAtualTopo"),
+        etapas: Array.from(document.querySelectorAll("[data-saldo-etapa]")),
+        paineis: Array.from(document.querySelectorAll("[data-saldo-painel]"))
     };
+}
+
+function selecionarEtapaSaldo(etapa = "saldo") {
+    const { modal, etapas, paineis } = obterElementos();
+
+    if (modal) {
+        modal.dataset.saldoEtapaAtiva = etapa;
+    }
+
+    etapas?.forEach((botao) => {
+        const ativo = botao.dataset.saldoEtapa === etapa;
+        botao.classList.toggle("ativo", ativo);
+        botao.setAttribute("aria-selected", String(ativo));
+    });
+
+    paineis?.forEach((painel) => {
+        const ativo = painel.dataset.saldoPainel === etapa;
+        painel.classList.toggle("ativo", ativo);
+        painel.hidden = !ativo;
+    });
 }
 
 function abrirModal() {
@@ -101,6 +135,7 @@ function abrirModal() {
     modal.setAttribute("aria-hidden", "false");
     modal.classList.add("ativo");
     document.body.classList.add("modal-aberto");
+    selecionarEtapaSaldo("saldo");
 }
 
 export function fecharSaldoInstituicao() {
@@ -233,11 +268,59 @@ async function carregarHistorico() {
     renderizarHistorico(dados);
 }
 
+
+function renderizarRecomendacaoCarregando() {
+    const { recomendacao, recomendacaoStatus, recomendacaoBeneficiarios, recomendacaoAtendidos, recomendacaoPendentes, recomendacaoNecessidade, recomendacaoSaldo, recomendacaoEnvio, recomendacaoRegra, recomendacaoFaltam, saldoAtualTopo } = obterElementos();
+    recomendacao?.classList.add("carregando");
+    if (recomendacaoStatus) recomendacaoStatus.textContent = "Calculando sugestão...";
+    [recomendacaoBeneficiarios, recomendacaoAtendidos, recomendacaoPendentes, recomendacaoNecessidade, recomendacaoSaldo, recomendacaoEnvio, recomendacaoFaltam].forEach((el) => { if (el) el.textContent = "—"; });
+    if (saldoAtualTopo) saldoAtualTopo.textContent = "—";
+    if (recomendacaoRegra) recomendacaoRegra.textContent = "1 cesta a cada 3 pessoas";
+}
+
+async function carregarRecomendacao({ preencherQuantidade = true } = {}) {
+    if (!instituicaoAtual?.id) return;
+    renderizarRecomendacaoCarregando();
+    const resposta = await buscarRecomendacaoCestasAPI(instituicaoAtual.id);
+    const dados = await lerJson(resposta);
+    if (!resposta.ok) throw new Error(mensagemErro(dados, "Não foi possível calcular a sugestão de cestas."));
+
+    const { recomendacao, recomendacaoStatus, recomendacaoBeneficiarios, recomendacaoAtendidos, recomendacaoPendentes, recomendacaoNecessidade, recomendacaoSaldo, recomendacaoEnvio, recomendacaoRegra, recomendacaoFaltam, saldoAtualTopo, quantidade } = obterElementos();
+    const sugestao = Math.max(Number(dados?.sugestaoEnvio) || 0, 0);
+    const pendentes = Math.max(Number(dados?.pendentesNoMes) || 0, 0);
+    const necessidade = Math.max(Number(dados?.necessidadePendente) || 0, 0);
+    const saldoAtual = Math.max(Number(dados?.saldoAtual) || 0, 0);
+
+    recomendacao?.classList.remove("carregando");
+    recomendacao?.classList.toggle("estoque-suficiente", sugestao === 0);
+    if (recomendacaoBeneficiarios) recomendacaoBeneficiarios.textContent = String(Number(dados?.beneficiariosAtivosCesta) || 0);
+    if (recomendacaoAtendidos) recomendacaoAtendidos.textContent = String(Number(dados?.atendidosNoMes) || 0);
+    if (recomendacaoPendentes) recomendacaoPendentes.textContent = String(pendentes);
+    if (recomendacaoNecessidade) recomendacaoNecessidade.textContent = `${necessidade} cesta${necessidade === 1 ? "" : "s"}`;
+    if (recomendacaoSaldo) recomendacaoSaldo.textContent = `${saldoAtual} cesta${saldoAtual === 1 ? "" : "s"}`;
+    if (recomendacaoFaltam) recomendacaoFaltam.textContent = `${sugestao} cesta${sugestao === 1 ? "" : "s"}`;
+    if (saldoAtualTopo) saldoAtualTopo.textContent = `${saldoAtual} cesta${saldoAtual === 1 ? "" : "s"}`;
+    if (recomendacaoEnvio) recomendacaoEnvio.textContent = `${sugestao} cesta${sugestao === 1 ? "" : "s"}`;
+    if (recomendacaoRegra) recomendacaoRegra.textContent = dados?.regra || "1 cesta a cada 3 pessoas";
+
+    if (recomendacaoStatus) {
+        if (sugestao > 0) recomendacaoStatus.textContent = `Sugestão para completar as entregas pendentes deste mês: enviar ${sugestao} cesta${sugestao === 1 ? "" : "s"}.`;
+        else if (pendentes === 0) recomendacaoStatus.textContent = "Todos os beneficiários elegíveis já foram atendidos neste mês.";
+        else recomendacaoStatus.textContent = "O saldo atual já é suficiente para as entregas pendentes deste mês.";
+    }
+
+    if (preencherQuantidade && quantidade) {
+        quantidade.value = sugestao > 0 ? String(sugestao) : "";
+        quantidade.placeholder = sugestao > 0 ? `Sugestão: ${sugestao}` : "Estoque suficiente";
+    }
+}
+
 async function atualizarModal() {
     try {
         await Promise.all([
             carregarSaldo(),
-            carregarHistorico()
+            carregarHistorico(),
+            carregarRecomendacao()
         ]);
     } catch (erro) {
         console.error("Erro ao carregar saldo de cestas:", erro);
@@ -322,7 +405,8 @@ export function configurarSaldoInstituicoes() {
         filtro,
         btnFechar,
         btnCancelar,
-        btnAtualizar
+        btnAtualizar,
+        etapas
     } = obterElementos();
 
     if (!modal) return;
@@ -338,11 +422,21 @@ export function configurarSaldoInstituicoes() {
     btnCancelar?.addEventListener("click", fecharSaldoInstituicao, op);
     btnAtualizar?.addEventListener("click", atualizarModal, op);
 
-    modal.addEventListener("click", (event) => {
-        if (event.target === modal) {
-            fecharSaldoInstituicao();
-        }
-    }, op);
+    etapas?.forEach((botao) => {
+        botao.addEventListener("click", async () => {
+            const etapa = botao.dataset.saldoEtapa || "saldo";
+            selecionarEtapaSaldo(etapa);
+
+            if (etapa === "historico") {
+                try {
+                    await carregarHistorico();
+                } catch (erro) {
+                    console.error("Erro ao carregar histórico de saldo:", erro);
+                    mostrarErro(erro.message || "Não foi possível carregar o histórico de cestas.");
+                }
+            }
+        }, op);
+    });
 
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && modal.hidden === false) {

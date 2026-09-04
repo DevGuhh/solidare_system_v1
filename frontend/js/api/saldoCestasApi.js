@@ -32,6 +32,14 @@ export function buscarSaldoCestasAPI(instituicaoId) {
     });
 }
 
+export function buscarRecomendacaoCestasAPI(instituicaoId) {
+    return fetch(`${API_URL}/saldo-cestas/${instituicaoId}/recomendacao`, {
+        method: "GET",
+        headers: obterHeaders(false),
+        cache: "no-store"
+    });
+}
+
 export function registrarEntradaSaldoCestasAPI(dados) {
     return fetch(`${API_URL}/saldo-cestas/entrada`, {
         method: "POST",

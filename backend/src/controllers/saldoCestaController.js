@@ -6,6 +6,7 @@ import {
   obterSaldo,
   listarHistorico,
 } from "../services/saldoCestaService.js";
+import { calcularQuantidadeCestas } from "../utils/generateQtdCestas.js";
 
 function idValido(id) {
   return Number.isInteger(id) && id > 0;
@@ -46,6 +47,74 @@ class SaldoCestaController {
 
       console.error("POST /saldo-cestas/entrada error:", error);
       return res.status(500).json({ error: "Erro interno ao registrar entrada de saldo." });
+    }
+  }
+
+  async recomendacaoEnvio(req, res) {
+    const instituicaoId = Number(req.params.instituicaoId);
+    if (!idValido(instituicaoId)) return res.status(400).json({ error: "ID inválido." });
+
+    try {
+      const instituicao = await prisma.instituicaoParceira.findFirst({
+        where: { id: instituicaoId, deletedAt: null },
+        select: { id: true, nome: true, ativa: true },
+      });
+      if (!instituicao) return res.status(404).json({ error: "Instituição não encontrada." });
+
+      const agora = new Date();
+      const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+      const inicioProximoMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 1);
+
+      const [beneficiarios, saldo] = await Promise.all([
+        prisma.beneficiario.findMany({
+          where: { instituicaoId, ativo: true, deletedAt: null, tipoBeneficio: { in: ["CESTA", "AMBOS"] } },
+          select: {
+            id: true,
+            composicaoFamiliar: true,
+            doacoes: {
+              where: { deletedAt: null, dataDoacao: { gte: inicioMes, lt: inicioProximoMes } },
+              select: { id: true },
+              take: 1,
+            },
+          },
+        }),
+        prisma.saldoCesta.findUnique({ where: { instituicaoId }, select: { saldoAtual: true } }),
+      ]);
+
+      let necessidadeMensalTotal = 0;
+      let necessidadePendente = 0;
+      let atendidosNoMes = 0;
+
+      for (const beneficiario of beneficiarios) {
+        const composicao = Math.max(Number(beneficiario.composicaoFamiliar) || 1, 1);
+        const quantidade = Math.max(calcularQuantidadeCestas(composicao), 1);
+        necessidadeMensalTotal += quantidade;
+        if (beneficiario.doacoes.length > 0) atendidosNoMes += 1;
+        else necessidadePendente += quantidade;
+      }
+
+      const beneficiariosAtivosCesta = beneficiarios.length;
+      const pendentesNoMes = Math.max(beneficiariosAtivosCesta - atendidosNoMes, 0);
+      const saldoAtual = Math.max(Number(saldo?.saldoAtual ?? 0), 0);
+      const sugestaoEnvio = Math.max(necessidadePendente - saldoAtual, 0);
+
+      return res.status(200).json({
+        instituicao,
+        referencia: { mes: agora.getMonth() + 1, ano: agora.getFullYear() },
+        beneficiariosAtivosCesta,
+        atendidosNoMes,
+        pendentesNoMes,
+        necessidadeMensalTotal,
+        necessidadePendente,
+        saldoAtual,
+        sugestaoEnvio,
+        saldoProjetado: saldoAtual + sugestaoEnvio,
+        sobraProjetada: Math.max(saldoAtual + sugestaoEnvio - necessidadePendente, 0),
+        regra: "1 cesta a cada 3 pessoas da composição familiar",
+      });
+    } catch (error) {
+      console.error(`GET /saldo-cestas/${instituicaoId}/recomendacao error:`, error);
+      return res.status(500).json({ error: "Erro ao calcular a sugestão de envio de cestas." });
     }
   }
 

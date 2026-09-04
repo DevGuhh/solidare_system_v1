@@ -3685,3 +3685,674 @@ body.modal-documentos-aberto {
     cursor: not-allowed;
     opacity: .5;
 }
+
+
+/* =====================================================
+   SALDO DE CESTAS - SUGESTÃO AUTOMÁTICA DE ENVIO
+===================================================== */
+.saldo-cestas-recomendacao { margin-bottom:17px; padding:14px; border:1px solid #f1c7ce; border-radius:12px; background:linear-gradient(135deg,#fff7f8,#fff); }
+.saldo-cestas-recomendacao.carregando { opacity:.72; }
+.saldo-cestas-recomendacao.estoque-suficiente { border-color:#c8e7d7; background:linear-gradient(135deg,#f2fbf6,#fff); }
+.saldo-cestas-recomendacao-topo { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding-bottom:12px; border-bottom:1px solid #f0e3e6; }
+.saldo-cestas-recomendacao-topo>div:first-child { min-width:0; }
+.saldo-cestas-recomendacao-eyebrow { display:block; margin-bottom:4px; color:#9f1239; font-size:.64rem; font-weight:800; letter-spacing:.06em; }
+.saldo-cestas-recomendacao-topo>div:first-child>strong { display:block; color:#344054; font-size:.75rem; line-height:1.45; }
+.saldo-cestas-recomendacao-destaque { min-width:92px; padding:8px 10px; border-radius:10px; background:#850013; color:#fff; text-align:center; }
+.saldo-cestas-recomendacao.estoque-suficiente .saldo-cestas-recomendacao-destaque { background:#18794e; }
+.saldo-cestas-recomendacao-destaque span,.saldo-cestas-recomendacao-destaque strong { display:block; color:inherit; }
+.saldo-cestas-recomendacao-destaque span { margin-bottom:2px; font-size:.61rem; font-weight:700; text-transform:uppercase; }
+.saldo-cestas-recomendacao-destaque strong { font-size:.92rem; }
+.saldo-cestas-recomendacao-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:12px; }
+.saldo-cestas-recomendacao-grid>div { min-width:0; padding:9px 10px; border:1px solid #eceff3; border-radius:9px; background:#fff; }
+.saldo-cestas-recomendacao-grid>div:last-child { grid-column:1/-1; }
+.saldo-cestas-recomendacao-grid span,.saldo-cestas-recomendacao-grid strong { display:block; }
+.saldo-cestas-recomendacao-grid span { margin-bottom:3px; color:#98a2b3; font-size:.62rem; line-height:1.3; }
+.saldo-cestas-recomendacao-grid strong { color:#344054; font-size:.76rem; }
+.saldo-cestas-recomendacao-regra { margin:11px 0 0; color:#667085; font-size:.67rem; line-height:1.5; }
+.saldo-cestas-recomendacao-regra i { margin-right:5px; color:#850013; }
+.saldo-cestas-recomendacao-regra strong { color:#475467; }
+@media (max-width:520px) { .saldo-cestas-recomendacao-topo{flex-direction:column}.saldo-cestas-recomendacao-destaque{width:100%}.saldo-cestas-recomendacao-grid{grid-template-columns:1fr}.saldo-cestas-recomendacao-grid>div:last-child{grid-column:auto} }
+
+
+/* =====================================================
+   REFINAMENTO VISUAL - SUGESTÃO AUTOMÁTICA DE CESTAS
+===================================================== */
+.saldo-cestas-card { width: min(900px, calc(100vw - 40px)); }
+.saldo-cestas-grid { grid-template-columns: minmax(330px, .95fr) minmax(0, 1.35fr); }
+.saldo-cestas-estoque-topo { margin: 4px 0 0 !important; color: #667085 !important; font-size: .68rem !important; }
+.saldo-cestas-estoque-topo strong { color: #18794e; font-weight: 800; }
+.saldo-cestas-recomendacao { padding: 15px; }
+.saldo-cestas-recomendacao-topo { align-items: center; }
+.saldo-cestas-recomendacao-topo > div:first-child > strong { max-width: 210px; font-size: .72rem; line-height: 1.4; }
+.saldo-cestas-recomendacao-destaque { min-width: 104px; padding: 10px 11px; }
+.saldo-cestas-recomendacao-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.saldo-cestas-recomendacao-grid > div { min-height: 58px; display: flex; flex-direction: column; justify-content: center; }
+.saldo-cestas-recomendacao-grid > div:last-child { grid-column: auto; }
+.saldo-cestas-recomendacao-grid .recomendacao-card-faltam { border-color: #f1c7ce; background: #fff7f8; }
+.saldo-cestas-recomendacao-grid .recomendacao-card-faltam strong { color: #9f1239; }
+.saldo-cestas-recomendacao.estoque-suficiente .recomendacao-card-faltam { border-color: #c8e7d7; background: #f2fbf6; }
+.saldo-cestas-recomendacao.estoque-suficiente .recomendacao-card-faltam strong { color: #18794e; }
+.saldo-cestas-recomendacao-regra { padding-top: 10px; border-top: 1px solid #f0e3e6; }
+@media (max-width: 800px) { .saldo-cestas-card { width: min(720px, calc(100vw - 24px)); } .saldo-cestas-grid { grid-template-columns: 1fr; } }
+
+
+/* =====================================================
+   SALDO DE CESTAS - MODAL EM 2 ETAPAS
+   Padrão visual inspirado no cadastro de beneficiários
+===================================================== */
+
+.saldo-cestas-card-etapas {
+  width: min(860px, calc(100vw - 44px)) !important;
+  max-width: 860px !important;
+  max-height: min(88vh, 820px) !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+}
+
+.saldo-cestas-header-etapas {
+  padding: 20px 24px 16px !important;
+  border-bottom: 1px solid #eaecf0 !important;
+}
+
+.saldo-cestas-header-etapas .saldo-cestas-estoque-topo {
+  display: none !important;
+}
+
+.saldo-cestas-etapas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px 24px;
+  border-bottom: 1px solid #eaecf0;
+  background: #fbfcfd;
+}
+
+.saldo-cestas-etapa {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 62px;
+  padding: 11px 14px;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+  background: #fff;
+  color: #667085;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease, color .18s ease;
+}
+
+.saldo-cestas-etapa:hover {
+  border-color: #d0d5dd;
+  background: #fcfcfd;
+}
+
+.saldo-cestas-etapa.ativo {
+  border-color: #d9a9b1;
+  background: #fff7f8;
+  color: #850013;
+  box-shadow: 0 0 0 2px rgba(133, 0, 19, .035);
+}
+
+.saldo-cestas-etapa-numero {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f2f4f7;
+  color: #667085;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.saldo-cestas-etapa.ativo .saldo-cestas-etapa-numero {
+  background: #850013;
+  color: #fff;
+}
+
+.saldo-cestas-etapa > span:last-child {
+  min-width: 0;
+}
+
+.saldo-cestas-etapa strong,
+.saldo-cestas-etapa small {
+  display: block;
+}
+
+.saldo-cestas-etapa strong {
+  margin-bottom: 2px;
+  color: #344054;
+  font-size: .78rem;
+}
+
+.saldo-cestas-etapa.ativo strong {
+  color: #850013;
+}
+
+.saldo-cestas-etapa small {
+  color: #98a2b3;
+  font-size: .64rem;
+}
+
+.saldo-cestas-body-etapas {
+  padding: 18px 24px 22px !important;
+  overflow-y: auto !important;
+  max-height: calc(min(88vh, 820px) - 190px) !important;
+}
+
+.saldo-cestas-painel-etapa {
+  display: none;
+}
+
+.saldo-cestas-painel-etapa.ativo {
+  display: block;
+}
+
+.saldo-cestas-resumo-etapas {
+  margin: 0 0 16px !important;
+  padding: 14px 16px !important;
+  border: 1px solid #bfe7d1 !important;
+  border-radius: 13px !important;
+  background: #f2fbf6 !important;
+}
+
+.saldo-cestas-resumo-texto {
+  flex: 1;
+}
+
+.saldo-cestas-resumo-etapas strong {
+  font-size: 1.35rem !important;
+  color: #137a4b !important;
+}
+
+.saldo-cestas-atualizar {
+  margin-left: auto;
+}
+
+.saldo-cestas-etapa-conteudo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(280px, .82fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.saldo-cestas-bloco {
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.saldo-cestas-bloco .saldo-cestas-section-title {
+  margin-bottom: 14px;
+}
+
+.saldo-cestas-recomendacao-etapas {
+  margin: 0 !important;
+  padding: 14px !important;
+}
+
+.saldo-cestas-recomendacao-grid-etapas {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.saldo-cestas-recomendacao-grid-etapas > div:last-child {
+  grid-column: auto !important;
+}
+
+.saldo-cestas-entrada-etapas {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.saldo-cestas-entrada-etapas .form-group {
+  margin-bottom: 14px;
+}
+
+.saldo-cestas-entrada-etapas textarea {
+  min-height: 116px;
+  resize: vertical;
+}
+
+.saldo-cestas-entrada-etapas .saldo-cestas-btn-entrada {
+  width: 100%;
+  margin-top: auto;
+}
+
+.saldo-cestas-historico-etapas {
+  min-height: 440px;
+  padding: 18px;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.saldo-cestas-historico-topo-etapas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 14px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.saldo-cestas-section-title-historico {
+  margin: 0 !important;
+}
+
+.saldo-cestas-historico-topo-etapas select {
+  width: 210px;
+  max-width: 100%;
+}
+
+.saldo-cestas-historico-lista-etapas {
+  min-height: 330px;
+  max-height: 430px;
+  overflow-y: auto;
+  padding-top: 12px;
+}
+
+.saldo-cestas-footer-etapas {
+  padding: 12px 24px !important;
+  border-top: 1px solid #eaecf0 !important;
+  background: #fbfcfd !important;
+}
+
+@media (max-width: 760px) {
+  .saldo-cestas-card-etapas {
+    width: calc(100vw - 20px) !important;
+    max-height: 92vh !important;
+  }
+
+  .saldo-cestas-header-etapas,
+  .saldo-cestas-etapas,
+  .saldo-cestas-body-etapas,
+  .saldo-cestas-footer-etapas {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .saldo-cestas-etapas {
+    grid-template-columns: 1fr;
+  }
+
+  .saldo-cestas-etapa-conteudo {
+    grid-template-columns: 1fr;
+  }
+
+  .saldo-cestas-historico-topo-etapas {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .saldo-cestas-historico-topo-etapas select {
+    width: 100%;
+  }
+}
+
+/* =====================================================
+   SALDO DE CESTAS - MODAL MAIS AMPLO E SEM ROLAGEM DUPLA
+===================================================== */
+
+/* Amplia o modal para os blocos respirarem melhor. */
+.saldo-cestas-card-etapas {
+  width: min(1120px, calc(100vw - 64px)) !important;
+  max-width: 1120px !important;
+  max-height: 92vh !important;
+  border-radius: 20px !important;
+}
+
+/* Cabeçalho e etapas com mais área horizontal. */
+.saldo-cestas-header-etapas {
+  padding: 22px 30px 18px !important;
+}
+
+.saldo-cestas-etapas {
+  gap: 14px !important;
+  padding: 16px 30px !important;
+}
+
+.saldo-cestas-etapa {
+  min-height: 68px !important;
+  padding: 13px 18px !important;
+}
+
+.saldo-cestas-etapa strong {
+  font-size: .84rem !important;
+}
+
+.saldo-cestas-etapa small {
+  font-size: .68rem !important;
+}
+
+/* Mantém uma única área de rolagem no conteúdo do modal. */
+.saldo-cestas-body-etapas {
+  padding: 20px 30px 28px !important;
+  max-height: calc(92vh - 205px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-gutter: stable;
+}
+
+/* Etapa 1: dá mais largura para sugestão e formulário. */
+.saldo-cestas-etapa-conteudo {
+  grid-template-columns: minmax(0, 1.35fr) minmax(340px, .85fr) !important;
+  gap: 22px !important;
+  align-items: start !important;
+}
+
+.saldo-cestas-bloco {
+  padding: 20px !important;
+  border-radius: 16px !important;
+}
+
+.saldo-cestas-recomendacao-etapas {
+  padding: 16px !important;
+}
+
+.saldo-cestas-recomendacao-grid-etapas {
+  gap: 10px !important;
+}
+
+.saldo-cestas-entrada-etapas textarea {
+  min-height: 138px !important;
+}
+
+/* Etapa 2: remove a segunda rolagem interna do histórico.
+   O histórico passa a usar somente a rolagem principal do modal. */
+.saldo-cestas-historico-etapas {
+  min-height: 0 !important;
+  padding: 20px !important;
+  border-radius: 16px !important;
+}
+
+.saldo-cestas-historico-lista-etapas {
+  min-height: 0 !important;
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding-top: 14px !important;
+}
+
+.saldo-cestas-historico-topo-etapas {
+  gap: 24px !important;
+  padding-bottom: 16px !important;
+}
+
+.saldo-cestas-historico-topo-etapas select {
+  width: 240px !important;
+}
+
+.saldo-cestas-footer-etapas {
+  padding: 13px 30px !important;
+}
+
+@media (max-width: 980px) {
+  .saldo-cestas-card-etapas {
+    width: calc(100vw - 32px) !important;
+    max-height: 94vh !important;
+  }
+
+  .saldo-cestas-etapa-conteudo {
+    grid-template-columns: 1fr !important;
+  }
+
+  .saldo-cestas-body-etapas {
+    max-height: calc(94vh - 205px) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .saldo-cestas-card-etapas {
+    width: calc(100vw - 18px) !important;
+  }
+
+  .saldo-cestas-header-etapas,
+  .saldo-cestas-etapas,
+  .saldo-cestas-body-etapas,
+  .saldo-cestas-footer-etapas {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+
+/* =====================================================
+   CORREÇÃO DEFINITIVA - ROLAGEM POR ETAPA
+   Etapa 1: sem rolagem.
+   Etapa 2: mantém a rolagem principal do modal.
+===================================================== */
+
+/* Na etapa SALDO, o modal cresce conforme o conteúdo e não cria scrollbar. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-card-etapas {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-body-etapas {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  scrollbar-gutter: auto !important;
+}
+
+/* Garante que nenhum bloco da primeira etapa crie rolagem própria. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] [data-saldo-painel="saldo"],
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-etapa-conteudo,
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-bloco,
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Na etapa HISTÓRICO, volta a limitar a altura e usa apenas a rolagem principal. */
+#modalSaldoCestas[data-saldo-etapa-ativa="historico"] .saldo-cestas-card-etapas {
+  max-height: 92vh !important;
+  overflow: hidden !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="historico"] .saldo-cestas-body-etapas {
+  max-height: calc(92vh - 205px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-gutter: stable;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="historico"] .saldo-cestas-historico-lista-etapas {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Em telas menores, a rolagem continua necessária por segurança. */
+@media (max-height: 760px), (max-width: 980px) {
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-card-etapas {
+    max-height: 94vh !important;
+    overflow: hidden !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-body-etapas {
+    max-height: calc(94vh - 205px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+}
+
+
+/* =====================================================
+   AJUSTE FINAL - ETAPA 1 CABE INTEIRA NA TELA
+   Sem rolagem no modal e sem criar rolagem na página.
+   A etapa 2 permanece como estava.
+===================================================== */
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] {
+  overflow: hidden !important;
+  padding: 18px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-card-etapas {
+  width: min(1120px, calc(100vw - 56px)) !important;
+  max-width: 1120px !important;
+  height: auto !important;
+  max-height: calc(100vh - 36px) !important;
+  overflow: hidden !important;
+}
+
+/* Cabeçalho um pouco mais compacto somente na etapa 1. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-header-etapas {
+  padding-top: 14px !important;
+  padding-bottom: 12px !important;
+}
+
+/* Navegação das etapas mais baixa, sem perder o visual. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-etapas {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  gap: 12px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-etapa {
+  min-height: 54px !important;
+  padding: 9px 16px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-etapa-numero {
+  width: 30px !important;
+  height: 30px !important;
+  flex-basis: 30px !important;
+}
+
+/* Corpo da primeira etapa não rola e usa menos altura vertical. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-body-etapas {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  max-height: none !important;
+  height: auto !important;
+  overflow: hidden !important;
+  scrollbar-gutter: auto !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] [data-saldo-painel="saldo"] {
+  overflow: hidden !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-resumo {
+  margin-bottom: 12px !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+/* Deixa sugestão e formulário mais compactos verticalmente. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-etapa-conteudo {
+  gap: 18px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-bloco {
+  padding: 14px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-etapas {
+  padding: 12px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-topo {
+  padding-bottom: 9px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-grid {
+  margin-top: 9px !important;
+  gap: 8px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-grid > div {
+  min-height: 46px !important;
+  padding: 7px 9px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-regra {
+  margin-top: 8px !important;
+  padding-top: 8px !important;
+  line-height: 1.35 !important;
+}
+
+/* Formulário: reduz somente o espaço vertical excessivo. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-bloco .form-group {
+  margin-bottom: 10px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] #observacaoEntradaSaldoCestas {
+  min-height: 88px !important;
+  height: 88px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .form-help {
+  margin-top: 4px !important;
+}
+
+/* Rodapé menor na etapa 1. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-footer-etapas {
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+}
+
+/* Mantém o comportamento correto em notebooks mais baixos.
+   Se realmente não houver espaço físico suficiente, reduz um pouco mais,
+   sem criar barra de rolagem na primeira etapa. */
+@media (max-height: 820px) and (min-width: 981px) {
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] {
+    padding: 10px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-card-etapas {
+    max-height: calc(100vh - 20px) !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-header-etapas {
+    padding-top: 10px !important;
+    padding-bottom: 8px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-etapas {
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-etapa {
+    min-height: 48px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-body-etapas {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-resumo {
+    margin-bottom: 8px !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-bloco {
+    padding: 11px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-grid > div {
+    min-height: 42px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] #observacaoEntradaSaldoCestas {
+    min-height: 70px !important;
+    height: 70px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-footer-etapas {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+}
