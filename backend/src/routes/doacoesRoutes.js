@@ -26,16 +26,9 @@ router.get(
   authorize("ADMIN", "INSTITUICAO"),
   DoacoesController.obterComprovanteEntrega,
 );
-router.put(
-  "/:id",
-  authorize("ADMIN", "INSTITUICAO"),
-  DoacoesController.atualizarUmaDoacao,
-);
-router.patch(
-  "/:id/comprovante",
-  authorize("ADMIN", "INSTITUICAO"),
-  DoacoesController.alterarComprovanteDoacao,
-);
+// Doações concluídas são imutáveis.
+// Em caso de erro, a correção deve ocorrer por cancelamento/estorno,
+// preservando a rastreabilidade e o histórico da movimentação.
 router.delete(
   "/:id",
   authorize("ADMIN", "INSTITUICAO"),
