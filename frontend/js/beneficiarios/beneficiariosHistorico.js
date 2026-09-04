@@ -92,6 +92,54 @@ async function lerRespostaJson(resposta) {
    ALTERAÇÕES
 ===================================================== */
 
+function formatarValorAlteracao(alteracao, lado) {
+    const campo = String(alteracao?.campo || "");
+    const valorExibicao =
+        lado === "de"
+            ? alteracao?.deExibicao
+            : alteracao?.paraExibicao;
+
+    if (
+        valorExibicao !== undefined &&
+        valorExibicao !== null &&
+        String(valorExibicao).trim() !== ""
+    ) {
+        return String(valorExibicao);
+    }
+
+    const valor =
+        lado === "de"
+            ? alteracao?.de
+            : alteracao?.para;
+
+    if (
+        valor === null ||
+        valor === undefined ||
+        String(valor).trim() === ""
+    ) {
+        return campo === "instituicaoId"
+            ? "Nenhuma"
+            : "Não informado";
+    }
+
+    const texto = String(valor).trim();
+
+    if (campo === "tipoBeneficio") {
+        return {
+            CESTA: "Cesta",
+            GRANEL: "Granel",
+            AMBOS: "Ambos",
+            OUTROS: "Outros",
+        }[texto.toUpperCase()] || texto;
+    }
+
+    if (campo === "instituicaoId") {
+        return `Instituição #${texto}`;
+    }
+
+    return texto;
+}
+
 function renderizarAlteracoes(detalhes) {
     const alteracoes = detalhes?.alteracoes;
 
@@ -150,11 +198,17 @@ function renderizarAlteracoes(detalhes) {
             );
 
             const anterior = escaparHtml(
-                alteracao?.de ?? "Não informado"
+                formatarValorAlteracao(
+                    alteracao,
+                    "de"
+                )
             );
 
             const atual = escaparHtml(
-                alteracao?.para ?? "Não informado"
+                formatarValorAlteracao(
+                    alteracao,
+                    "para"
+                )
             );
 
             return `

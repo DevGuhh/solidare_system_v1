@@ -625,7 +625,96 @@ class BeneficiarioController {
         },
       });
 
-      return res.status(200).json(historico);
+      // Torna alterações de instituição legíveis sem modificar os
+      // registros históricos já gravados no banco. Os IDs originais
+      // continuam preservados em detalhes.alteracoes para auditoria.
+      const idsInstituicoes = new Set();
+
+      for (const evento of historico) {
+        const alteracoes = evento?.detalhes?.alteracoes;
+
+        if (!Array.isArray(alteracoes)) {
+          continue;
+        }
+
+        for (const alteracao of alteracoes) {
+          if (alteracao?.campo !== "instituicaoId") {
+            continue;
+          }
+
+          for (const valor of [alteracao?.de, alteracao?.para]) {
+            const idInstituicao = Number(valor);
+
+            if (
+              Number.isInteger(idInstituicao) &&
+              idInstituicao > 0
+            ) {
+              idsInstituicoes.add(idInstituicao);
+            }
+          }
+        }
+      }
+
+      const instituicoes =
+        idsInstituicoes.size > 0
+          ? await prisma.instituicaoParceira.findMany({
+              where: {
+                id: {
+                  in: [...idsInstituicoes],
+                },
+              },
+              select: {
+                id: true,
+                nome: true,
+              },
+            })
+          : [];
+
+      const nomesInstituicoes = new Map(
+        instituicoes.map((instituicao) => [
+          instituicao.id,
+          instituicao.nome,
+        ]),
+      );
+
+      const historicoLegivel = historico.map((evento) => {
+        const alteracoes = evento?.detalhes?.alteracoes;
+
+        if (!Array.isArray(alteracoes)) {
+          return evento;
+        }
+
+        return {
+          ...evento,
+          detalhes: {
+            ...evento.detalhes,
+            alteracoes: alteracoes.map((alteracao) => {
+              if (alteracao?.campo !== "instituicaoId") {
+                return alteracao;
+              }
+
+              const idAnterior = Number(alteracao?.de);
+              const idAtual = Number(alteracao?.para);
+
+              return {
+                ...alteracao,
+                deExibicao:
+                  Number.isInteger(idAnterior) && idAnterior > 0
+                    ? nomesInstituicoes.get(idAnterior) ||
+                      `Instituição #${idAnterior}`
+                    : "Nenhuma",
+                paraExibicao:
+                  Number.isInteger(idAtual) && idAtual > 0
+                    ? nomesInstituicoes.get(idAtual) ||
+                      `Instituição #${idAtual}`
+                    : "Nenhuma",
+              };
+            }),
+          },
+        };
+      });
+
+      return res.status(200).json(historicoLegivel);
     } catch (error) {
       console.error(
         `GET /beneficiarios/${req.params.id}/historico error:`,

@@ -802,7 +802,7 @@
 }
 
 .qrcode-botao-confirmar-entrega:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.7;
 }
 

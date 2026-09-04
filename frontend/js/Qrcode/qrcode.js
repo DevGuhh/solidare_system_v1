@@ -3,6 +3,8 @@
     // =====================================================
 
     import { listarBeneficiarios } from "../api/beneficiariosApi.js";
+import { confirmar } from "../components/modal.js";
+    import { mostrarSucesso } from "../utils/toast.js";
     import {
         listarQRCodes,
         criarQRCode,
@@ -835,10 +837,15 @@
                 return;
             }
 
-            const confirmou = window.confirm(
-                "Confirmar a entrega de 1 cesta para este beneficiário?\n\n" +
-                "Essa ação registrará a doação e dará baixa no saldo da instituição."
-            );
+            const confirmou = await confirmar({
+                titulo: "Confirmar entrega da cesta",
+                mensagem:
+                    "Deseja confirmar a entrega de 1 cesta para este beneficiário? " +
+                    "Essa ação registrará a doação e dará baixa no saldo da instituição.",
+                textoConfirmar: "Confirmar entrega",
+                textoCancelar: "Cancelar",
+                tipo: "sucesso"
+            });
 
             if (!confirmou) return;
 
@@ -1020,9 +1027,11 @@
         }
 
         async function copiarCodigo(codigo) {
+            let copiado = false;
+
             try {
                 await navigator.clipboard.writeText(codigo);
-                alert("Código copiado com sucesso.");
+                copiado = true;
             } catch {
                 const campo = document.createElement("textarea");
                 campo.value = codigo;
@@ -1030,9 +1039,16 @@
                 campo.style.opacity = "0";
                 document.body.appendChild(campo);
                 campo.select();
-                document.execCommand("copy");
+
+                copiado = document.execCommand("copy");
                 campo.remove();
-                alert("Código copiado com sucesso.");
+            }
+
+            if (copiado) {
+                mostrarSucesso(
+                    "Código copiado com sucesso.",
+                    1800
+                );
             }
         }
 

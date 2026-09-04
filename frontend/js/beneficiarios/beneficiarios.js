@@ -3174,9 +3174,48 @@ function imprimirCarteirinhaAtual() {
     janela.document.write(`<!doctype html>
         <html lang="pt-BR"><head><meta charset="utf-8"><title>Carteirinha do beneficiário</title>
         <style>
-          *{box-sizing:border-box} body{margin:0;padding:28px;font-family:Arial,sans-serif;background:#fff;display:flex;justify-content:center}
-          .carteirinha-cartao{width:680px;min-height:390px;border-radius:24px;overflow:hidden;border:1px solid #dedede;box-shadow:none;background:#fff;color:#1f2937}
-          .carteirinha-faixa{background:#980019;color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
+          *{
+            box-sizing:border-box;
+            -webkit-print-color-adjust:exact !important;
+            print-color-adjust:exact !important;
+          }
+
+          html,body{
+            -webkit-print-color-adjust:exact !important;
+            print-color-adjust:exact !important;
+          }
+
+          body{margin:0;padding:28px;font-family:Arial,sans-serif;background:#fff;display:flex;justify-content:center}
+
+          .carteirinha-cartao{
+            width:680px;
+            min-height:390px;
+            border-radius:24px;
+            overflow:hidden;
+            border:1px solid #dedede;
+            box-shadow:none;
+            background:#fff !important;
+            color:#1f2937;
+            -webkit-print-color-adjust:exact !important;
+            print-color-adjust:exact !important;
+          }
+
+          .carteirinha-faixa{
+            background:#980019 !important;
+            background-color:#980019 !important;
+            color:#fff !important;
+            padding:18px 24px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            -webkit-print-color-adjust:exact !important;
+            print-color-adjust:exact !important;
+          }
+
+          .carteirinha-faixa strong,
+          .carteirinha-faixa span{
+            color:#fff !important;
+          }
           .carteirinha-faixa strong{font-size:22px}.carteirinha-faixa span{font-size:12px;text-transform:uppercase;letter-spacing:1px}
           .carteirinha-corpo{display:grid;grid-template-columns:150px 1fr 170px;gap:22px;padding:24px;align-items:center}
           .carteirinha-foto{width:145px;height:175px;border-radius:18px;object-fit:cover;background:#f3f4f6;border:1px solid #e5e7eb}
@@ -3184,7 +3223,28 @@ function imprimirCarteirinhaAtual() {
           .carteirinha-dados h2{margin:0 0 14px;font-size:23px}.carteirinha-dados p{margin:7px 0;font-size:14px}.carteirinha-dados b{color:#980019}
           .carteirinha-qr{text-align:center}.carteirinha-qr img{width:155px;height:155px;object-fit:contain}.carteirinha-qr small{display:block;margin-top:4px;font-family:monospace;font-size:10px}
           .carteirinha-rodape{border-top:1px solid #eee;padding:10px 24px;text-align:center;font-size:11px;color:#6b7280}
-          @media print{body{padding:0}.carteirinha-cartao{width:100%;page-break-inside:avoid}}
+          @media print{
+            @page{margin:10mm}
+
+            html,body,*{
+              -webkit-print-color-adjust:exact !important;
+              print-color-adjust:exact !important;
+            }
+
+            body{padding:0}
+
+            .carteirinha-cartao{
+              width:100%;
+              page-break-inside:avoid;
+              break-inside:avoid;
+            }
+
+            .carteirinha-faixa{
+              background:#980019 !important;
+              background-color:#980019 !important;
+              color:#fff !important;
+            }
+          }
         </style></head><body>${cartao.outerHTML}<script>window.onload=()=>{window.print();};<\/script></body></html>`);
     janela.document.close();
 }
