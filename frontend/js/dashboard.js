@@ -1114,12 +1114,19 @@ async function inicializarDashboard() {
         }
 
         try {
-            const moduloNotificacoes = await import("./notificacoes.js");
-            if (typeof moduloNotificacoes.inicializarNotificacoes === "function") {
-                moduloNotificacoes.inicializarNotificacoes();
+            const moduloSuporte = await import("./suporte.js");
+
+            if (
+                typeof moduloSuporte.inicializarSuporte ===
+                "function"
+            ) {
+                moduloSuporte.inicializarSuporte();
             }
         } catch (erro) {
-            console.error("Erro ao inicializar notificações:", erro);
+            console.error(
+                "Erro ao inicializar a central de suporte:",
+                erro
+            );
         }
 
     } catch (erro) {

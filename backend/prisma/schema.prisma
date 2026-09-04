@@ -57,6 +57,7 @@ model InstituicaoParceira {
   cnpj          String?        @unique
   comprovantes  Comprovante[]
   notificacoes  Notificacao[]
+  chamadosSuporte ChamadoSuporte[]
 
   @@map("instituicoes_parceiras")
 }
@@ -248,6 +249,56 @@ model Notificacao {
   @@index([lida, criadoEm])
   @@index([instituicao, criadoEm])
   @@map("notificacoes")
+}
+
+
+model ChamadoSuporte {
+  id            Int                    @id @default(autoincrement())
+  instituicaoId Int
+  assunto       String
+  categoria     CategoriaChamadoSuporte
+  status        StatusChamadoSuporte   @default(ABERTO)
+  criadoPorNome String
+  criadoEm      DateTime               @default(now())
+  atualizadoEm  DateTime               @updatedAt
+  resolvidoEm   DateTime?
+
+  instituicao InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
+  mensagens   MensagemSuporte[]
+
+  @@index([instituicaoId, atualizadoEm])
+  @@index([status, atualizadoEm])
+  @@map("chamados_suporte")
+}
+
+model MensagemSuporte {
+  id         Int         @id @default(autoincrement())
+  chamadoId  Int
+  autorRole  RoleUsuario
+  autorNome  String
+  mensagem   String
+  lida       Boolean     @default(false)
+  criadoEm   DateTime    @default(now())
+
+  chamado ChamadoSuporte @relation(fields: [chamadoId], references: [id], onDelete: Cascade)
+
+  @@index([chamadoId, criadoEm])
+  @@index([lida, criadoEm])
+  @@map("mensagens_suporte")
+}
+
+enum CategoriaChamadoSuporte {
+  ALTERACAO_CADASTRAL
+  DUVIDA
+  PROBLEMA_TECNICO
+  OUTRO
+}
+
+enum StatusChamadoSuporte {
+  ABERTO
+  EM_ATENDIMENTO
+  AGUARDANDO_INSTITUICAO
+  RESOLVIDO
 }
 
 enum RoleUsuario {

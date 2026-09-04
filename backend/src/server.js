@@ -22,6 +22,7 @@ import qrcodeRoutes from "./routes/qrcodeRoutes.js";
 import saldoCestaRoutes from "./routes/saldoCestaRoutes.js";
 import comprovanteRoutes from "./routes/comprovanteRoutes.js";
 import notificacoesRoutes from "./routes/notificacoesRoutes.js";
+import suporteRoutes from "./routes/suporteRoutes.js";
 
 // ===============================
 // VARIÁVEIS DE AMBIENTE
@@ -148,6 +149,7 @@ const comprovantesLimiter = rateLimit({
 
 app.use("/api/comprovantes", comprovantesLimiter, comprovanteRoutes);
 app.use("/notificacoes", notificacoesRoutes);
+app.use("/suporte", suporteRoutes);
 
 app.use("/auth", authRoutes);
 

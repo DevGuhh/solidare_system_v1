@@ -47,7 +47,7 @@
     <link rel="stylesheet" href="../css/components/toast.css" />
 
     <link rel="stylesheet" href="../css/components/loading.css" />
-    <link rel="stylesheet" href="../css/notificacoes.css" />
+    <link rel="stylesheet" href="../css/suporte.css" />
   </head>
 
   <body>
@@ -237,50 +237,20 @@
           </div>
 
           <div class="topbar-lado-direito">
-            <div class="notificacoes-wrapper">
+            <div class="suporte-wrapper">
               <button
                 type="button"
-                id="btnNotificacoes"
-                class="btn-notificacoes"
-                aria-label="Abrir notificações"
-                aria-expanded="false"
-                aria-haspopup="true"
-                title="Notificações"
+                id="btnSuporte"
+                class="btn-suporte"
+                aria-label="Abrir central de suporte"
+                title="Central de suporte"
               >
-                <i class="fa-regular fa-bell"></i>
+                <i class="fa-solid fa-headset"></i>
 
-                <span id="badgeNotificacoes" class="badge-notificacoes" hidden>
+                <span id="badgeSuporte" class="badge-suporte" hidden>
                   0
                 </span>
               </button>
-
-              <div id="painelNotificacoes" class="painel-notificacoes" hidden>
-                <div class="painel-notificacoes-header">
-                  <div class="painel-titulo-row">
-                    <strong>Notificações</strong>
-                    <span id="textoContadorNotificacoes"
-                      >Nenhuma nova notificação</span
-                    >
-                  </div>
-
-                  <button
-                    type="button"
-                    id="btnMarcarTodasLidas"
-                    class="btn-marcar-todas"
-                  >
-                    Marcar todas como lidas
-                  </button>
-                </div>
-
-                <div id="listaNotificacoes" class="lista-notificacoes"></div>
-
-                <div class="painel-notificacoes-footer">
-                  <button type="button" id="btnVerTodasNotificacoes">
-                    Ver todas as notificações
-                    <i class="fa-solid fa-arrow-right"></i>
-                  </button>
-                </div>
-              </div>
             </div>
 
             <div class="usuario">
@@ -317,6 +287,76 @@
     </div>
 
     <!-- =====================================================
+         CENTRAL DE SUPORTE
+    ====================================================== -->
+
+    <div
+      id="modalSuporte"
+      class="suporte-modal"
+      hidden
+      aria-hidden="true"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tituloCentralSuporte"
+    >
+      <div class="suporte-shell">
+        <div class="suporte-header">
+          <div class="suporte-header-titulo">
+            <div class="suporte-header-icone">
+              <i class="fa-solid fa-headset"></i>
+            </div>
+
+            <div>
+              <strong id="tituloCentralSuporte">
+                Central de suporte
+              </strong>
+              <span>
+                Atendimento entre instituições e administração
+              </span>
+            </div>
+          </div>
+
+          <div class="suporte-header-acoes">
+            <button
+              type="button"
+              id="btnNovoChamadoSuporte"
+            >
+              <i class="fa-solid fa-plus"></i>
+              <span>Novo chamado</span>
+            </button>
+
+            <button
+              type="button"
+              id="btnFecharSuporte"
+              class="btn-fechar-suporte"
+              aria-label="Fechar central de suporte"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="suporte-body">
+          <aside class="suporte-sidebar">
+            <div class="suporte-sidebar-titulo">
+              Chamados
+            </div>
+
+            <div
+              id="suporteListaChamados"
+              class="suporte-lista"
+            ></div>
+          </aside>
+
+          <section
+            id="suporteDetalhe"
+            class="suporte-detalhe"
+          ></section>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================
          JAVASCRIPT
     ====================================================== -->
 
@@ -324,6 +364,5 @@
 
     <script type="module" src="../js/dashboard.js"></script>
 
-    <script type="module" src="../js/notificacoes.js"></script>
   </body>
 </html>
