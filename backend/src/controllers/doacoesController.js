@@ -4,7 +4,6 @@ import { startOfMonth, endOfMonth } from "date-fns";
 import { z, ZodError } from "zod";
 import { gerarCodigoDoacao } from "../utils/generateCode.js";
 import { calcularQuantidadeCestas } from "../utils/generateQtdCestas.js";
-import { deflate } from "node:zlib";
 import { registrarEventoHistorico } from "../services/historicoBeneficiarioService.js";
 import {
   afetaSaldoCesta,
@@ -21,6 +20,10 @@ const ROTULOS_TIPO_BENEFICIO = {
 };
 
 const atualizarDoacaoSchema = criarDoacaoSchema.partial();
+
+const cancelarDoacaoSchema = z.object({
+  motivo: z.string().trim().min(5, "Informe um motivo com pelo menos 5 caracteres.").max(300),
+});
 
 const alterarComprovanteSchema = z.object({
   comprovante: z.boolean({
@@ -54,6 +57,7 @@ const includeDoacao = {
       id: true,
 
       nomeCompleto: true,
+      composicaoFamiliar: true,
     },
   },
 
@@ -66,10 +70,30 @@ const includeDoacao = {
   },
 
   usuario: {
+    select: { id: true, nome: true },
+  },
+  canceladaPor: {
+    select: { id: true, nome: true },
+  },
+  movimentacoesSaldo: {
+    select: {
+      tipo: true,
+      quantidade: true,
+      saldoAnterior: true,
+      saldoPosterior: true,
+      observacao: true,
+      criadoEm: true,
+      usuario: { select: { id: true, nome: true } },
+    },
+    orderBy: { criadoEm: "asc" },
+  },
+  comprovanteEntrega: {
     select: {
       id: true,
-
-      nome: true,
+      mimeType: true,
+      tamanho: true,
+      criadoEm: true,
+      expiraEm: true,
     },
   },
 };
@@ -141,6 +165,9 @@ class DoacoesController {
             tipo: data.tipo,
             quantidade: quantidadeFinal,
             observacoes: data.observacoes,
+            origem: "MANUAL",
+            composicaoFamiliarSnapshot: beneficiario.composicaoFamiliar,
+            quantidadeCalculada: afetaSaldoCesta(data.tipo),
           },
           include: includeDoacao,
         });
@@ -194,9 +221,7 @@ class DoacoesController {
   }
   async listarDoacoes(req, res) {
     try {
-      const where = {
-        deletedAt: null,
-      };
+      const where = {};
 
       if (req.user.role === "INSTITUICAO") {
         where.instituicaoId = req.user.instituicaoId;
@@ -246,11 +271,11 @@ class DoacoesController {
     }
 
     try {
-      const where = montarFiltroAcessoDoacao(req, id);
+      const where = { id };
+      if (req.user.role !== "ADMIN") where.instituicaoId = req.user.instituicaoId;
 
       const doacao = await prisma.doacao.findFirst({
         where,
-
         include: includeDoacao,
       });
 
@@ -269,6 +294,39 @@ class DoacoesController {
       });
     }
   }
+  async obterComprovanteEntrega(req, res) {
+    const id = obterIdValido(req.params.id);
+    if (!id) return res.status(400).json({ error: "ID inválido." });
+
+    try {
+      const where = { id };
+      if (req.user.role !== "ADMIN") where.instituicaoId = req.user.instituicaoId;
+
+      const doacao = await prisma.doacao.findFirst({
+        where,
+        select: {
+          id: true,
+          comprovanteEntrega: {
+            select: { foto: true, mimeType: true, expiraEm: true },
+          },
+        },
+      });
+
+      if (!doacao) return res.status(404).json({ error: "Doação não encontrada." });
+      if (!doacao.comprovanteEntrega) {
+        return res.status(404).json({ error: "Foto do comprovante de entrega não encontrada ou já expirada." });
+      }
+
+      res.setHeader("Content-Type", doacao.comprovanteEntrega.mimeType || "image/jpeg");
+      res.setHeader("Cache-Control", "private, no-store, max-age=0");
+      res.setHeader("Content-Disposition", `inline; filename=comprovante-entrega-${id}`);
+      return res.status(200).send(Buffer.from(doacao.comprovanteEntrega.foto));
+    } catch (error) {
+      console.error(`GET /doacoes/${req.params.id}/comprovante-entrega - erro:`, error);
+      return res.status(500).json({ error: "Erro ao carregar a foto do comprovante de entrega." });
+    }
+  }
+
   async atualizarUmaDoacao(req, res) {
     const id = obterIdValido(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido." });
@@ -449,6 +507,7 @@ class DoacoesController {
     if (!id) return res.status(400).json({ error: "ID inválido." });
 
     try {
+      const { motivo } = cancelarDoacaoSchema.parse(req.body ?? {});
       const where = montarFiltroAcessoDoacao(req, id);
 
       const doacao = await prisma.doacao.findFirst({
@@ -463,7 +522,12 @@ class DoacoesController {
       await prisma.$transaction(async (tx) => {
         await tx.doacao.update({
           where: { id },
-          data: { deletedAt: new Date() },
+          data: {
+            deletedAt: new Date(),
+            canceladaEm: new Date(),
+            motivoCancelamento: motivo,
+            canceladaPorId: req.user.id,
+          },
         });
 
         if (afetaSaldoCesta(doacao.tipo)) {
@@ -472,7 +536,7 @@ class DoacoesController {
             quantidade: doacao.quantidade,
             doacaoId: doacao.id,
             usuarioId: req.user.id,
-            observacao: "Devolução por cancelamento de doação",
+            observacao: `Devolução por cancelamento de doação. Motivo: ${motivo}`,
           });
         }
       });
@@ -481,6 +545,11 @@ class DoacoesController {
         .status(200)
         .json({ mensagem: "Doação cancelada com sucesso." });
     } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          error: error.issues?.[0]?.message || "Informe o motivo do cancelamento.",
+        });
+      }
       console.error(`DELETE /doacoes/${req.params.id} - erro:`, error);
       return res.status(500).json({ error: "Erro ao cancelar a doação." });
     }

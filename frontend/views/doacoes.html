@@ -32,20 +32,6 @@
 
             <button
                 type="button"
-                id="btnAtualizarDoacoes"
-                class="btn btn-info"
-            >
-                <i
-                    class="fa-solid fa-rotate"
-                    aria-hidden="true"
-                ></i>
-
-                Atualizar
-            </button>
-
-
-            <button
-                type="button"
                 id="btnNovaDoacao"
                 class="btn btn-primary"
             >
@@ -60,6 +46,25 @@
         </div>
 
     </header>
+
+    <section class="doacoes-resumo" aria-label="Resumo das doações">
+        <article class="doacoes-resumo-card">
+            <div class="doacoes-resumo-icone"><i class="fa-solid fa-hand-holding-heart"></i></div>
+            <div><span>Entregas</span><strong id="resumoEntregasDoacoes">0</strong><small>concluídas no filtro</small></div>
+        </article>
+        <article class="doacoes-resumo-card">
+            <div class="doacoes-resumo-icone"><i class="fa-solid fa-box-open"></i></div>
+            <div><span>Cestas</span><strong id="resumoCestasDoacoes">0</strong><small>distribuídas no filtro</small></div>
+        </article>
+        <article class="doacoes-resumo-card">
+            <div class="doacoes-resumo-icone"><i class="fa-solid fa-users"></i></div>
+            <div><span>Beneficiários</span><strong id="resumoBeneficiariosDoacoes">0</strong><small>atendidos no filtro</small></div>
+        </article>
+        <article class="doacoes-resumo-card">
+            <div class="doacoes-resumo-icone"><i class="fa-solid fa-ban"></i></div>
+            <div><span>Canceladas</span><strong id="resumoCanceladasDoacoes">0</strong><small>no filtro</small></div>
+        </article>
+    </section>
 
 
     <!-- ==============================================
@@ -194,6 +199,43 @@
         </div>
 
 
+        <div class="doacoes-filtros-avancados">
+            <label class="doacoes-campo-filtro">
+                <span>De</span>
+                <input type="date" id="filtroDataInicioDoacoes" aria-label="Data inicial">
+            </label>
+            <label class="doacoes-campo-filtro">
+                <span>Até</span>
+                <input type="date" id="filtroDataFimDoacoes" aria-label="Data final">
+            </label>
+            <label class="doacoes-campo-filtro" id="grupoFiltroInstituicaoDoacoes">
+                <span>Instituição</span>
+                <select id="filtroInstituicaoDoacoes" aria-label="Filtrar por instituição">
+                    <option value="">Todas as instituições</option>
+                </select>
+            </label>
+            <label class="doacoes-campo-filtro">
+                <span>Origem</span>
+                <select id="filtroOrigemDoacoes" aria-label="Filtrar por origem">
+                    <option value="">Todas</option>
+                    <option value="MANUAL">Manual</option>
+                    <option value="QR_CODE">QR Code</option>
+                </select>
+            </label>
+            <label class="doacoes-campo-filtro">
+                <span>Status</span>
+                <select id="filtroStatusDoacoes" aria-label="Filtrar por status">
+                    <option value="">Todos</option>
+                    <option value="CONCLUIDA">Concluída</option>
+                    <option value="CANCELADA">Cancelada</option>
+                </select>
+            </label>
+            <button type="button" id="btnLimparFiltrosDoacoes" class="doacoes-btn-limpar-filtros">
+                <i class="fa-solid fa-filter-circle-xmark" aria-hidden="true"></i>
+                Limpar filtros
+            </button>
+        </div>
+
         <div class="doacoes-toolbar-rodape">
 
             <div class="doacoes-toolbar-info">
@@ -301,27 +343,6 @@
                             <button
                                 type="button"
                                 class="doacoes-ordenacao"
-                                data-ordenar-doacao="id"
-                                aria-label="Ordenar por ID"
-                            >
-                                <span>
-                                    ID
-                                </span>
-
-                                <i
-                                    class="fa-solid fa-sort"
-                                    aria-hidden="true"
-                                ></i>
-                            </button>
-
-                        </th>
-
-
-                        <th scope="col">
-
-                            <button
-                                type="button"
-                                class="doacoes-ordenacao"
                                 data-ordenar-doacao="codigo"
                                 aria-label="Ordenar por código"
                             >
@@ -423,6 +444,14 @@
 
 
                         <th scope="col">
+                            <button type="button" class="doacoes-ordenacao" data-ordenar-doacao="origem" aria-label="Ordenar por origem">
+                                <span>Origem</span>
+                                <i class="fa-solid fa-sort" aria-hidden="true"></i>
+                            </button>
+                        </th>
+
+
+                        <th scope="col">
 
                             <button
                                 type="button"
@@ -443,6 +472,10 @@
                         </th>
 
 
+                        <th scope="col">
+                            <span>Status</span>
+                        </th>
+
                         <th
                             scope="col"
                             class="coluna-acoes"
@@ -459,7 +492,7 @@
 
                     <tr class="tabela-carregando">
 
-                        <td colspan="8">
+                        <td colspan="9">
 
                             <div class="doacoes-loading">
 
@@ -977,317 +1010,87 @@
 <!-- ==================================================
      MODAL DE DETALHES DA DOAÇÃO
 ================================================== -->
-
-<div
-    id="modalDetalhesDoacao"
-    class="modal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="tituloModalDetalhesDoacao"
-    aria-hidden="true"
->
-
+<div id="modalDetalhesDoacao" class="modal" role="dialog" aria-modal="true" aria-labelledby="tituloModalDetalhesDoacao" aria-hidden="true">
     <div class="modal-content modal-doacao-content modal-detalhes-doacao-content">
-
-        <!-- ==========================================
-             CABEÇALHO
-        =========================================== -->
-
         <header class="modal-doacao-header">
-
             <div class="modal-doacao-titulo">
-
-                <div
-                    class="modal-doacao-icone"
-                    aria-hidden="true"
-                >
-                    <i class="fa-solid fa-eye"></i>
-                </div>
-
-                <div>
-
-                    <span class="modal-doacao-eyebrow">
-                        Consulta
-                    </span>
-
-                    <h2 id="tituloModalDetalhesDoacao">
-                        Detalhes da doação
-                    </h2>
-
-                </div>
-
+                <div class="modal-doacao-icone" aria-hidden="true"><i class="fa-solid fa-eye"></i></div>
+                <div><span class="modal-doacao-eyebrow">Consulta</span><h2 id="tituloModalDetalhesDoacao">Detalhes da doação</h2></div>
             </div>
-
-
-            <button
-                type="button"
-                id="btnFecharDetalhesDoacao"
-                class="modal-doacao-fechar"
-                aria-label="Fechar detalhes da doação"
-                title="Fechar"
-            >
-                <i
-                    class="fa-solid fa-xmark"
-                    aria-hidden="true"
-                ></i>
-            </button>
-
+            <button type="button" id="btnFecharDetalhesDoacao" class="modal-doacao-fechar" aria-label="Fechar detalhes da doação" title="Fechar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
         </header>
 
-
-        <!-- ==========================================
-             CONTEÚDO
-        =========================================== -->
-
         <div class="modal-doacao-body">
-
             <section class="detalhes-doacao-resumo">
-
-                <div class="detalhes-doacao-codigo">
-
-                    <span>
-                        Código da doação
-                    </span>
-
-                    <strong id="detalheDoacaoCodigo">
-                        -
-                    </strong>
-
+                <div class="detalhes-doacao-codigo"><span>Código da doação</span><strong id="detalheDoacaoCodigo">-</strong></div>
+                <div class="detalhes-resumo-badges">
+                    <span id="detalheDoacaoStatus" class="detalhe-status-badge">-</span>
+                    <div id="detalheDoacaoTipoBadge" class="detalhes-doacao-tipo">-</div>
                 </div>
-
-
-                <div
-                    id="detalheDoacaoTipoBadge"
-                    class="detalhes-doacao-tipo"
-                >
-                    -
-                </div>
-
             </section>
 
-
             <section class="form-section">
-
-                <div class="form-section-header">
-
-                    <div
-                        class="form-section-icon"
-                        aria-hidden="true"
-                    >
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-
-                    <div>
-
-                        <h3>
-                            Atendimento
-                        </h3>
-
-                        <p>
-                            Informações do beneficiário e da instituição.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
+                <div class="form-section-header"><div class="form-section-icon"><i class="fa-solid fa-user"></i></div><div><h3>Atendimento</h3><p>Beneficiário e instituição responsáveis pelo atendimento.</p></div></div>
                 <div class="detalhes-doacao-grid">
-
-                    <article class="detalhe-doacao-item">
-
-                        <span class="detalhe-doacao-label">
-                            Beneficiário
-                        </span>
-
-                        <strong id="detalheDoacaoBeneficiario">
-                            -
-                        </strong>
-
-                    </article>
-
-
-                    <article class="detalhe-doacao-item">
-
-                        <span class="detalhe-doacao-label">
-                            Instituição
-                        </span>
-
-                        <strong id="detalheDoacaoInstituicao">
-                            -
-                        </strong>
-
-                    </article>
-
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Beneficiário</span><strong id="detalheDoacaoBeneficiario">-</strong></article>
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Instituição</span><strong id="detalheDoacaoInstituicao">-</strong></article>
                 </div>
-
             </section>
-
 
             <section class="form-section">
-
-                <div class="form-section-header">
-
-                    <div
-                        class="form-section-icon"
-                        aria-hidden="true"
-                    >
-                        <i class="fa-solid fa-box-open"></i>
-                    </div>
-
-                    <div>
-
-                        <h3>
-                            Dados da entrega
-                        </h3>
-
-                        <p>
-                            Informações registradas no momento da doação.
-                        </p>
-
-                    </div>
-
+                <div class="form-section-header"><div class="form-section-icon"><i class="fa-solid fa-people-roof"></i></div><div><h3>Composição familiar</h3><p>Regra utilizada para calcular automaticamente a quantidade de cestas.</p></div></div>
+                <div class="detalhes-doacao-grid detalhes-grid-3">
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Pessoas na família</span><strong id="detalheDoacaoComposicao">-</strong></article>
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Regra utilizada</span><strong id="detalheDoacaoRegraCalculo">-</strong></article>
+                    <article class="detalhe-doacao-item destaque-calculo"><span class="detalhe-doacao-label">Quantidade calculada</span><strong id="detalheDoacaoQuantidadeCalculada">-</strong></article>
                 </div>
-
-
-                <div class="detalhes-doacao-grid">
-
-                    <article class="detalhe-doacao-item">
-
-                        <span class="detalhe-doacao-label">
-                            Tipo
-                        </span>
-
-                        <strong id="detalheDoacaoTipo">
-                            -
-                        </strong>
-
-                    </article>
-
-
-                    <article class="detalhe-doacao-item">
-
-                        <span class="detalhe-doacao-label">
-                            Quantidade
-                        </span>
-
-                        <strong id="detalheDoacaoQuantidade">
-                            -
-                        </strong>
-
-                    </article>
-
-
-                    <article class="detalhe-doacao-item">
-
-                        <span class="detalhe-doacao-label">
-                            Data da doação
-                        </span>
-
-                        <strong id="detalheDoacaoData">
-                            -
-                        </strong>
-
-                    </article>
-
-
-                    <article class="detalhe-doacao-item">
-
-                        <span class="detalhe-doacao-label">
-                            Registrado por
-                        </span>
-
-                        <strong id="detalheDoacaoUsuario">
-                            -
-                        </strong>
-
-                    </article>
-
-
-                    <article class="detalhe-doacao-item">
-
-                        <span class="detalhe-doacao-label">
-                            Comprovante
-                        </span>
-
-                        <strong id="detalheDoacaoComprovante">
-                            -
-                        </strong>
-
-                    </article>
-
-
-                    <article class="detalhe-doacao-item">
-
-                        <span class="detalhe-doacao-label">
-                            Identificador
-                        </span>
-
-                        <strong id="detalheDoacaoId">
-                            -
-                        </strong>
-
-                    </article>
-
-                </div>
-
             </section>
-
 
             <section class="form-section">
-
-                <div class="form-section-header">
-
-                    <div
-                        class="form-section-icon"
-                        aria-hidden="true"
-                    >
-                        <i class="fa-solid fa-file-lines"></i>
-                    </div>
-
-                    <div>
-
-                        <h3>
-                            Observações
-                        </h3>
-
-                        <p>
-                            Informações complementares da doação.
-                        </p>
-
-                    </div>
-
+                <div class="form-section-header"><div class="form-section-icon"><i class="fa-solid fa-box-open"></i></div><div><h3>Entrega</h3><p>Dados registrados no momento da doação.</p></div></div>
+                <div class="detalhes-doacao-grid detalhes-grid-3">
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Tipo</span><strong id="detalheDoacaoTipo">-</strong></article>
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Origem</span><strong id="detalheDoacaoOrigem">-</strong></article>
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Quantidade</span><strong id="detalheDoacaoQuantidade">-</strong></article>
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Data</span><strong id="detalheDoacaoData">-</strong></article>
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Responsável</span><strong id="detalheDoacaoUsuario">-</strong></article>
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Próxima entrega permitida</span><strong id="detalheDoacaoProximaEntrega">-</strong></article>
                 </div>
-
-
-                <div
-                    id="detalheDoacaoObservacoes"
-                    class="detalhes-doacao-observacoes"
-                >
-                    Nenhuma observação informada.
-                </div>
-
             </section>
 
+            <section class="form-section">
+                <div class="form-section-header"><div class="form-section-icon"><i class="fa-solid fa-boxes-stacked"></i></div><div><h3>Movimentação do estoque</h3><p>Impacto da entrega no saldo de cestas da instituição.</p></div></div>
+                <div class="detalhes-estoque-faixa">
+                    <div><span>Saldo antes</span><strong id="detalheDoacaoSaldoAntes">-</strong></div>
+                    <i class="fa-solid fa-arrow-right"></i>
+                    <div class="estoque-saida"><span>Entregue</span><strong id="detalheDoacaoDebitado">-</strong></div>
+                    <i class="fa-solid fa-arrow-right"></i>
+                    <div><span>Saldo depois</span><strong id="detalheDoacaoSaldoDepois">-</strong></div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="form-section-header"><div class="form-section-icon"><i class="fa-solid fa-camera"></i></div><div><h3>Comprovante da entrega</h3><p>Foto registrada durante a confirmação via QR Code, quando disponível.</p></div></div>
+                <div id="detalheDoacaoComprovanteEntrega" class="detalhe-comprovante-entrega"></div>
+                <div class="detalhes-doacao-grid detalhes-grid-3 detalhes-metadados-secundarios">
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Comprovante</span><strong id="detalheDoacaoComprovante">-</strong></article>
+                    <article class="detalhe-doacao-item"><span class="detalhe-doacao-label">Identificador</span><strong id="detalheDoacaoId">-</strong></article>
+                </div>
+            </section>
+
+            <section id="detalheDoacaoCancelamento" class="form-section detalhes-cancelamento-secao" hidden></section>
+
+            <section class="form-section">
+                <div class="form-section-header"><div class="form-section-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div><h3>Histórico</h3><p>Linha do tempo da entrega e das movimentações de estoque.</p></div></div>
+                <div id="detalheDoacaoHistorico" class="detalhes-historico-lista"></div>
+            </section>
+
+            <section class="form-section">
+                <div class="form-section-header"><div class="form-section-icon"><i class="fa-solid fa-file-lines"></i></div><div><h3>Observações</h3><p>Informações complementares da doação.</p></div></div>
+                <div id="detalheDoacaoObservacoes" class="detalhes-doacao-observacoes">Nenhuma observação informada.</div>
+            </section>
         </div>
 
-
-        <!-- ==========================================
-             AÇÕES
-        =========================================== -->
-
-        <footer class="modal-doacao-actions">
-
-            <button
-                type="button"
-                id="btnFecharDetalhesDoacaoRodape"
-                class="btn btn-secondary"
-            >
-                Fechar
-            </button>
-
-        </footer>
-
+        <footer class="modal-doacao-actions"><button type="button" id="btnFecharDetalhesDoacaoRodape" class="btn btn-secondary">Fechar</button></footer>
     </div>
-
 </div>

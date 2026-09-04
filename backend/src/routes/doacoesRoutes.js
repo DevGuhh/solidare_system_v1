@@ -21,6 +21,11 @@ router.get(
   authorize("ADMIN", "INSTITUICAO"),
   DoacoesController.detalheDeDoacao,
 );
+router.get(
+  "/:id/comprovante-entrega",
+  authorize("ADMIN", "INSTITUICAO"),
+  DoacoesController.obterComprovanteEntrega,
+);
 router.put(
   "/:id",
   authorize("ADMIN", "INSTITUICAO"),

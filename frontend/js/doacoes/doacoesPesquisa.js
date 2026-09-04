@@ -53,6 +53,10 @@ export function filtrarDoacoes(
 
                 doacao?.tipo,
 
+                doacao?.origem === "QR_CODE" ? "QR Code" : "Manual",
+
+                (doacao?.deletedAt || doacao?.canceladaEm) ? "Cancelada" : "Concluída",
+
                 doacao?.quantidade,
 
                 formatarDataPesquisa(

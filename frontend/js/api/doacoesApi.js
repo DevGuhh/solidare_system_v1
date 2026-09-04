@@ -232,7 +232,8 @@ export async function alterarComprovanteDoacaoAPI(
 // =====================================================
 
 export async function excluirDoacaoAPI(
-    id
+    id,
+    motivo
 ) {
 
     return fetch(
@@ -243,9 +244,27 @@ export async function excluirDoacaoAPI(
                 "DELETE",
 
             headers:
-                obterHeaders()
+                obterHeaders(),
+
+            body:
+                JSON.stringify({ motivo })
 
         }
     );
 
+}
+
+// =====================================================
+// BUSCAR FOTO DO COMPROVANTE DE ENTREGA
+// =====================================================
+
+export async function buscarFotoComprovanteEntrega(id) {
+    return fetch(
+        `${API_URL}/doacoes/${id}/comprovante-entrega`,
+        {
+            method: "GET",
+            headers: { Authorization: `Bearer ${obterToken() || ""}` },
+            cache: "no-store"
+        }
+    );
 }

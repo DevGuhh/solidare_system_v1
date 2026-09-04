@@ -320,7 +320,7 @@ function renderizarEstadoVazio(
 
         <tr class="doacoes-linha-vazia">
 
-            <td colspan="8">
+            <td colspan="9">
 
                 <div class="doacoes-empty">
 
@@ -446,25 +446,19 @@ export function renderizarTabelaDoacoes(
                             doacao?.dataDoacao
                         );
 
+                    const cancelada = Boolean(doacao?.deletedAt || doacao?.canceladaEm);
+                    const statusHtml = cancelada
+                        ? '<span class="doacao-status cancelada"><i class="fa-solid fa-ban" aria-hidden="true"></i> Cancelada</span>'
+                        : '<span class="doacao-status concluida"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Concluída</span>';
+                    const origem = String(doacao?.origem || "MANUAL").toUpperCase();
+                    const origemHtml = origem === "QR_CODE"
+                        ? '<span class="doacao-origem qrcode"><i class="fa-solid fa-qrcode" aria-hidden="true"></i> QR Code</span>'
+                        : '<span class="doacao-origem manual"><i class="fa-solid fa-hand" aria-hidden="true"></i> Manual</span>';
+
 
                     return `
 
-                        <tr data-id-doacao="${id}">
-
-                            <!-- =========================
-                                 ID
-                            ========================== -->
-
-                            <td>
-
-                                <span class="doacao-id">
-
-                                    #${id}
-
-                                </span>
-
-                            </td>
-
+                        <tr data-id-doacao="${id}" class="${cancelada ? 'doacao-linha-cancelada' : ''}">
 
                             <!-- =========================
                                  CÓDIGO E COMPROVANTE
@@ -589,6 +583,10 @@ export function renderizarTabelaDoacoes(
                             </td>
 
 
+                            <!-- ORIGEM -->
+                            <td>${origemHtml}</td>
+
+
                             <!-- =========================
                                  DATA
                             ========================== -->
@@ -608,6 +606,10 @@ export function renderizarTabelaDoacoes(
                                 </span>
 
                             </td>
+
+
+                            <!-- STATUS -->
+                            <td>${statusHtml}</td>
 
 
                             <!-- =========================
@@ -638,7 +640,7 @@ export function renderizarTabelaDoacoes(
 
                                     <!-- EDITAR -->
 
-                                    <button
+                                    ${cancelada ? "" : `<button
                                         type="button"
                                         class="btn-acao-tabela btnEditarDoacao"
                                         data-id="${id}"
@@ -651,12 +653,12 @@ export function renderizarTabelaDoacoes(
                                             aria-hidden="true"
                                         ></i>
 
-                                    </button>
+                                    </button>`}
 
 
                                     <!-- COMPROVANTE -->
 
-                                    ${renderizarBotaoComprovante(
+                                    ${cancelada ? "" : renderizarBotaoComprovante(
                                         doacao,
                                         codigo
                                     )}
@@ -664,7 +666,7 @@ export function renderizarTabelaDoacoes(
 
                                     <!-- CANCELAR -->
 
-                                    <button
+                                    ${cancelada ? "" : `<button
                                         type="button"
                                         class="btn-acao-tabela btnExcluirDoacao"
                                         data-id="${id}"
@@ -673,11 +675,11 @@ export function renderizarTabelaDoacoes(
                                     >
 
                                         <i
-                                            class="fa-solid fa-trash"
+                                            class="fa-solid fa-arrow-rotate-left"
                                             aria-hidden="true"
                                         ></i>
 
-                                    </button>
+                                                                        </button>`}
 
                                 </div>
 

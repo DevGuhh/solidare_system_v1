@@ -20,7 +20,8 @@ model Usuario {
   resetTokenHash      String?
   resetTokenExpiresAt DateTime?
 
-  doacoes             Doacao[]
+  doacoes             Doacao[] @relation("DoacaoCriadaPor")
+  doacoesCanceladas   Doacao[] @relation("DoacaoCanceladaPor")
   historicoRegistrado HistoricoBeneficiario[]
   movimentacoesSaldo  MovimentacaoSaldo[]
   instituicao         InstituicaoParceira?    @relation(fields: [instituicaoId], references: [id])
@@ -130,10 +131,17 @@ model Doacao {
   atualizadoEm   DateTime      @updatedAt
   deletedAt      DateTime?
   usuarioId      Int
+  origem         String        @default("MANUAL")
+  composicaoFamiliarSnapshot Int?
+  quantidadeCalculada Boolean  @default(false)
+  canceladaEm    DateTime?
+  motivoCancelamento String?
+  canceladaPorId Int?
 
   beneficiario       Beneficiario        @relation(fields: [beneficiarioId], references: [id])
   instituicao        InstituicaoParceira @relation(fields: [instituicaoId], references: [id])
-  usuario            Usuario             @relation(fields: [usuarioId], references: [id])
+  usuario            Usuario             @relation("DoacaoCriadaPor", fields: [usuarioId], references: [id])
+  canceladaPor        Usuario?            @relation("DoacaoCanceladaPor", fields: [canceladaPorId], references: [id])
   movimentacoesSaldo MovimentacaoSaldo[]
   comprovanteEntrega ComprovanteEntrega?
   comprovantes       Comprovante[]
@@ -142,6 +150,8 @@ model Doacao {
   @@index([beneficiarioId])
   @@index([instituicaoId])
   @@index([usuarioId])
+  @@index([canceladaPorId])
+  @@index([origem])
   @@index([dataDoacao])
   @@index([instituicaoId, dataDoacao])
   @@map("doacoes")

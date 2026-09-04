@@ -569,7 +569,7 @@ class QrCodeController {
 
       const entrega = await montarSituacaoEntrega(qrCode.beneficiario);
       const mensagem = entrega.liberada
-        ? "QR Code válido. Beneficiário liberado para receber 1 cesta."
+        ? `QR Code válido. Beneficiário liberado para receber ${entrega.quantidade} cesta(s).`
         : entrega.mensagemBloqueio || "QR Code válido, mas a entrega não está liberada.";
 
       return res.status(200).json({
@@ -695,6 +695,9 @@ class QrCodeController {
             quantidade: quantidadeCestas,
             observacoes: `Entrega confirmada por leitura do QR Code ${qrCode.codigo}.`,
             comprovante: true,
+            origem: "QR_CODE",
+            composicaoFamiliarSnapshot: qrCode.beneficiario.composicaoFamiliar,
+            quantidadeCalculada: true,
           },
           include: {
             beneficiario: {

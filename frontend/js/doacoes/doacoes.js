@@ -211,11 +211,6 @@ function capturarElementosDoacoes() {
                     "btnNovaDoacao"
                 ),
 
-            btnAtualizar:
-                document.getElementById(
-                    "btnAtualizarDoacoes"
-                ),
-
             btnFecharModal:
                 document.getElementById(
                     "btnFecharModalDoacao"
@@ -240,6 +235,14 @@ function capturarElementosDoacoes() {
                 document.getElementById(
                     "btnLimparPesquisaDoacao"
                 ),
+
+            filtroDataInicio: document.getElementById("filtroDataInicioDoacoes"),
+            filtroDataFim: document.getElementById("filtroDataFimDoacoes"),
+            filtroInstituicao: document.getElementById("filtroInstituicaoDoacoes"),
+            grupoFiltroInstituicao: document.getElementById("grupoFiltroInstituicaoDoacoes"),
+            filtroOrigem: document.getElementById("filtroOrigemDoacoes"),
+            filtroStatus: document.getElementById("filtroStatusDoacoes"),
+            btnLimparFiltros: document.getElementById("btnLimparFiltrosDoacoes"),
 
             filtros:
                 document.querySelectorAll(
@@ -280,6 +283,11 @@ function capturarElementosDoacoes() {
                 document.getElementById(
                     "resultadoFiltroDoacoes"
                 ),
+
+            resumoEntregas: document.getElementById("resumoEntregasDoacoes"),
+            resumoCestas: document.getElementById("resumoCestasDoacoes"),
+            resumoBeneficiarios: document.getElementById("resumoBeneficiariosDoacoes"),
+            resumoCanceladas: document.getElementById("resumoCanceladasDoacoes"),
 
 
             // ==========================================
@@ -399,7 +407,20 @@ function capturarElementosDoacoes() {
             detalheObservacoes:
                 document.getElementById(
                     "detalheDoacaoObservacoes"
-                )
+                ),
+
+            detalheStatus: document.getElementById("detalheDoacaoStatus"),
+            detalheOrigem: document.getElementById("detalheDoacaoOrigem"),
+            detalheComposicao: document.getElementById("detalheDoacaoComposicao"),
+            detalheProximaEntrega: document.getElementById("detalheDoacaoProximaEntrega"),
+            detalheSaldoAntes: document.getElementById("detalheDoacaoSaldoAntes"),
+            detalheSaldoDepois: document.getElementById("detalheDoacaoSaldoDepois"),
+            detalheRegraCalculo: document.getElementById("detalheDoacaoRegraCalculo"),
+            detalheQuantidadeCalculada: document.getElementById("detalheDoacaoQuantidadeCalculada"),
+            detalheDebitado: document.getElementById("detalheDoacaoDebitado"),
+            detalheComprovanteEntrega: document.getElementById("detalheDoacaoComprovanteEntrega"),
+            detalheHistorico: document.getElementById("detalheDoacaoHistorico"),
+            detalheCancelamento: document.getElementById("detalheDoacaoCancelamento")
 
         }
     );
@@ -453,13 +474,22 @@ function validarElementosDoacoes() {
 
         // Botões principais.
         elementosDoacoes.btnNova,
-        elementosDoacoes.btnAtualizar,
         elementosDoacoes.btnFecharModal,
         elementosDoacoes.btnCancelar,
 
         // Pesquisa.
         elementosDoacoes.pesquisa,
         elementosDoacoes.btnLimparPesquisa,
+        elementosDoacoes.filtroDataInicio,
+        elementosDoacoes.filtroDataFim,
+        elementosDoacoes.filtroInstituicao,
+        elementosDoacoes.filtroOrigem,
+        elementosDoacoes.filtroStatus,
+        elementosDoacoes.btnLimparFiltros,
+        elementosDoacoes.resumoEntregas,
+        elementosDoacoes.resumoCestas,
+        elementosDoacoes.resumoBeneficiarios,
+        elementosDoacoes.resumoCanceladas,
 
         // Contadores.
         elementosDoacoes.contadorTodas,
@@ -647,22 +677,95 @@ function configurarCampoInstituicao() {
 
 export function obterDoacoesFiltradas() {
 
-    const filtradas =
-        filtrarDoacoes(
-            estadoDoacoes.lista,
-            elementosDoacoes.pesquisa.value,
-            estadoDoacoes.filtroAtual
-        );
+    let filtradas = filtrarDoacoes(
+        estadoDoacoes.lista,
+        elementosDoacoes.pesquisa.value,
+        estadoDoacoes.filtroAtual
+    );
 
+    const inicio = elementosDoacoes.filtroDataInicio?.value || "";
+    const fim = elementosDoacoes.filtroDataFim?.value || "";
+    const instituicao = elementosDoacoes.filtroInstituicao?.value || "";
+    const origem = elementosDoacoes.filtroOrigem?.value || "";
+    const status = elementosDoacoes.filtroStatus?.value || "";
+
+    filtradas = filtradas.filter((doacao) => {
+        const cancelada = Boolean(doacao?.deletedAt || doacao?.canceladaEm);
+        const data = doacao?.dataDoacao ? String(doacao.dataDoacao).slice(0, 10) : "";
+
+        if (inicio && data && data < inicio) return false;
+        if (fim && data && data > fim) return false;
+        if (instituicao && String(doacao?.instituicao?.id ?? doacao?.instituicaoId ?? "") !== instituicao) return false;
+        if (origem && String(doacao?.origem || "MANUAL") !== origem) return false;
+        if (status === "CONCLUIDA" && cancelada) return false;
+        if (status === "CANCELADA" && !cancelada) return false;
+        return true;
+    });
 
     return ordenarDoacoes(
         filtradas,
         estadoDoacoes.campoOrdenacao,
         estadoDoacoes.direcaoOrdenacao
     );
-
 }
 
+function atualizarResumoDoacoes(lista) {
+    const itens = Array.isArray(lista) ? lista : [];
+    const concluidas = itens.filter((d) => !d?.deletedAt && !d?.canceladaEm);
+    const canceladas = itens.length - concluidas.length;
+    const cestas = concluidas
+        .filter((d) => ["CESTA", "AMBOS"].includes(String(d?.tipo || "")))
+        .reduce((total, d) => total + (Number(d?.quantidade) || 0), 0);
+    const beneficiarios = new Set(concluidas.map((d) => d?.beneficiario?.id).filter(Boolean)).size;
+
+    elementosDoacoes.resumoEntregas.textContent = String(concluidas.length);
+    elementosDoacoes.resumoCestas.textContent = String(cestas);
+    elementosDoacoes.resumoBeneficiarios.textContent = String(beneficiarios);
+    elementosDoacoes.resumoCanceladas.textContent = String(canceladas);
+}
+
+function preencherFiltroInstituicoes() {
+    if (!elementosDoacoes.filtroInstituicao) return;
+    const atual = elementosDoacoes.filtroInstituicao.value;
+    const mapa = new Map();
+    estadoDoacoes.lista.forEach((d) => {
+        const id = d?.instituicao?.id ?? d?.instituicaoId;
+        const nome = d?.instituicao?.nome;
+        if (id && nome) mapa.set(String(id), nome);
+    });
+    elementosDoacoes.filtroInstituicao.innerHTML = '<option value="">Todas as instituições</option>' +
+        [...mapa.entries()].sort((a,b)=>a[1].localeCompare(b[1], 'pt-BR')).map(([id,nome]) =>
+            `<option value="${id}">${String(nome).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}</option>`
+        ).join('');
+    if ([...mapa.keys()].includes(atual)) elementosDoacoes.filtroInstituicao.value = atual;
+
+    const admin = estadoDoacoes.usuarioLogado?.role === "ADMIN";
+    if (elementosDoacoes.grupoFiltroInstituicao) elementosDoacoes.grupoFiltroInstituicao.hidden = !admin;
+}
+
+function configurarFiltrosAvancados() {
+    const controles = [
+        elementosDoacoes.filtroDataInicio, elementosDoacoes.filtroDataFim,
+        elementosDoacoes.filtroInstituicao, elementosDoacoes.filtroOrigem, elementosDoacoes.filtroStatus
+    ].filter(Boolean);
+
+    controles.forEach((controle) => controle.addEventListener("change", () => {
+        estadoDoacoes.paginaAtual = 1;
+        renderizarDoacoes();
+    }, { signal: estadoDoacoes.controladorEventos?.signal }));
+
+    elementosDoacoes.btnLimparFiltros?.addEventListener("click", () => {
+        elementosDoacoes.filtroDataInicio.value = "";
+        elementosDoacoes.filtroDataFim.value = "";
+        elementosDoacoes.filtroInstituicao.value = "";
+        elementosDoacoes.filtroOrigem.value = "";
+        elementosDoacoes.filtroStatus.value = "";
+        estadoDoacoes.filtroAtual = "TODAS";
+        estadoDoacoes.paginaAtual = 1;
+        atualizarBotoesFiltroDoacoes(elementosDoacoes, estadoDoacoes);
+        renderizarDoacoes();
+    }, { signal: estadoDoacoes.controladorEventos?.signal });
+}
 
 // =====================================================
 // RENDERIZAR DOAÇÕES
@@ -672,6 +775,8 @@ export function renderizarDoacoes() {
 
     const filtradas =
         obterDoacoesFiltradas();
+
+    atualizarResumoDoacoes(filtradas);
 
 
     const totalPaginas =
@@ -777,6 +882,8 @@ export async function carregarDoacoes() {
             normalizarListaDoacoes(
                 dados
             );
+
+        preencherFiltroInstituicoes();
 
 
         atualizarContadoresDoacoes(
@@ -989,6 +1096,8 @@ export async function inicializarDoacoes() {
             prepararEdicaoDoacao
 
         });
+
+        configurarFiltrosAvancados();
 
 
         // ==============================================

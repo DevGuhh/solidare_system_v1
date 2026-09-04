@@ -440,6 +440,59 @@ async function alterarComprovanteDoacao({
 }
 
 
+
+// =====================================================
+// MOTIVO DO CANCELAMENTO
+// =====================================================
+
+function solicitarMotivoCancelamento() {
+    return new Promise((resolve) => {
+        const existente = document.getElementById("modalMotivoCancelamentoDoacao");
+        if (existente) existente.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "modalMotivoCancelamentoDoacao";
+        overlay.className = "modal-cancelamento-doacao-overlay";
+        overlay.innerHTML = `
+            <div class="modal-cancelamento-doacao" role="dialog" aria-modal="true" aria-labelledby="tituloCancelamentoDoacao">
+                <div class="modal-cancelamento-icone"><i class="fa-solid fa-ban" aria-hidden="true"></i></div>
+                <h3 id="tituloCancelamentoDoacao">Cancelar doação</h3>
+                <p>Informe o motivo. As cestas serão devolvidas automaticamente ao saldo da instituição e o registro continuará no histórico.</p>
+                <label for="motivoCancelamentoDoacao">Motivo do cancelamento <span aria-hidden="true">*</span></label>
+                <textarea id="motivoCancelamentoDoacao" maxlength="300" rows="4" placeholder="Ex.: lançamento realizado por engano"></textarea>
+                <small id="erroMotivoCancelamentoDoacao" class="erro-motivo-cancelamento" hidden>Informe pelo menos 5 caracteres.</small>
+                <div class="modal-cancelamento-acoes">
+                    <button type="button" class="btn-cancelamento-voltar">Voltar</button>
+                    <button type="button" class="btn-cancelamento-confirmar"><i class="fa-solid fa-ban" aria-hidden="true"></i> Cancelar doação</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        document.body.classList.add("modal-aberto");
+
+        const textarea = overlay.querySelector("textarea");
+        const erro = overlay.querySelector(".erro-motivo-cancelamento");
+        const fechar = (valor) => {
+            overlay.remove();
+            document.body.classList.remove("modal-aberto");
+            resolve(valor);
+        };
+        overlay.querySelector(".btn-cancelamento-voltar").addEventListener("click", () => fechar(null));
+        overlay.querySelector(".btn-cancelamento-confirmar").addEventListener("click", () => {
+            const motivo = textarea.value.trim();
+            if (motivo.length < 5) {
+                erro.hidden = false;
+                textarea.focus();
+                return;
+            }
+            fechar(motivo);
+        });
+        overlay.addEventListener("click", (event) => {
+            if (event.target === overlay) fechar(null);
+        });
+        setTimeout(() => textarea.focus(), 50);
+    });
+}
+
 // =====================================================
 // CANCELAR DOAÇÃO
 // =====================================================
@@ -473,13 +526,11 @@ async function cancelarDoacao({
     }
 
 
-    const confirmou =
-        await confirmarAcao(
-            "Deseja realmente cancelar esta doação?"
-        );
+    const motivo =
+        await solicitarMotivoCancelamento();
 
 
-    if (!confirmou) {
+    if (!motivo) {
 
         return;
 
@@ -493,7 +544,8 @@ async function cancelarDoacao({
 
         const resposta =
             await excluirDoacaoAPI(
-                idNumerico
+                idNumerico,
+                motivo
             );
 
 
@@ -1160,15 +1212,13 @@ export function configurarEventosDoacoes({
     // ATUALIZAR LISTA
     // =================================================
 
-    elementos.btnAtualizar.addEventListener(
-
-        "click",
-
-        carregarDoacoes,
-
-        opcoes
-
-    );
+    if (elementos.btnAtualizar) {
+        elementos.btnAtualizar.addEventListener(
+            "click",
+            carregarDoacoes,
+            opcoes
+        );
+    }
 
 
     // =================================================

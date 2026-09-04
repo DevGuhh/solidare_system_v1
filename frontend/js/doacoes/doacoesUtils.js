@@ -124,6 +124,8 @@ function obterValorOrdenacao(
 
         case "tipo":
 
+        case "origem":
+
             return normalizarTexto(
                 doacao?.[campo]
             );
@@ -227,13 +229,17 @@ export function atualizarContadoresDoacoes(
 
 ) {
 
-    const doacoes =
+    const historico =
         Array.isArray(lista)
             ? lista
             : [];
 
+    const doacoes = historico.filter(
+        (doacao) => !doacao?.deletedAt && !doacao?.canceladaEm
+    );
+
     const total =
-        doacoes.length;
+        historico.length;
 
     const totalCesta =
         doacoes.filter(
