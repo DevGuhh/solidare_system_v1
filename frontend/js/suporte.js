@@ -614,7 +614,7 @@ function iniciarPolling() {
         preservarDetalhe: true,
       }).catch(() => {});
     }
-  }, 30000);
+  }, 60000);
 }
 
 export function inicializarSuporte() {

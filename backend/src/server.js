@@ -120,7 +120,7 @@ app.get("/health", (req, res) => {
 // OPTIONS é ignorado para não penalizar o preflight do CORS.
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 300,
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => req.method === "OPTIONS",
