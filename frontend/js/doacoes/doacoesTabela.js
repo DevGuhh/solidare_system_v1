@@ -240,75 +240,6 @@ function renderizarStatusComprovante(
 
 
 // =====================================================
-// RENDERIZAR BOTÃO DO COMPROVANTE
-// =====================================================
-
-function renderizarBotaoComprovante(
-    doacao,
-    codigo
-) {
-
-    const id =
-        Number(
-            doacao?.id
-        ) || 0;
-
-
-    const possuiComprovante =
-        valorBooleano(
-            doacao?.comprovante
-        );
-
-
-    const titulo =
-        possuiComprovante
-            ? "Remover comprovante"
-            : "Confirmar comprovante";
-
-
-    const descricao =
-        possuiComprovante
-            ? `Remover o comprovante da doação ${codigo}`
-            : `Confirmar o comprovante da doação ${codigo}`;
-
-
-    const classeEstado =
-        possuiComprovante
-            ? "comprovante-confirmado"
-            : "comprovante-pendente";
-
-
-    const icone =
-        possuiComprovante
-            ? "fa-solid fa-file-circle-check"
-            : "fa-regular fa-file";
-
-
-    return `
-
-        <button
-            type="button"
-            class="btn-acao-tabela btnComprovanteDoacao ${classeEstado}"
-            data-id="${id}"
-            data-comprovante="${String(possuiComprovante)}"
-            title="${titulo}"
-            aria-label="${descricao}"
-            aria-pressed="${String(possuiComprovante)}"
-        >
-
-            <i
-                class="${icone}"
-                aria-hidden="true"
-            ></i>
-
-        </button>
-
-    `;
-
-}
-
-
-// =====================================================
 // RENDERIZAR ESTADO VAZIO
 // =====================================================
 
@@ -638,31 +569,10 @@ export function renderizarTabelaDoacoes(
                                     </button>
 
 
-                                    <!-- EDITAR -->
-
-                                    ${cancelada ? "" : `<button
-                                        type="button"
-                                        class="btn-acao-tabela btnEditarDoacao"
-                                        data-id="${id}"
-                                        title="Editar doação"
-                                        aria-label="Editar a doação ${codigo}"
-                                    >
-
-                                        <i
-                                            class="fa-solid fa-pen"
-                                            aria-hidden="true"
-                                        ></i>
-
-                                    </button>`}
-
-
-                                    <!-- COMPROVANTE -->
-
-                                    ${cancelada ? "" : renderizarBotaoComprovante(
-                                        doacao,
-                                        codigo
-                                    )}
-
+                                    <!--
+                                        Doações concluídas são imutáveis.
+                                        Correções devem ser feitas por cancelamento/estorno.
+                                    -->
 
                                     <!-- CANCELAR -->
 

@@ -131,7 +131,7 @@ async function montarComprovante(elementos, doacao) {
     const meta = doacao?.comprovanteEntrega;
     if (!meta) {
         elementos.detalheComprovanteEntrega.innerHTML = `
-            <div class="comprovante-vazio"><i class="fa-regular fa-image"></i><div><strong>Foto não disponível</strong><span>${doacao?.origem === "QR_CODE" ? "O comprovante pode ter expirado ou sido removido." : "Doação manual sem foto de entrega."}</span></div></div>`;
+            <div class="comprovante-vazio"><i class="fa-regular fa-image"></i><div><strong>Foto não disponível</strong><span>${doacao?.origem === "QR_CODE" ? "O comprovante pode ter expirado ou ter sido excluído automaticamente conforme a política de retenção." : "Doação manual sem foto de entrega."}</span></div></div>`;
         return;
     }
 
