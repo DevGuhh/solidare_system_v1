@@ -108,10 +108,7 @@ function obterElementos() {
 
 function selecionarEtapaSaldo(etapa = "saldo") {
     const { modal, etapas, paineis } = obterElementos();
-
-    if (modal) {
-        modal.dataset.saldoEtapaAtiva = etapa;
-    }
+    if (!modal) return;
 
     etapas?.forEach((botao) => {
         const ativo = botao.dataset.saldoEtapa === etapa;
@@ -124,6 +121,15 @@ function selecionarEtapaSaldo(etapa = "saldo") {
         painel.classList.toggle("ativo", ativo);
         painel.hidden = !ativo;
     });
+
+    // A dimensão externa do modal é fixa nas duas etapas.
+    // O atributo serve apenas para controlar a rolagem do conteúdo.
+    modal.dataset.saldoEtapaAtiva = etapa;
+
+    const corpo = modal.querySelector(".saldo-cestas-body-etapas");
+    if (corpo) {
+        corpo.scrollTop = 0;
+    }
 }
 
 function abrirModal() {

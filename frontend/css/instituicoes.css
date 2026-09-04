@@ -4356,3 +4356,188 @@ body.modal-documentos-aberto {
     padding-bottom: 6px !important;
   }
 }
+
+
+/* =====================================================
+   SALDO DE CESTAS - MESMO TAMANHO NAS DUAS ETAPAS
+   Evita o "piscar" do backdrop e a mudança de tamanho.
+===================================================== */
+
+/* O contêiner externo não muda mais de geometria quando troca de etapa. */
+#modalSaldoCestas.modal {
+  overflow: hidden !important;
+  padding: 18px !important;
+}
+
+#modalSaldoCestas .saldo-cestas-card-etapas {
+  width: min(1120px, calc(100vw - 56px)) !important;
+  max-width: 1120px !important;
+
+  height: min(820px, calc(100vh - 36px)) !important;
+  min-height: min(820px, calc(100vh - 36px)) !important;
+  max-height: min(820px, calc(100vh - 36px)) !important;
+
+  overflow: hidden !important;
+
+  /* Impede animação/repaint de dimensão ao alternar abas. */
+  transition: none !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout paint;
+}
+
+/* Cabeçalho, etapas e rodapé têm exatamente a mesma altura nas duas telas. */
+#modalSaldoCestas .saldo-cestas-header-etapas {
+  flex: 0 0 auto;
+  padding: 14px 30px 12px !important;
+}
+
+#modalSaldoCestas .saldo-cestas-etapas {
+  flex: 0 0 auto;
+  padding: 10px 30px !important;
+  gap: 14px !important;
+}
+
+#modalSaldoCestas .saldo-cestas-etapa {
+  min-height: 54px !important;
+  padding: 9px 18px !important;
+}
+
+#modalSaldoCestas .saldo-cestas-etapa-numero {
+  width: 30px !important;
+  height: 30px !important;
+  flex-basis: 30px !important;
+}
+
+#modalSaldoCestas .saldo-cestas-footer-etapas {
+  flex: 0 0 auto;
+  padding: 9px 30px !important;
+}
+
+/* O corpo sempre ocupa o mesmo espaço disponível do modal. */
+#modalSaldoCestas .saldo-cestas-body-etapas {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 12px 30px !important;
+  overflow-x: hidden !important;
+  transition: none !important;
+}
+
+/* ETAPA 1: conteúdo sem barra de rolagem. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-body-etapas {
+  overflow-y: hidden !important;
+  scrollbar-gutter: auto !important;
+}
+
+/* ETAPA 2: mesma dimensão externa, somente o conteúdo pode rolar. */
+#modalSaldoCestas[data-saldo-etapa-ativa="historico"] .saldo-cestas-body-etapas {
+  overflow-y: auto !important;
+  scrollbar-gutter: stable;
+}
+
+/* Histórico não cria uma segunda rolagem interna. */
+#modalSaldoCestas[data-saldo-etapa-ativa="historico"] .saldo-cestas-historico-lista-etapas {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Evita qualquer mudança de fundo durante a troca de painel. */
+#modalSaldoCestas.modal,
+#modalSaldoCestas.modal.ativo,
+#modalSaldoCestas.modal.ativo:not([hidden]) {
+  background-color: rgba(15, 23, 42, 0.58) !important;
+}
+
+/* Os painéis trocam instantaneamente, sem fade/transform. */
+#modalSaldoCestas .saldo-cestas-painel-etapa {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Mantém a primeira etapa compacta o suficiente para caber no espaço fixo. */
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-resumo {
+  margin-bottom: 10px !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-etapa-conteudo {
+  gap: 18px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-bloco {
+  padding: 13px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-etapas {
+  padding: 11px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-grid {
+  margin-top: 8px !important;
+  gap: 7px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-grid > div {
+  min-height: 43px !important;
+  padding: 6px 9px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-recomendacao-regra {
+  margin-top: 7px !important;
+  padding-top: 7px !important;
+  line-height: 1.3 !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] .saldo-cestas-bloco .form-group {
+  margin-bottom: 9px !important;
+}
+
+#modalSaldoCestas[data-saldo-etapa-ativa="saldo"] #observacaoEntradaSaldoCestas {
+  min-height: 78px !important;
+  height: 78px !important;
+}
+
+/* Em telas mais baixas, mantém exatamente a mesma lógica para as duas etapas. */
+@media (max-height: 820px) and (min-width: 981px) {
+  #modalSaldoCestas.modal {
+    padding: 10px !important;
+  }
+
+  #modalSaldoCestas .saldo-cestas-card-etapas {
+    height: calc(100vh - 20px) !important;
+    min-height: calc(100vh - 20px) !important;
+    max-height: calc(100vh - 20px) !important;
+  }
+
+  #modalSaldoCestas .saldo-cestas-header-etapas {
+    padding-top: 9px !important;
+    padding-bottom: 7px !important;
+  }
+
+  #modalSaldoCestas .saldo-cestas-etapas {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  #modalSaldoCestas .saldo-cestas-etapa {
+    min-height: 46px !important;
+  }
+
+  #modalSaldoCestas .saldo-cestas-body-etapas {
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+  }
+
+  #modalSaldoCestas[data-saldo-etapa-ativa="saldo"] #observacaoEntradaSaldoCestas {
+    min-height: 64px !important;
+    height: 64px !important;
+  }
+
+  #modalSaldoCestas .saldo-cestas-footer-etapas {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+}
