@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import QRCode from "qrcode";
 import { startOfMonth, endOfMonth, addDays } from "date-fns";
 import { gerarCodigoDoacao } from "../utils/generateCode.js";
+import { calcularQuantidadeCestas } from "../utils/generateQtdCestas.js";
 import {
   debitarSaldoParaDoacao,
   SaldoInsuficienteError,
@@ -149,6 +150,9 @@ async function montarSituacaoEntrega(beneficiario) {
     tipoBeneficioNormalizado,
   );
   const saldoDisponivel = Number(saldo?.saldoAtual ?? 0);
+  const quantidadeCestas = calcularQuantidadeCestas(
+    beneficiario.composicaoFamiliar,
+  );
 
   let motivoBloqueio = null;
   let mensagemBloqueio = null;
@@ -159,15 +163,17 @@ async function montarSituacaoEntrega(beneficiario) {
   } else if (!tipoPermiteCesta) {
     motivoBloqueio = "BENEFICIO_NAO_PERMITE_CESTA";
     mensagemBloqueio = "O benefício deste beneficiário não está configurado para cesta.";
-  } else if (saldoDisponivel < 1) {
+  } else if (saldoDisponivel < quantidadeCestas) {
     motivoBloqueio = "SALDO_INSUFICIENTE";
-    mensagemBloqueio = "A instituição não possui cesta disponível em saldo.";
+    mensagemBloqueio =
+      `Saldo insuficiente. A família possui ${beneficiario.composicaoFamiliar} pessoa(s) ` +
+      `e necessita de ${quantidadeCestas} cesta(s), mas há ${saldoDisponivel} disponível(is).`;
   }
 
   return {
     liberada: !motivoBloqueio,
     tipo: "CESTA",
-    quantidade: 1,
+    quantidade: quantidadeCestas,
     saldoDisponivel,
     motivoBloqueio,
     mensagemBloqueio,
@@ -182,6 +188,7 @@ const selectBeneficiarioValidacao = {
   telefonePrincipal: true,
   email: true,
   tipoBeneficio: true,
+  composicaoFamiliar: true,
   ativo: true,
   deletedAt: true,
   instituicao: {
@@ -212,6 +219,9 @@ class QrCodeController {
               id: true,
               nomeCompleto: true,
               cpf: true,
+              tipoBeneficio: true,
+              ativo: true,
+              deletedAt: true,
             },
           },
         },
@@ -220,9 +230,88 @@ class QrCodeController {
         },
       });
 
+      const beneficiarioIds = [...new Set(qrcodes.map((item) => item.beneficiarioId))];
+      const hoje = new Date();
+      const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+      const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1);
+
+      let resumoPorBeneficiario = new Map();
+      let entregasHoje = 0;
+
+      if (beneficiarioIds.length > 0) {
+        const [resumosDoacoes, totalEntregasHoje] = await Promise.all([
+          prisma.doacao.groupBy({
+            by: ["beneficiarioId"],
+            where: {
+              beneficiarioId: { in: beneficiarioIds },
+              deletedAt: null,
+              tipo: { in: ["CESTA", "AMBOS"] },
+            },
+            _sum: { quantidade: true },
+            _max: { dataDoacao: true },
+          }),
+          prisma.doacao.count({
+            where: {
+              beneficiarioId: { in: beneficiarioIds },
+              deletedAt: null,
+              tipo: { in: ["CESTA", "AMBOS"] },
+              dataDoacao: { gte: inicioHoje, lt: fimHoje },
+            },
+          }),
+        ]);
+
+        resumoPorBeneficiario = new Map(
+          resumosDoacoes.map((item) => [
+            item.beneficiarioId,
+            {
+              cestasRecebidas: Number(item._sum.quantidade ?? 0),
+              ultimaEntrega: item._max.dataDoacao ?? null,
+            },
+          ]),
+        );
+        entregasHoje = totalEntregasHoje;
+      }
+
+      const agora = new Date();
+      const qrcodesComEntregas = qrcodes.map((item) => {
+        const resumo = resumoPorBeneficiario.get(item.beneficiarioId) ?? {
+          cestasRecebidas: 0,
+          ultimaEntrega: null,
+        };
+
+        let proximaEntrega = null;
+        let proximaEntregaStatus = "DISPONIVEL";
+        const tipo = normalizarTipoBeneficio(item.beneficiario?.tipoBeneficio);
+
+        if (!item.ativo || !item.beneficiario?.ativo || item.beneficiario?.deletedAt) {
+          proximaEntregaStatus = "INDISPONIVEL";
+        } else if (!["CESTA", "AMBOS"].includes(tipo)) {
+          proximaEntregaStatus = "NAO_APLICAVEL";
+        } else if (resumo.ultimaEntrega) {
+          const ultima = new Date(resumo.ultimaEntrega);
+          const mesmoMes = ultima.getFullYear() === agora.getFullYear()
+            && ultima.getMonth() === agora.getMonth();
+
+          if (mesmoMes) {
+            proximaEntrega = new Date(agora.getFullYear(), agora.getMonth() + 1, 1);
+            proximaEntregaStatus = "AGENDADA";
+          }
+        }
+
+        return {
+          ...item,
+          entregas: {
+            ...resumo,
+            proximaEntrega,
+            proximaEntregaStatus,
+          },
+        };
+      });
+
       return res.status(200).json({
         ok: true,
-        data: qrcodes,
+        data: qrcodesComEntregas,
+        resumo: { entregasHoje },
       });
     } catch (erro) {
       console.error("Erro ao listar QR Codes:", erro);
@@ -589,6 +678,10 @@ class QrCodeController {
         });
       }
 
+      const quantidadeCestas = calcularQuantidadeCestas(
+        qrCode.beneficiario.composicaoFamiliar,
+      );
+
       const codigoDoacao = gerarCodigoDoacao();
 
       const doacao = await prisma.$transaction(async (tx) => {
@@ -599,7 +692,7 @@ class QrCodeController {
             instituicaoId: qrCode.beneficiario.instituicao.id,
             usuarioId: req.user.id,
             tipo: "CESTA",
-            quantidade: 1,
+            quantidade: quantidadeCestas,
             observacoes: `Entrega confirmada por leitura do QR Code ${qrCode.codigo}.`,
             comprovante: true,
           },
@@ -628,10 +721,11 @@ class QrCodeController {
 
         await debitarSaldoParaDoacao(tx, {
           instituicaoId: qrCode.beneficiario.instituicao.id,
-          quantidade: 1,
+          quantidade: quantidadeCestas,
           doacaoId: novaDoacao.id,
           usuarioId: req.user.id,
-          observacao: `Baixa automática pela entrega via QR Code ${qrCode.codigo}`,
+          observacao:
+            `Baixa automática de ${quantidadeCestas} cesta(s) pela entrega via QR Code ${qrCode.codigo}`,
         });
 
         await tx.comprovanteEntrega.create({
@@ -650,13 +744,14 @@ class QrCodeController {
       await registrarEventoHistorico({
         beneficiarioId: qrCode.beneficiario.id,
         tipo: "DOACAO",
-        descricao: "Entrega de 1 cesta confirmada por QR Code.",
+        descricao:
+          `Entrega de ${quantidadeCestas} cesta(s) confirmada por QR Code.`,
         detalhes: {
           doacaoId: doacao.id,
           codigo: doacao.codigo,
           qrCode: qrCode.codigo,
           tipo: "CESTA",
-          quantidade: 1,
+          quantidade: quantidadeCestas,
           comprovanteFotografico: true,
           comprovanteExpiraEm: expiraEm.toISOString(),
         },

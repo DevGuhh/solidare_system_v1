@@ -130,7 +130,7 @@
             <div>
 
                 <span>
-                    Gerados hoje
+                    Entregas hoje
                 </span>
 
                 <strong id="qrcodesHoje">
@@ -173,11 +173,15 @@
         >
 
             <option value="">
-                Todos os tipos
+                Todos os status
             </option>
 
-            <option value="BENEFICIARIO">
-                Beneficiário
+            <option value="ATIVO">
+                Ativos
+            </option>
+
+            <option value="INATIVO">
+                Inativos
             </option>
 
         </select>
@@ -202,15 +206,19 @@
                     </th>
 
                     <th>
-                        Tipo
-                    </th>
-
-                    <th>
                         Beneficiário
                     </th>
 
                     <th>
-                        Data
+                        Cestas recebidas
+                    </th>
+
+                    <th>
+                        Última entrega
+                    </th>
+
+                    <th>
+                        Próxima entrega
                     </th>
 
                     <th>
@@ -231,7 +239,7 @@
                 <tr>
 
                     <td
-                        colspan="6"
+                        colspan="7"
                         class="qrcode-tabela-vazia"
                     >
 
@@ -264,34 +272,26 @@
         id="modalQRCode"
         hidden
     >
-
         <div
-            class="qrcode-modal"
+            class="qrcode-modal qrcode-modal-geracao"
             role="dialog"
             aria-modal="true"
             aria-labelledby="tituloModalQRCode"
         >
+            <div class="qrcode-modal-cabecalho qrcode-geracao-cabecalho">
+                <div class="qrcode-geracao-titulo">
+                    <div class="qrcode-geracao-icone">
+                        <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
+                    </div>
 
-
-            <!-- ========================================= -->
-            <!-- CABEÇALHO DO MODAL -->
-            <!-- ========================================= -->
-
-            <div class="qrcode-modal-cabecalho">
-
-                <div>
-
-                    <h2 id="tituloModalQRCode">
-                        Gerar QR Code
-                    </h2>
-
-                    <p>
-                        Selecione o beneficiário que receberá
-                        o QR Code.
-                    </p>
-
+                    <div>
+                        <span class="qrcode-geracao-kicker">CADASTRO</span>
+                        <h2 id="tituloModalQRCode">Gerar QR Code</h2>
+                        <p>
+                            Selecione um beneficiário ativo que ainda não possui QR Code.
+                        </p>
+                    </div>
                 </div>
-
 
                 <button
                     type="button"
@@ -300,118 +300,63 @@
                     aria-label="Fechar"
                     title="Fechar"
                 >
-
-                    <i
-                        class="fa-solid fa-xmark"
-                        aria-hidden="true"
-                    ></i>
-
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                 </button>
-
             </div>
 
+            <div class="qrcode-modal-corpo qrcode-geracao-corpo">
+                <div class="qrcode-geracao-etapa">
+                    <div class="qrcode-geracao-etapa-topo">
+                        <div>
+                            <strong>1. Escolha o beneficiário</strong>
+                            <span>Busque pelo nome ou CPF.</span>
+                        </div>
 
-            <!-- ========================================= -->
-            <!-- CORPO -->
-            <!-- ========================================= -->
+                        <span class="qrcode-geracao-badge">
+                            Apenas sem QR ativo
+                        </span>
+                    </div>
 
-            <div class="qrcode-modal-corpo">
-
-
-                <!-- ===================================== -->
-                <!-- PESQUISA BENEFICIÁRIO -->
-                <!-- ===================================== -->
-
-                <div class="qrcode-campo">
-
-                    <label
-                        for="pesquisaBeneficiarioQRCode"
-                    >
-                        Beneficiário
-                    </label>
-
-
-                    <div
-                        class="qrcode-pesquisa-beneficiario"
-                    >
-
+                    <div class="qrcode-pesquisa-beneficiario qrcode-pesquisa-beneficiario-melhorada">
                         <i
                             class="fa-solid fa-magnifying-glass"
                             aria-hidden="true"
                         ></i>
 
-
                         <input
                             type="search"
                             id="pesquisaBeneficiarioQRCode"
-                            placeholder="Pesquisar por nome ou CPF..."
+                            placeholder="Digite o nome ou CPF do beneficiário..."
                             autocomplete="off"
+                            aria-label="Pesquisar beneficiário por nome ou CPF"
                         >
-
                     </div>
 
+                    <div
+                        class="qrcode-beneficiarios-resultados qrcode-beneficiarios-resultados-melhorado"
+                        id="resultadosBeneficiariosQRCode"
+                        hidden
+                    ></div>
                 </div>
 
-
-                <!-- ===================================== -->
-                <!-- RESULTADOS DA PESQUISA -->
-                <!-- ===================================== -->
-
                 <div
-                    class="qrcode-beneficiarios-resultados"
-                    id="resultadosBeneficiariosQRCode"
-                    hidden
-                ></div>
-
-
-                <!-- ===================================== -->
-                <!-- BENEFICIÁRIO SELECIONADO -->
-                <!-- ===================================== -->
-
-                <div
-                    class="qrcode-beneficiario-selecionado"
+                    class="qrcode-beneficiario-selecionado qrcode-beneficiario-selecionado-melhorado"
                     id="beneficiarioSelecionadoQRCode"
                     hidden
                 >
-
-
-                    <!-- AVATAR -->
-
-                    <div
-                        class="qrcode-beneficiario-avatar"
-                    >
-
-                        <i
-                            class="fa-solid fa-user"
-                            aria-hidden="true"
-                        ></i>
-
+                    <div class="qrcode-selecionado-check">
+                        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
                     </div>
 
-
-                    <!-- INFORMAÇÕES -->
-
-                    <div
-                        class="qrcode-beneficiario-info"
-                    >
-
-                        <strong
-                            id="nomeBeneficiarioQRCode"
-                        >
-                            -
-                        </strong>
-
-
-                        <span
-                            id="dadosBeneficiarioQRCode"
-                        >
-                            -
+                    <div class="qrcode-beneficiario-info">
+                        <span class="qrcode-selecionado-label">
+                            Beneficiário selecionado
                         </span>
 
+                        <strong id="nomeBeneficiarioQRCode">-</strong>
+
+                        <span id="dadosBeneficiarioQRCode">-</span>
                     </div>
-
-
-                    <!-- TROCAR BENEFICIÁRIO -->
 
                     <button
                         type="button"
@@ -420,81 +365,45 @@
                         title="Trocar beneficiário"
                         aria-label="Trocar beneficiário"
                     >
-
-                        <i
-                            class="fa-solid fa-xmark"
-                            aria-hidden="true"
-                        ></i>
-
+                        <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                        <span>Trocar</span>
                     </button>
-
                 </div>
 
+                <div class="qrcode-info-geracao qrcode-info-geracao-melhorada">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
 
-                <!-- ===================================== -->
-                <!-- INFORMAÇÃO -->
-                <!-- ===================================== -->
-
-                <div
-                    class="qrcode-info-geracao"
-                >
-
-                    <i
-                        class="fa-solid fa-circle-info"
-                        aria-hidden="true"
-                    ></i>
-
-
-                    <p>
-
-                        O QR Code será vinculado
-                        automaticamente ao ID do
-                        beneficiário selecionado.
-
-                    </p>
-
+                    <div>
+                        <strong>Vinculação automática</strong>
+                        <p>
+                            O QR Code será vinculado ao beneficiário selecionado
+                            e ficará disponível imediatamente para validação e
+                            impressão da carteirinha.
+                        </p>
+                    </div>
                 </div>
-
             </div>
 
-
-            <!-- ========================================= -->
-            <!-- RODAPÉ -->
-            <!-- ========================================= -->
-
-            <div class="qrcode-modal-rodape">
-
-
+            <div class="qrcode-modal-rodape qrcode-geracao-rodape">
                 <button
                     type="button"
                     class="qrcode-botao-cancelar"
                     id="btnCancelarQRCode"
                 >
-
                     Cancelar
-
                 </button>
-
 
                 <button
                     type="button"
                     class="qrcode-botao-confirmar"
                     id="btnConfirmarQRCode"
+                    disabled
                 >
-
-                    <i
-                        class="fa-solid fa-qrcode"
-                        aria-hidden="true"
-                    ></i>
-
+                    <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
                     Gerar QR Code
-
                 </button>
-
             </div>
-
         </div>
-
     </div>
 
 

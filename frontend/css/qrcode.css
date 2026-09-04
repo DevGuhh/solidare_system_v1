@@ -142,17 +142,21 @@
     ===================================================== */
 
   .qrcode-filtros {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
     align-items: center;
     gap: 14px;
 
+    width: 100%;
+    min-width: 0;
     margin-bottom: 20px;
   }
 
   .qrcode-pesquisa {
     position: relative;
 
-    flex: 1;
+    width: 100%;
+    min-width: 0;
   }
 
   .qrcode-pesquisa i {
@@ -161,17 +165,23 @@
     left: 14px;
     top: 50%;
 
+    z-index: 2;
     transform: translateY(-50%);
 
     color: #9ca3af;
+    pointer-events: none;
   }
 
   .qrcode-pesquisa input {
+    display: block;
+
     width: 100%;
+    min-width: 0;
+    height: 46px;
 
     box-sizing: border-box;
 
-    padding: 12px 14px 12px 40px;
+    padding: 0 14px 0 42px;
 
     border: 1px solid #d5d8dc;
     border-radius: 10px;
@@ -179,12 +189,21 @@
     outline: none;
 
     background: #ffffff;
+    color: #1f2937;
 
     font-size: 14px;
+    line-height: 46px;
+
+    overflow: visible;
 
     transition:
       border-color 0.2s ease,
       box-shadow 0.2s ease;
+  }
+
+  .qrcode-pesquisa input::placeholder {
+    color: #9ca3af;
+    opacity: 1;
   }
 
   .qrcode-pesquisa input:focus {
@@ -194,7 +213,8 @@
   }
 
   .qrcode-filtro-tipo {
-    min-width: 190px;
+    width: 100%;
+    min-width: 0;
 
     padding: 12px 14px;
 
@@ -232,7 +252,7 @@
 
     border-collapse: collapse;
 
-    min-width: 800px;
+    min-width: 1120px;
   }
 
   .qrcode-tabela th {
@@ -261,6 +281,18 @@
     color: #374151;
 
     font-size: 14px;
+  }
+
+
+
+  .qrcode-tabela th:nth-child(3),
+  .qrcode-tabela td:nth-child(3) {
+    text-align: center;
+  }
+
+  .qrcode-cestas-recebidas {
+    font-weight: 700;
+    text-align: center;
   }
 
   .qrcode-tabela tbody tr:last-child td {
@@ -318,7 +350,7 @@
 
   @media (max-width: 600px) {
     .qrcode-filtros {
-      flex-direction: column;
+      grid-template-columns: 1fr;
       align-items: stretch;
     }
 
@@ -982,3 +1014,354 @@
     max-height: 250px;
   }
 }
+
+
+/* =====================================================
+   GERAR QR CODE - MODAL REFINADO
+===================================================== */
+
+.qrcode-modal-geracao {
+  max-width: 640px;
+  border: 1px solid #eceef2;
+  border-radius: 18px;
+  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.24);
+}
+
+.qrcode-geracao-cabecalho {
+  padding: 22px 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #fffafb 100%);
+}
+
+.qrcode-geracao-titulo {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  min-width: 0;
+}
+
+.qrcode-geracao-icone {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #f9e9ed;
+  color: #a3001b;
+  font-size: 18px;
+}
+
+.qrcode-geracao-kicker {
+  display: block;
+  margin-bottom: 3px;
+  color: #a3001b;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.qrcode-geracao-cabecalho h2 {
+  margin-bottom: 4px;
+  font-size: 20px;
+}
+
+.qrcode-geracao-cabecalho p {
+  max-width: 460px;
+  line-height: 1.45;
+}
+
+.qrcode-geracao-corpo {
+  gap: 16px;
+  padding: 20px 24px 22px;
+}
+
+.qrcode-geracao-etapa {
+  display: grid;
+  gap: 12px;
+}
+
+.qrcode-geracao-etapa-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.qrcode-geracao-etapa-topo > div {
+  display: grid;
+  gap: 2px;
+}
+
+.qrcode-geracao-etapa-topo strong {
+  color: #273244;
+  font-size: 13px;
+}
+
+.qrcode-geracao-etapa-topo span:not(.qrcode-geracao-badge) {
+  color: #7b8798;
+  font-size: 11px;
+}
+
+.qrcode-geracao-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  padding: 0 9px;
+  border: 1px solid #f0c9d0;
+  border-radius: 999px;
+  background: #fff5f7;
+  color: #a3001b;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.qrcode-pesquisa-beneficiario-melhorada {
+  position: relative;
+  width: 100%;
+}
+
+.qrcode-pesquisa-beneficiario-melhorada > i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+  color: #8a94a4;
+  pointer-events: none;
+}
+
+.qrcode-pesquisa-beneficiario-melhorada input {
+  width: 100%;
+  height: 46px;
+  box-sizing: border-box;
+  padding: 0 42px;
+  border: 1px solid #d9dee6;
+  border-radius: 11px;
+  background: #fff;
+  color: #1f2937;
+  font-size: 13px;
+  outline: none;
+}
+
+.qrcode-pesquisa-beneficiario-melhorada input:focus {
+  border-color: #a3001b;
+  box-shadow: 0 0 0 3px rgba(163, 0, 27, 0.08);
+}
+
+.qrcode-beneficiarios-resultados-melhorado {
+  display: grid;
+  gap: 7px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+}
+
+.qrcode-beneficiarios-resultados-melhorado[hidden] {
+  display: none;
+}
+
+.qrcode-beneficiario-opcao {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto 16px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid #e6e9ee;
+  border-radius: 11px;
+  background: #fff;
+  color: #263244;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.qrcode-beneficiario-opcao:hover {
+  border-color: #d8aab2;
+  background: #fff8f9;
+  transform: translateY(-1px);
+}
+
+.qrcode-opcao-avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #f7e9ec;
+  color: #a3001b;
+}
+
+.qrcode-opcao-info {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.qrcode-opcao-info strong {
+  overflow: hidden;
+  color: #1f2937;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qrcode-opcao-info span {
+  overflow: hidden;
+  color: #7c8798;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qrcode-opcao-beneficio {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #566173;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.qrcode-opcao-seta {
+  color: #9ba5b4;
+  font-size: 11px;
+}
+
+.qrcode-beneficiario-selecionado-melhorado {
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 14px;
+  border: 1px solid #b7e4c7;
+  border-radius: 12px;
+  background: #f2fbf5;
+}
+
+.qrcode-selecionado-check {
+  color: #16803c;
+  font-size: 22px;
+}
+
+.qrcode-selecionado-label {
+  color: #16803c !important;
+  font-size: 9px !important;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.qrcode-beneficiario-selecionado-melhorado .qrcode-beneficiario-info {
+  min-width: 0;
+}
+
+.qrcode-beneficiario-selecionado-melhorado .qrcode-beneficiario-info strong {
+  color: #172033;
+  font-size: 14px;
+}
+
+.qrcode-beneficiario-selecionado-melhorado .qrcode-beneficiario-info > span:last-child {
+  color: #687588;
+  font-size: 11px;
+}
+
+.qrcode-remover-beneficiario {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #d7dde5;
+  border-radius: 9px;
+  background: #fff;
+  color: #4b5563;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.qrcode-remover-beneficiario:hover {
+  border-color: #b9c1cc;
+  background: #f8fafc;
+}
+
+.qrcode-info-geracao-melhorada {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px 13px;
+  border: 1px solid #dce5f1;
+  border-radius: 11px;
+  background: #f8fbff;
+  color: #536174;
+}
+
+.qrcode-info-geracao-melhorada > i {
+  margin-top: 2px;
+  color: #64748b;
+}
+
+.qrcode-info-geracao-melhorada strong {
+  display: block;
+  margin-bottom: 2px;
+  color: #334155;
+  font-size: 11px;
+}
+
+.qrcode-info-geracao-melhorada p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.qrcode-geracao-rodape {
+  padding: 15px 24px;
+  background: #fbfcfd;
+}
+
+.qrcode-botao-confirmar:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none !important;
+}
+
+@media (max-width: 640px) {
+  .qrcode-modal-geracao {
+    max-width: none;
+  }
+
+  .qrcode-geracao-etapa-topo {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .qrcode-beneficiario-opcao {
+    grid-template-columns: 38px minmax(0, 1fr) 16px;
+  }
+
+  .qrcode-opcao-beneficio {
+    grid-column: 2 / 3;
+    width: fit-content;
+  }
+
+  .qrcode-beneficiario-selecionado-melhorado {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .qrcode-remover-beneficiario {
+    grid-column: 2 / 3;
+    justify-self: start;
+  }
+}
+

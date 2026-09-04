@@ -1,4 +1,8 @@
 import { API_URL } from "../config.js";
+import {
+    mostrarSucesso,
+    mostrarErro
+} from "./utils/toast.js";
 
 function mostrarSenha() {
     const senha = document.getElementById("senha");
@@ -33,20 +37,31 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
             // Salva o JWT
             localStorage.setItem("token", dados.data.token);
 
-            alert("Login realizado com sucesso!");
+            mostrarSucesso(
+                "Login realizado com sucesso.",
+                900
+            );
 
-            window.location.href = "./views/dashboard.html";
+            setTimeout(() => {
+                window.location.href =
+                    "./views/dashboard.html";
+            }, 450);
 
         } else {
 
-            alert(dados.error);
+            mostrarErro(
+                dados.error ||
+                "E-mail ou senha inválidos."
+            );
 
         }
 
     } catch (erro) {
 
         console.error(erro);
-        alert("Erro ao conectar com o servidor.");
+        mostrarErro(
+            "Erro ao conectar com o servidor."
+        );
 
     }
 

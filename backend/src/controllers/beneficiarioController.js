@@ -132,6 +132,7 @@ class BeneficiarioController {
             ativo: true,
             instituicaoId: true,
             tipoBeneficio: true,
+            composicaoFamiliar: true,
             instituicao: {
               select: {
                 id: true,

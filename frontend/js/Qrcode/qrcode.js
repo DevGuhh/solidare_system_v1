@@ -3,8 +3,12 @@
     // =====================================================
 
     import { listarBeneficiarios } from "../api/beneficiariosApi.js";
-import { confirmar } from "../components/modal.js";
-    import { mostrarSucesso } from "../utils/toast.js";
+    import { confirmar } from "../components/modal.js";
+    import {
+        mostrarSucesso,
+        mostrarErro,
+        mostrarAviso
+    } from "../utils/toast.js";
     import {
         listarQRCodes,
         criarQRCode,
@@ -17,6 +21,7 @@ import { confirmar } from "../components/modal.js";
     export async function inicializarQRCode() {
         let beneficiarios = [];
         let qrcodes = [];
+        let resumoQRCodes = { entregasHoje: 0 };
         let beneficiarioSelecionado = null;
         let urlImagemAtual = null;
         let qrCodeVisualizado = null;
@@ -82,6 +87,25 @@ import { confirmar } from "../components/modal.js";
             return [];
         }
 
+        function mascararCpfGeracao(cpf) {
+            const numeros = String(cpf ?? "").replace(/\D/g, "");
+
+            if (numeros.length !== 11) {
+                return "CPF não informado";
+            }
+
+            return `***.${numeros.slice(3, 6)}.${numeros.slice(6, 9)}-**`;
+        }
+
+        function rotuloBeneficioGeracao(tipo) {
+            return {
+                CESTA: "Cesta",
+                GRANEL: "Granel",
+                AMBOS: "Ambos",
+                OUTROS: "Outros"
+            }[String(tipo ?? "").toUpperCase()] || "Não informado";
+        }
+
         function somenteDataLocal(valor) {
             if (!valor) return "-";
 
@@ -95,6 +119,25 @@ import { confirmar } from "../components/modal.js";
                 hour: "2-digit",
                 minute: "2-digit"
             }).format(data);
+        }
+
+        function somenteData(valor) {
+            if (!valor) return "-";
+            const data = new Date(valor);
+            if (Number.isNaN(data.getTime())) return "-";
+            return new Intl.DateTimeFormat("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            }).format(data);
+        }
+
+        function rotuloProximaEntrega(entregas) {
+            const status = String(entregas?.proximaEntregaStatus ?? "");
+            if (status === "AGENDADA") return somenteData(entregas?.proximaEntrega);
+            if (status === "DISPONIVEL") return "Disponível agora";
+            if (status === "NAO_APLICAVEL") return "Não aplicável";
+            return "Indisponível";
         }
 
         function foiGeradoHoje(valor) {
@@ -118,9 +161,7 @@ import { confirmar } from "../components/modal.js";
                 );
             }
             if (qrcodesHoje) {
-                qrcodesHoje.textContent = String(
-                    qrcodes.filter((item) => foiGeradoHoje(item.criadoEm)).length
-                );
+                qrcodesHoje.textContent = String(Number(resumoQRCodes.entregasHoje ?? 0));
             }
         }
 
@@ -131,7 +172,7 @@ import { confirmar } from "../components/modal.js";
                 .replace(/[\u0300-\u036f]/g, "")
                 .toLowerCase();
 
-            const tipo = String(filtroTipo?.value ?? "").toUpperCase();
+            const statusFiltro = String(filtroTipo?.value ?? "").toUpperCase();
 
             return qrcodes.filter((item) => {
                 const codigo = String(item.codigo ?? "").toLowerCase();
@@ -147,9 +188,10 @@ import { confirmar } from "../components/modal.js";
                     || nome.includes(pesquisa)
                     || (pesquisaNumerica && cpf.includes(pesquisaNumerica));
 
-                const correspondeTipo = !tipo || tipo === "BENEFICIARIO";
+                const statusItem = item.ativo === true ? "ATIVO" : "INATIVO";
+                const correspondeStatus = !statusFiltro || statusFiltro === statusItem;
 
-                return correspondePesquisa && correspondeTipo;
+                return correspondePesquisa && correspondeStatus;
             });
         }
 
@@ -159,7 +201,7 @@ import { confirmar } from "../components/modal.js";
             if (lista.length === 0) {
                 tabelaQRCodes.innerHTML = `
                     <tr>
-                        <td colspan="6" class="qrcode-tabela-vazia">
+                        <td colspan="7" class="qrcode-tabela-vazia">
                             <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
                             <span>Nenhum QR Code encontrado.</span>
                         </td>
@@ -178,14 +220,15 @@ import { confirmar } from "../components/modal.js";
                         <td>
                             <strong class="qrcode-codigo">${escaparHtml(item.codigo)}</strong>
                         </td>
-                        <td>Beneficiário</td>
                         <td>
                             <div class="qrcode-beneficiario-tabela">
                                 <strong>${escaparHtml(beneficiario.nomeCompleto || "Não informado")}</strong>
                                 <span>${beneficiario.cpf ? `CPF ${escaparHtml(beneficiario.cpf)}` : `ID #${escaparHtml(item.beneficiarioId)}`}</span>
                             </div>
                         </td>
-                        <td>${escaparHtml(somenteDataLocal(item.criadoEm))}</td>
+                        <td class="qrcode-cestas-recebidas">${Number(item.entregas?.cestasRecebidas ?? 0)}</td>
+                        <td>${escaparHtml(somenteData(item.entregas?.ultimaEntrega))}</td>
+                        <td>${escaparHtml(rotuloProximaEntrega(item.entregas))}</td>
                         <td>
                             <span class="qrcode-status qrcode-status-${statusClasse}">${status}</span>
                         </td>
@@ -233,7 +276,7 @@ import { confirmar } from "../components/modal.js";
         async function carregarQRCodes() {
             tabelaQRCodes.innerHTML = `
                 <tr>
-                    <td colspan="6" class="qrcode-tabela-vazia">
+                    <td colspan="7" class="qrcode-tabela-vazia">
                         <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
                         <span>Carregando QR Codes...</span>
                     </td>
@@ -249,15 +292,17 @@ import { confirmar } from "../components/modal.js";
                 }
 
                 qrcodes = normalizarLista(dados, "qrcodes");
+                resumoQRCodes = dados?.resumo ?? { entregasHoje: 0 };
                 atualizarCards();
                 renderizarTabela();
             } catch (erro) {
                 console.error("Erro ao carregar QR Codes:", erro);
                 qrcodes = [];
+                resumoQRCodes = { entregasHoje: 0 };
                 atualizarCards();
                 tabelaQRCodes.innerHTML = `
                     <tr>
-                        <td colspan="6" class="qrcode-tabela-vazia">
+                        <td colspan="7" class="qrcode-tabela-vazia">
                             <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
                             <span>${escaparHtml(erro.message || "Não foi possível carregar os QR Codes.")}</span>
                         </td>
@@ -291,6 +336,13 @@ import { confirmar } from "../components/modal.js";
 
         function limparFormulario() {
             beneficiarioSelecionado = null;
+
+            if (btnConfirmar) {
+                btnConfirmar.disabled = true;
+                btnConfirmar.innerHTML =
+                    '<i class="fa-solid fa-qrcode" aria-hidden="true"></i> Gerar QR Code';
+            }
+
             if (pesquisaBeneficiario) pesquisaBeneficiario.value = "";
             if (resultadosBeneficiarios) {
                 resultadosBeneficiarios.innerHTML = "";
@@ -325,6 +377,11 @@ import { confirmar } from "../components/modal.js";
 
             const resultados = beneficiarios
                 .filter((beneficiario) => {
+                    const possuiQRCodeAtivo = qrcodes.some((qr) =>
+                        qr.ativo === true && Number(qr.beneficiarioId) === Number(beneficiario.id)
+                    );
+                    if (beneficiario.ativo === false || possuiQRCodeAtivo) return false;
+
                     const nome = String(beneficiario.nomeCompleto ?? beneficiario.nome ?? "")
                         .normalize("NFD")
                         .replace(/[\u0300-\u036f]/g, "")
@@ -355,11 +412,34 @@ import { confirmar } from "../components/modal.js";
                     <div class="qrcode-opcao-avatar">
                         <i class="fa-solid fa-user" aria-hidden="true"></i>
                     </div>
+
                     <div class="qrcode-opcao-info">
-                        <strong>${escaparHtml(beneficiario.nomeCompleto ?? beneficiario.nome ?? "Nome não informado")}</strong>
-                        <span>ID #${escaparHtml(beneficiario.id)}${beneficiario.cpf ? ` · CPF ${escaparHtml(beneficiario.cpf)}` : ""}</span>
+                        <strong>
+                            ${escaparHtml(
+                                beneficiario.nomeCompleto ??
+                                beneficiario.nome ??
+                                "Nome não informado"
+                            )}
+                        </strong>
+
+                        <span>
+                            ${escaparHtml(mascararCpfGeracao(beneficiario.cpf))}
+                            · ID #${escaparHtml(beneficiario.id)}
+                        </span>
                     </div>
-                    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+
+                    <span class="qrcode-opcao-beneficio">
+                        ${escaparHtml(
+                            rotuloBeneficioGeracao(
+                                beneficiario.tipoBeneficio
+                            )
+                        )}
+                    </span>
+
+                    <i
+                        class="fa-solid fa-chevron-right qrcode-opcao-seta"
+                        aria-hidden="true"
+                    ></i>
                 </button>
             `).join("");
 
@@ -375,8 +455,16 @@ import { confirmar } from "../components/modal.js";
                 nomeBeneficiario.textContent = beneficiario.nomeCompleto ?? beneficiario.nome ?? "Nome não informado";
             }
             if (dadosBeneficiario) {
-                dadosBeneficiario.textContent = `ID #${beneficiario.id}${beneficiario.cpf ? ` · CPF ${beneficiario.cpf}` : ""}`;
+                dadosBeneficiario.textContent =
+                    `${mascararCpfGeracao(beneficiario.cpf)} · ` +
+                    `${rotuloBeneficioGeracao(beneficiario.tipoBeneficio)} · ` +
+                    `ID #${beneficiario.id}`;
             }
+
+            if (btnConfirmar) {
+                btnConfirmar.disabled = false;
+            }
+
             if (beneficiarioSelecionadoElemento) beneficiarioSelecionadoElemento.hidden = false;
             if (resultadosBeneficiarios) {
                 resultadosBeneficiarios.innerHTML = "";
@@ -387,6 +475,11 @@ import { confirmar } from "../components/modal.js";
 
         function removerBeneficiario() {
             beneficiarioSelecionado = null;
+
+            if (btnConfirmar) {
+                btnConfirmar.disabled = true;
+            }
+
             if (beneficiarioSelecionadoElemento) beneficiarioSelecionadoElemento.hidden = true;
             if (pesquisaBeneficiario) {
                 pesquisaBeneficiario.value = "";
@@ -421,7 +514,7 @@ import { confirmar } from "../components/modal.js";
 
         async function visualizarQRCode(item) {
             if (!modalVisualizar || !imagemQRCode || !imagemCarregando) {
-                alert("O modal de visualização do QR Code não foi encontrado.");
+                mostrarErro("O modal de visualização do QR Code não foi encontrado.");
                 return;
             }
 
@@ -489,7 +582,7 @@ import { confirmar } from "../components/modal.js";
             const janela = window.open("", "_blank", "width=620,height=760");
 
             if (!janela) {
-                alert("Permita pop-ups no navegador para imprimir o QR Code.");
+                mostrarAviso("Permita pop-ups no navegador para imprimir o QR Code.");
                 return;
             }
 
@@ -770,7 +863,8 @@ import { confirmar } from "../components/modal.js";
                         <span><b>Instituição:</b> ${escaparHtml(instituicao?.nome || "-")}</span>
                         <span><b>Benefício cadastrado:</b> ${escaparHtml(rotuloTipoBeneficio(beneficiario?.tipoBeneficio))}</span>
                         ${entrega ? `
-                            <span><b>Cesta prevista:</b> 1 cesta</span>
+                            <span><b>Composição familiar:</b> ${Number(beneficiario?.composicaoFamiliar ?? 1)} pessoa(s)</span>
+                            <span><b>Cestas previstas:</b> ${Number(entrega.quantidade ?? 1)} cesta(s)</span>
                             <span><b>Saldo disponível:</b> ${Number(entrega.saldoDisponivel ?? 0)} cesta(s)</span>
                         ` : ""}
                         ${doacaoMes ? `
@@ -818,7 +912,13 @@ import { confirmar } from "../components/modal.js";
 
                                 <span class="qrcode-foto-status" data-foto-status>A foto do beneficiário é obrigatória para confirmar a entrega.</span>
                             </div>
-                            <button type="button" class="qrcode-botao-confirmar-entrega" data-confirmar-entrega="${escaparHtml(qr.codigo || "")}" disabled>
+                            <button
+                                type="button"
+                                class="qrcode-botao-confirmar-entrega"
+                                data-confirmar-entrega="${escaparHtml(qr.codigo || "")}"
+                                data-quantidade-entrega="${Number(entrega?.quantidade ?? 1)}"
+                                disabled
+                            >
                                 <i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i>
                                 Confirmar entrega da cesta
                             </button>
@@ -828,19 +928,21 @@ import { confirmar } from "../components/modal.js";
             `;
         }
 
-        async function confirmarEntrega(codigoQRCode) {
+        async function confirmarEntrega(codigoQRCode, quantidadePrevista = 1) {
             const codigo = extrairCodigoQRCode(codigoQRCode);
             if (!codigo) return;
 
             if (!fotoComprovanteAtual) {
-                alert("Tire ou selecione a foto do beneficiário antes de confirmar a entrega.");
+                mostrarAviso("Tire ou selecione a foto do beneficiário antes de confirmar a entrega.");
                 return;
             }
 
             const confirmou = await confirmar({
                 titulo: "Confirmar entrega da cesta",
                 mensagem:
-                    "Deseja confirmar a entrega de 1 cesta para este beneficiário? " +
+                    `Deseja confirmar a entrega de ${quantidadePrevista} cesta(s) para este beneficiário? ` +
+                    "A quantidade foi calculada automaticamente pela composição familiar" +
+                    ". " +
                     "Essa ação registrará a doação e dará baixa no saldo da instituição.",
                 textoConfirmar: "Confirmar entrega",
                 textoCancelar: "Cancelar",
@@ -863,13 +965,19 @@ import { confirmar } from "../components/modal.js";
                     throw new Error(dados.message || dados.error || "Não foi possível confirmar a entrega.");
                 }
 
-                alert(dados.message || "Entrega da cesta confirmada com sucesso.");
+                mostrarSucesso(
+                    "Entrega confirmada com sucesso.",
+                    900
+                );
 
-                // Revalida para exibir imediatamente a entrega que acabou de ser registrada.
-                await validarCodigo(codigo);
+                // Recarrega a página para atualizar automaticamente
+                // a tabela, os cards, a última entrega e a próxima entrega.
+                setTimeout(() => {
+                    window.location.reload();
+                }, 700);
             } catch (erro) {
                 console.error("Erro ao confirmar entrega pelo QR Code:", erro);
-                alert(erro.message || "Erro ao confirmar a entrega da cesta.");
+                mostrarErro(erro.message || "Erro ao confirmar a entrega da cesta.");
                 await validarCodigo(codigo);
             }
         }
@@ -984,45 +1092,74 @@ import { confirmar } from "../components/modal.js";
         }
 
         async function gerarQRCode() {
-            if (!beneficiarioSelecionado) {
-                alert("Selecione um beneficiário antes de gerar o QR Code.");
+            if (!beneficiarioSelecionado || !btnConfirmar) {
                 return;
             }
 
-            try {
-                if (btnConfirmar) btnConfirmar.disabled = true;
+            const conteudoOriginal = btnConfirmar.innerHTML;
 
-                const resposta = await criarQRCode(Number(beneficiarioSelecionado.id));
-                const dados = await resposta.json().catch(() => ({}));
+            try {
+                btnConfirmar.disabled = true;
+                btnConfirmar.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Gerando...';
+
+                const resposta = await criarQRCode(
+                    Number(beneficiarioSelecionado.id)
+                );
+
+                const dados =
+                    await resposta.json().catch(() => ({}));
 
                 if (!resposta.ok) {
-                    throw new Error(dados.message || "Erro ao gerar QR Code.");
+                    throw new Error(
+                        dados.message ||
+                        "Erro ao gerar QR Code."
+                    );
                 }
 
-                const qrCode = dados.data || dados.qrcode || {};
+                const qrCode =
+                    dados.data ||
+                    dados.qrcode ||
+                    {};
 
-                alert(
-                    `QR Code criado com sucesso!\n\n` +
-                    `Código: ${qrCode.codigo ?? "Gerado"}\n` +
-                    `Beneficiário: ${beneficiarioSelecionado.nomeCompleto ?? beneficiarioSelecionado.nome ?? "Não informado"}`
+                mostrarSucesso(
+                    "QR Code gerado com sucesso.",
+                    1800
                 );
+
+                const beneficiarioGerado =
+                    beneficiarioSelecionado;
 
                 fecharModal();
 
-                // Atualiza imediatamente a tabela e os cards depois da criação.
                 await carregarQRCodes();
 
-                const itemCriado = qrcodes.find((item) => item.codigo === qrCode.codigo) || {
-                    ...qrCode,
-                    beneficiario: qrCode.beneficiario || beneficiarioSelecionado
-                };
+                const itemCriado =
+                    qrcodes.find(
+                        (item) =>
+                            item.codigo === qrCode.codigo
+                    ) || {
+                        ...qrCode,
+                        beneficiario:
+                            qrCode.beneficiario ||
+                            beneficiarioGerado
+                    };
 
                 await visualizarQRCode(itemCriado);
             } catch (erro) {
-                console.error("Erro ao gerar QR Code:", erro);
-                alert(erro.message || "Erro ao gerar QR Code.");
+                console.error(
+                    "Erro ao gerar QR Code:",
+                    erro
+                );
+
+                mostrarErro(erro.message || "Erro ao gerar QR Code.");
             } finally {
-                if (btnConfirmar) btnConfirmar.disabled = false;
+                btnConfirmar.innerHTML = conteudoOriginal;
+
+                if (!modal.hidden) {
+                    btnConfirmar.disabled =
+                        !beneficiarioSelecionado;
+                }
             }
         }
 
@@ -1053,23 +1190,48 @@ import { confirmar } from "../components/modal.js";
         }
 
         async function desativar(id) {
-            if (!confirm("Deseja realmente desativar este QR Code?")) return;
+            const confirmou = await confirmar({
+                titulo: "Desativar QR Code",
+                mensagem:
+                    "Deseja realmente desativar este QR Code? " +
+                    "Após a desativação, ele não poderá ser usado para confirmar entregas.",
+                textoConfirmar: "Desativar",
+                textoCancelar: "Cancelar",
+                tipo: "perigo"
+            });
+
+            if (!confirmou) return;
 
             try {
                 const resposta = await desativarQRCode(id);
-                const dados = await resposta.json().catch(() => ({}));
+                const dados =
+                    await resposta.json().catch(() => ({}));
 
                 if (!resposta.ok) {
-                    throw new Error(dados.message || "Erro ao desativar QR Code.");
+                    throw new Error(
+                        dados.message ||
+                        "Erro ao desativar QR Code."
+                    );
                 }
+
+                mostrarSucesso(
+                    "QR Code desativado com sucesso.",
+                    1800
+                );
 
                 await carregarQRCodes();
             } catch (erro) {
-                console.error("Erro ao desativar QR Code:", erro);
-                alert(erro.message || "Erro ao desativar QR Code.");
+                console.error(
+                    "Erro ao desativar QR Code:",
+                    erro
+                );
+
+                mostrarErro(
+                    erro.message ||
+                    "Erro ao desativar QR Code."
+                );
             }
         }
-
         btnValidarQRCode?.addEventListener("click", abrirValidacaoQRCode);
         btnFecharValidarQRCode?.addEventListener("click", fecharValidacaoQRCode);
         btnValidarCodigoManual?.addEventListener("click", () => validarCodigo(codigoValidacaoQRCode?.value));
@@ -1087,9 +1249,9 @@ import { confirmar } from "../components/modal.js";
                     await abrirCameraComprovante();
                 } catch (erro) {
                     console.error("Erro ao abrir câmera do comprovante:", erro);
-                    alert(
+                    mostrarAviso(
                         (erro.message || "Não foi possível abrir a câmera.") +
-                        "\n\nVocê ainda pode usar a opção Selecionar arquivo."
+                        " Você ainda pode usar a opção Selecionar arquivo."
                     );
                 }
                 return;
@@ -1100,7 +1262,7 @@ import { confirmar } from "../components/modal.js";
                 try {
                     capturarFotoCamera();
                 } catch (erro) {
-                    alert(erro.message || "Não foi possível capturar a foto.");
+                    mostrarErro(erro.message || "Não foi possível capturar a foto.");
                 }
                 return;
             }
@@ -1119,7 +1281,7 @@ import { confirmar } from "../components/modal.js";
                     await abrirCameraComprovante();
                 } catch (erro) {
                     console.error("Erro ao reabrir câmera:", erro);
-                    alert(erro.message || "Não foi possível abrir a câmera.");
+                    mostrarErro(erro.message || "Não foi possível abrir a câmera.");
                 }
                 return;
             }
@@ -1133,7 +1295,10 @@ import { confirmar } from "../components/modal.js";
 
             const botao = event.target.closest("[data-confirmar-entrega]");
             if (!botao) return;
-            confirmarEntrega(botao.dataset.confirmarEntrega);
+            confirmarEntrega(
+                botao.dataset.confirmarEntrega,
+                Number(botao.dataset.quantidadeEntrega || 1)
+            );
         });
 
         resultadoValidacaoQRCode?.addEventListener("change", async (event) => {
@@ -1150,7 +1315,7 @@ import { confirmar } from "../components/modal.js";
                 fotoComprovanteAtual = null;
                 input.value = "";
                 atualizarEstadoFotoComprovante();
-                alert(erro.message || "Não foi possível preparar a foto.");
+                mostrarErro(erro.message || "Não foi possível preparar a foto.");
             }
         });
 

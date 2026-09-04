@@ -3,6 +3,7 @@ import { criarDoacaoSchema } from "../validators/doacaoValidator.js";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { z, ZodError } from "zod";
 import { gerarCodigoDoacao } from "../utils/generateCode.js";
+import { calcularQuantidadeCestas } from "../utils/generateQtdCestas.js";
 import { deflate } from "node:zlib";
 import { registrarEventoHistorico } from "../services/historicoBeneficiarioService.js";
 import {
@@ -93,6 +94,7 @@ class DoacoesController {
           id: true,
           nomeCompleto: true,
           instituicaoId: true,
+          composicaoFamiliar: true,
           ativo: true,
         },
       });
@@ -123,6 +125,10 @@ class DoacoesController {
         });
       }
 
+      const quantidadeFinal = afetaSaldoCesta(data.tipo)
+        ? calcularQuantidadeCestas(beneficiario.composicaoFamiliar)
+        : data.quantidade;
+
       const codigo = gerarCodigoDoacao();
 
       const doacao = await prisma.$transaction(async (tx) => {
@@ -133,7 +139,7 @@ class DoacoesController {
             instituicaoId: beneficiario.instituicaoId,
             usuarioId: req.user.id,
             tipo: data.tipo,
-            quantidade: data.quantidade,
+            quantidade: quantidadeFinal,
             observacoes: data.observacoes,
           },
           include: includeDoacao,
@@ -142,7 +148,7 @@ class DoacoesController {
         if (afetaSaldoCesta(data.tipo)) {
           await debitarSaldoParaDoacao(tx, {
             instituicaoId: beneficiario.instituicaoId,
-            quantidade: data.quantidade,
+            quantidade: quantidadeFinal,
             doacaoId: novaDoacao.id,
             usuarioId: req.user.id,
           });
