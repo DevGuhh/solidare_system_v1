@@ -50,11 +50,12 @@ app.disable("x-powered-by");
 // CORS
 // ===============================
 
-const allowedOrigins = new Set([
-  "https://solidare-login-v4.vercel.app",
-  "https://solidare-system-v1.vercel.app",
-  "https://solidare-login-v4-jihy0l9fa-devguhhs-projects.vercel.app",
-]);
+const allowedOrigins = new Set(
+  (process.env.FRONTEND_URLS || "")
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean),
+);
 
 function origemPermitida(origin) {
   // Requisições sem Origin (Postman, servidor-servidor, health checks).
@@ -62,8 +63,7 @@ function origemPermitida(origin) {
 
   if (allowedOrigins.has(origin)) return true;
 
-  // Ambiente local: aceita Live Server em localhost/127.0.0.1,
-  // independentemente da porta escolhida pelo VS Code.
+  // Ambiente local: aceita localhost/127.0.0.1 em qualquer porta.
   try {
     const url = new URL(origin);
 
