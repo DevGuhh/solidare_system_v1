@@ -51,7 +51,7 @@ app.disable("x-powered-by");
 // ===============================
 
 const allowedOrigins = new Set(
-  (process.env.FRONTEND_URLS || "")
+  (process.env.FRONTEND_URL || "")
     .split(",")
     .map((url) => url.trim())
     .filter(Boolean),
