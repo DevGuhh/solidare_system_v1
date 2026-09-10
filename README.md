@@ -150,11 +150,6 @@ O backend consome as seguintes variáveis (defina-as em `backend/.env`, nunca as
 | `COMPUTER_VISION_SUBSCRIPTION_KEY` / `COMPUTER_VISION_ENDPOINT` | Serviço de OCR (Azure Computer Vision) usado na leitura de comprovantes. |
 | `PORT` | Porta da API (padrão `3000`). |
 
-> ⚠️ **Atenção:** o arquivo `backend/.env` enviado dentro do `.zip` contém credenciais reais (string de conexão do banco, chave JWT, chave da Resend, tokens da Cloudflare e chave do Azure Computer Vision). Isso significa que essas credenciais **vazaram** e devem ser consideradas comprometidas. Recomendo:
-> 1. Rotacionar/revogar imediatamente todas essas chaves e senhas nos respectivos painéis (Neon, Resend, Cloudflare, Azure) e gerar um novo `JWT_SECRET`.
-> 2. Remover o arquivo `.env` real do pacote distribuído e manter apenas um `backend/.env.example` com placeholders.
-> 3. Confirmar que `backend/.env` está de fato no `.gitignore` (já está) e nunca foi commitado no histórico do Git — se já foi, é necessário reescrever o histórico além de rotacionar as chaves.
-
 ## Scripts disponíveis
 
 No diretório `backend/`:
@@ -179,4 +174,3 @@ O pipeline definido em `.github/workflows/tests.yml` roda no GitHub Actions a ca
 - Não altere migrations do Prisma que já foram aplicadas em um banco compartilhado — crie uma nova migration em vez disso.
 - Arquivos de comprovantes não são públicos: o acesso ocorre apenas pela rota autenticada `/api/comprovantes/:id/arquivo`.
 - A API aplica rate limiting geral (300 requisições/15 min) e um limite mais restrito para operações de comprovantes (30 requisições/15 min).
-- CORS restrito por allowlist de origens (`FRONTEND_URL`), com liberação automática apenas para `localhost`/`127.0.0.1` em desenvolvimento.
