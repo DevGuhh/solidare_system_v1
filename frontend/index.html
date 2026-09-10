@@ -1,684 +1,402 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
 
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <meta
-        name="description"
-        content="Acesso ao sistema de gestão do Instituto Solidare"
-    >
+      name="description"
+      content="Acesso ao sistema de gestão do Instituto Solidare"
+    />
 
-    <meta
-        name="theme-color"
-        content="#5f000e"
-    >
+    <meta name="theme-color" content="#5f000e" />
 
     <title>Login | Instituto Solidare</title>
 
     <!-- CSS da tela -->
-    <link
-        rel="stylesheet"
-        href="css/login.css"
-    >
+    <link rel="stylesheet" href="css/login.css" />
 
     <!-- Font Awesome -->
     <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    >
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
 
-</head>
-
-<body>
-
+  <body>
     <main class="login-page">
-
-        <!-- =====================================================
+      <!-- =====================================================
              ELEMENTOS DECORATIVOS DO FUNDO
         ====================================================== -->
 
-        <div
-            class="background-effects"
-            aria-hidden="true"
-        >
+      <div class="background-effects" aria-hidden="true">
+        <span class="light-effect light-effect-one"></span>
+        <span class="light-effect light-effect-two"></span>
+        <span class="light-effect light-effect-three"></span>
 
-            <span class="light-effect light-effect-one"></span>
-            <span class="light-effect light-effect-two"></span>
-            <span class="light-effect light-effect-three"></span>
+        <span class="decorative-ring ring-one"></span>
+        <span class="decorative-ring ring-two"></span>
 
-            <span class="decorative-ring ring-one"></span>
-            <span class="decorative-ring ring-two"></span>
+        <span class="gold-particle particle-one"></span>
+        <span class="gold-particle particle-two"></span>
+        <span class="gold-particle particle-three"></span>
+        <span class="gold-particle particle-four"></span>
+        <span class="gold-particle particle-five"></span>
+      </div>
 
-            <span class="gold-particle particle-one"></span>
-            <span class="gold-particle particle-two"></span>
-            <span class="gold-particle particle-three"></span>
-            <span class="gold-particle particle-four"></span>
-            <span class="gold-particle particle-five"></span>
-
-        </div>
-
-
-        <!-- =====================================================
+      <!-- =====================================================
              CONTEÚDO PRINCIPAL
         ====================================================== -->
 
-        <div class="login-layout">
-
-            <!-- =================================================
+      <div class="login-layout">
+        <!-- =================================================
                  ÁREA INSTITUCIONAL
             ================================================== -->
 
-            <section
-                class="institutional-area"
-                aria-label="Apresentação do Instituto Solidare"
-            >
-                <!-- Marca -->
+        <section
+          class="institutional-area"
+          aria-label="Apresentação do Instituto Solidare"
+        >
+          <!-- Marca -->
+
+          <header class="institutional-brand">
+            <div class="brand-symbol">
+              <img src="img/logo-solidare.png" alt="" aria-hidden="true" />
+            </div>
+
+            <div class="brand-text">
+              <span> Instituto </span>
+
+              <strong> Solidare </strong>
+            </div>
+          </header>
+
+          <!-- Composição da imagem -->
+
+          <div class="institutional-image-wrapper">
+            <div class="institutional-image" aria-hidden="true"></div>
+
+            <div class="institutional-image-overlay" aria-hidden="true"></div>
+
+            <div class="image-badge">
+              <span class="image-badge-icon">
+                <i class="fa-solid fa-heart" aria-hidden="true"></i>
+              </span>
+
+              <div>
+                <strong> Impacto social </strong>
+
+                <span> Gestão que transforma </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensagem institucional -->
+
+          <div class="institutional-content">
+            <span class="institutional-eyebrow">
+              <span class="eyebrow-line" aria-hidden="true"></span>
+
+              Tecnologia e solidariedade
+            </span>
+
+            <h1>
+              Transformando vidas por meio de uma gestão
+              <span>mais humana e conectada.</span>
+            </h1>
+
+            <p>
+              Uma plataforma desenvolvida para aproximar instituições, pessoas e
+              oportunidades em um ambiente seguro, organizado e eficiente.
+            </p>
+          </div>
+
+          <!-- Indicadores visuais -->
+
+          <div
+            class="impact-indicators"
+            aria-label="Áreas de impacto do sistema"
+          >
+            <div class="impact-item">
+              <span class="impact-icon">
+                <i class="fa-solid fa-building" aria-hidden="true"></i>
+              </span>
+
+              <div>
+                <strong> Instituições </strong>
+
+                <span> Gestão centralizada </span>
+              </div>
+            </div>
+
+            <div class="impact-item">
+              <span class="impact-icon">
+                <i class="fa-solid fa-users" aria-hidden="true"></i>
+              </span>
+
+              <div>
+                <strong> Beneficiários </strong>
+
+                <span> Atendimento organizado </span>
+              </div>
+            </div>
+
+            <div class="impact-item">
+              <span class="impact-icon">
+                <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+              </span>
+
+              <div>
+                <strong> Impacto </strong>
+
+                <span> Resultados acompanhados </span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                <header class="institutional-brand">
-
-                    <div class="brand-symbol">
-
-                        <img
-                            src="img/logo-solidare.png"
-                            alt=""
-                            aria-hidden="true"
-                        >
-
-                    </div>
-
-                    <div class="brand-text">
-
-                        <span>
-                            Instituto
-                        </span>
-
-                        <strong>
-                            Solidare
-                        </strong>
-
-                    </div>
-
-                </header>
-
-
-                <!-- Composição da imagem -->
-
-                <div class="institutional-image-wrapper">
-
-                    <div
-                        class="institutional-image"
-                        aria-hidden="true"
-                    ></div>
-
-                    <div
-                        class="institutional-image-overlay"
-                        aria-hidden="true"
-                    ></div>
-
-                    <div class="image-badge">
-
-                        <span class="image-badge-icon">
-
-                            <i
-                                class="fa-solid fa-heart"
-                                aria-hidden="true"
-                            ></i>
-
-                        </span>
-
-                        <div>
-
-                            <strong>
-                                Impacto social
-                            </strong>
-
-                            <span>
-                                Gestão que transforma
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- Mensagem institucional -->
-
-                <div class="institutional-content">
-
-                    <span class="institutional-eyebrow">
-
-                        <span
-                            class="eyebrow-line"
-                            aria-hidden="true"
-                        ></span>
-
-                        Tecnologia e solidariedade
-
-                    </span>
-
-                    <h1>
-                        Transformando vidas por meio de uma gestão
-                        <span>mais humana e conectada.</span>
-                    </h1>
-
-                    <p>
-                        Uma plataforma desenvolvida para aproximar
-                        instituições, pessoas e oportunidades em um
-                        ambiente seguro, organizado e eficiente.
-                    </p>
-
-                </div>
-
-
-                <!-- Indicadores visuais -->
-
-                <div
-                    class="impact-indicators"
-                    aria-label="Áreas de impacto do sistema"
-                >
-
-                    <div class="impact-item">
-
-                        <span class="impact-icon">
-
-                            <i
-                                class="fa-solid fa-building"
-                                aria-hidden="true"
-                            ></i>
-
-                        </span>
-
-                        <div>
-
-                            <strong>
-                                Instituições
-                            </strong>
-
-                            <span>
-                                Gestão centralizada
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="impact-item">
-
-                        <span class="impact-icon">
-
-                            <i
-                                class="fa-solid fa-users"
-                                aria-hidden="true"
-                            ></i>
-
-                        </span>
-
-                        <div>
-
-                            <strong>
-                                Beneficiários
-                            </strong>
-
-                            <span>
-                                Atendimento organizado
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="impact-item">
-
-                        <span class="impact-icon">
-
-                            <i
-                                class="fa-solid fa-chart-line"
-                                aria-hidden="true"
-                            ></i>
-
-                        </span>
-
-                        <div>
-
-                            <strong>
-                                Impacto
-                            </strong>
-
-                            <span>
-                                Resultados acompanhados
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
+        <!-- =================================================
                  ÁREA DE AUTENTICAÇÃO
             ================================================== -->
 
-            <section
-                class="authentication-area"
-                aria-label="Acesso ao sistema"
-            >
-
-                <div class="login-card">
-
-                    <!-- Detalhe superior -->
-
-                    <div
-                        class="card-accent"
-                        aria-hidden="true"
-                    ></div>
-
-
-                    <!-- Marca em telas menores -->
-
-                    <div class="mobile-brand">
-
-                        <div class="mobile-brand-symbol">
-
-                            <img
-                                src="img/logo-solidare.png"
-                                alt=""
-                                aria-hidden="true"
-                            >
-
-                        </div>
-
-                        <div>
-
-                            <span>
-                                Instituto
-                            </span>
-
-                            <strong>
-                                Solidare
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- Cabeçalho do formulário -->
-
-                    <header class="login-header">
-
-                        <div class="login-header-icon">
-
-                            <i
-                                class="fa-solid fa-shield-heart"
-                                aria-hidden="true"
-                            ></i>
-
-                        </div>
-
-                        <span class="login-eyebrow">
-                            Acesso seguro
-                        </span>
-
-                        <h2>
-                            Bem-vindo(a)!
-                        </h2>
-
-                        <p>
-                            Entre com suas credenciais para acessar
-                            o painel de gestão.
-                        </p>
-
-                    </header>
-
-
-                    <!-- Mensagem geral -->
-
-                    <div
-                        id="mensagemLogin"
-                        class="login-message"
-                        role="alert"
-                        aria-live="polite"
-                        hidden
-                    ></div>
-
-
-                    <!-- Formulário -->
-
-                    <form
-                        id="loginForm"
-                        class="login-form"
-                        novalidate
-                    >
-
-                        <!-- E-mail -->
-
-                        <div class="form-group">
-
-                            <label for="email">
-                                E-mail
-                            </label>
-
-                            <div class="input-wrapper">
-
-                                <span
-                                    class="input-icon"
-                                    aria-hidden="true"
-                                >
-                                    <i class="fa-regular fa-envelope"></i>
-                                </span>
-
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    placeholder="Digite seu e-mail"
-                                    autocomplete="email"
-                                    inputmode="email"
-                                    maxlength="150"
-                                    required
-                                    autofocus
-                                    aria-describedby="erroEmail"
-                                >
-
-                            </div>
-
-                            <small
-                                id="erroEmail"
-                                class="field-error"
-                                aria-live="polite"
-                            ></small>
-
-                        </div>
-
-
-                        <!-- Senha -->
-
-                        <div class="form-group">
-
-                            <label for="senha">
-                                Senha
-                            </label>
-
-                            <div class="input-wrapper">
-
-                                <span
-                                    class="input-icon"
-                                    aria-hidden="true"
-                                >
-                                    <i class="fa-solid fa-lock"></i>
-                                </span>
-
-                                <input
-                                    type="password"
-                                    id="senha"
-                                    name="senha"
-                                    placeholder="Digite sua senha"
-                                    autocomplete="current-password"
-                                    minlength="6"
-                                    required
-                                    aria-describedby="erroSenha"
-                                >
-
-                                <button
-                                    type="button"
-                                    id="btnMostrarSenha"
-                                    class="password-toggle"
-                                    aria-label="Mostrar senha"
-                                    title="Mostrar senha"
-                                >
-
-                                    <i
-                                        id="iconeMostrarSenha"
-                                        class="fa-regular fa-eye"
-                                        aria-hidden="true"
-                                    ></i>
-
-                                </button>
-
-                            </div>
-
-                            <small
-                                id="erroSenha"
-                                class="field-error"
-                                aria-live="polite"
-                            ></small>
-
-                        </div>
-
-
-                        <!-- Opções -->
-
-                        <div class="login-options">
-
-                            <label
-                                for="lembrarAcesso"
-                                class="remember-option"
-                            >
-
-                                <input
-                                    type="checkbox"
-                                    id="lembrarAcesso"
-                                    name="lembrarAcesso"
-                                >
-
-                                <span
-                                    class="custom-checkbox"
-                                    aria-hidden="true"
-                                >
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
-
-                                <span>
-                                    Lembrar meu e-mail
-                                </span>
-
-                            </label>
-
-                            <button
-                                type="button"
-                                id="btnEsqueciSenha"
-                                class="forgot-password-button"
-                            >
-                                Esqueceu sua senha?
-                            </button>
-
-                        </div>
-
-
-                        <!-- Botão -->
-
-                        <button
-                            type="submit"
-                            id="btnEntrar"
-                            class="login-button"
-                        >
-
-                            <span
-                                id="conteudoBotao"
-                                class="button-content"
-                            >
-
-                                <span>
-                                    Entrar no sistema
-                                </span>
-
-                                <i
-                                    class="fa-solid fa-arrow-right"
-                                    aria-hidden="true"
-                                ></i>
-
-                            </span>
-
-                            <span
-                                id="carregamentoBotao"
-                                class="button-loading"
-                                hidden
-                            >
-
-                                <i
-                                    class="fa-solid fa-spinner fa-spin"
-                                    aria-hidden="true"
-                                ></i>
-
-                                <span>
-                                    Entrando...
-                                </span>
-
-                            </span>
-
-                        </button>
-
-                    </form>
-
-
-                    <!-- Segurança -->
-
-                    <div class="security-info">
-
-                        <span class="security-icon">
-
-                            <i
-                                class="fa-solid fa-lock"
-                                aria-hidden="true"
-                            ></i>
-
-                        </span>
-
-                        <div>
-
-                            <strong>
-                                Ambiente protegido
-                            </strong>
-
-                            <span>
-                                Acesso autenticado e dados protegidos.
-                            </span>
-
-                        </div>
-
-                        <span
-                            class="security-status"
-                            aria-label="Sistema protegido"
-                            title="Sistema protegido"
-                        ></span>
-
-                    </div>
-
-
-                    <!-- Rodapé -->
-
-                    <footer class="login-footer">
-
-                        <span class="footer-divider"></span>
-
-                        <p>
-                            © 2026 Instituto Solidare.
-                            Todos os direitos reservados.
-                        </p>
-
-                    </footer>
-
+        <section class="authentication-area" aria-label="Acesso ao sistema">
+          <div class="login-card">
+            <!-- Detalhe superior -->
+
+            <div class="card-accent" aria-hidden="true"></div>
+
+            <!-- Marca em telas menores -->
+
+            <div class="mobile-brand">
+              <div class="mobile-brand-symbol">
+                <img src="img/logo-solidare.png" alt="" aria-hidden="true" />
+              </div>
+
+              <div>
+                <span> Instituto </span>
+
+                <strong> Solidare </strong>
+              </div>
+            </div>
+
+            <!-- Cabeçalho do formulário -->
+
+            <header class="login-header">
+              <div class="login-header-icon">
+                <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
+              </div>
+
+              <span class="login-eyebrow"> Acesso seguro </span>
+
+              <h2>Bem-vindo(a)!</h2>
+
+              <p>Entre com suas credenciais para acessar o painel de gestão.</p>
+            </header>
+
+            <!-- Mensagem geral -->
+
+            <div
+              id="mensagemLogin"
+              class="login-message"
+              role="alert"
+              aria-live="polite"
+              hidden
+            ></div>
+
+            <!-- Formulário -->
+
+            <form id="loginForm" class="login-form" novalidate>
+              <!-- E-mail -->
+
+              <div class="form-group">
+                <label for="email"> E-mail </label>
+
+                <div class="input-wrapper">
+                  <span class="input-icon" aria-hidden="true">
+                    <i class="fa-regular fa-envelope"></i>
+                  </span>
+
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Digite seu e-mail"
+                    autocomplete="email"
+                    inputmode="email"
+                    maxlength="150"
+                    required
+                    autofocus
+                    aria-describedby="erroEmail"
+                  />
                 </div>
 
-            </section>
+                <small
+                  id="erroEmail"
+                  class="field-error"
+                  aria-live="polite"
+                ></small>
+              </div>
 
-        </div>
+              <!-- Senha -->
 
+              <div class="form-group">
+                <label for="senha"> Senha </label>
+
+                <div class="input-wrapper">
+                  <span class="input-icon" aria-hidden="true">
+                    <i class="fa-solid fa-lock"></i>
+                  </span>
+
+                  <input
+                    type="password"
+                    id="senha"
+                    name="senha"
+                    placeholder="Digite sua senha"
+                    autocomplete="current-password"
+                    minlength="6"
+                    required
+                    aria-describedby="erroSenha"
+                  />
+
+                  <button
+                    type="button"
+                    id="btnMostrarSenha"
+                    class="password-toggle"
+                    aria-label="Mostrar senha"
+                    title="Mostrar senha"
+                  >
+                    <i
+                      id="iconeMostrarSenha"
+                      class="fa-regular fa-eye"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                </div>
+
+                <small
+                  id="erroSenha"
+                  class="field-error"
+                  aria-live="polite"
+                ></small>
+              </div>
+
+              <!-- Opções -->
+
+              <div class="login-options">
+                <label for="lembrarAcesso" class="remember-option">
+                  <input
+                    type="checkbox"
+                    id="lembrarAcesso"
+                    name="lembrarAcesso"
+                  />
+
+                  <span class="custom-checkbox" aria-hidden="true">
+                    <i class="fa-solid fa-check"></i>
+                  </span>
+
+                  <span> Lembrar meu e-mail </span>
+                </label>
+
+                <button
+                  type="button"
+                  id="btnEsqueciSenha"
+                  class="forgot-password-button"
+                >
+                  Esqueceu sua senha?
+                </button>
+              </div>
+
+              <!-- Botão -->
+
+              <button type="submit" id="btnEntrar" class="login-button">
+                <span id="conteudoBotao" class="button-content">
+                  <span> Entrar no sistema </span>
+
+                  <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </span>
+
+                <span id="carregamentoBotao" class="button-loading" hidden>
+                  <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+
+                  <span> Entrando... </span>
+                </span>
+              </button>
+            </form>
+
+            <!-- Segurança -->
+
+            <div class="security-info">
+              <span class="security-icon">
+                <i class="fa-solid fa-lock" aria-hidden="true"></i>
+              </span>
+
+              <div>
+                <strong> Ambiente protegido </strong>
+
+                <span> Acesso autenticado e dados protegidos. </span>
+              </div>
+
+              <span
+                class="security-status"
+                aria-label="Sistema protegido"
+                title="Sistema protegido"
+              ></span>
+            </div>
+
+            <!-- Rodapé -->
+
+            <footer class="login-footer">
+              <span class="footer-divider"></span>
+
+              <p>© 2026 Instituto Solidare. Todos os direitos reservados.</p>
+            </footer>
+          </div>
+        </section>
+      </div>
     </main>
 
     <!-- =========================================
         MODAL RECUPERAÇÃO DE SENHA
     ========================================== -->
 
-    <div
-        id="modalRecuperarSenha"
-        class="password-modal"
-        hidden
-    >
+    <div id="modalRecuperarSenha" class="password-modal" hidden>
+      <div class="password-modal-content">
+        <button type="button" id="fecharModalSenha" class="close-modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
 
-        <div class="password-modal-content">
+        <div class="modal-header">
+          <i class="fa-solid fa-key"></i>
 
-            <button
-                type="button"
-                id="fecharModalSenha"
-                class="close-modal"
-            >
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+          <h3>Recuperar senha</h3>
 
-            <div class="modal-header">
-
-                <i class="fa-solid fa-key"></i>
-
-                <h3>
-                    Recuperar senha
-                </h3>
-
-                <p>
-                    Informe o e-mail cadastrado.
-                </p>
-
-            </div>
-
-            <form id="formRecuperarSenha">
-
-                <div class="form-group">
-
-                    <label for="emailRecuperacao">
-
-                        E-mail
-
-                    </label>
-
-                    <input
-                        type="email"
-                        id="emailRecuperacao"
-                        placeholder="Digite seu e-mail"
-                        required
-                    >
-
-                </div>
-
-                <button
-                    type="submit"
-                    class="login-button"
-                >
-
-                    Gerar senha provisória
-
-                </button>
-
-            </form>
-
-            <div
-                id="resultadoRecuperacao"
-                class="login-message"
-                hidden
-            ></div>
-
+          <p>Informe o e-mail cadastrado.</p>
         </div>
 
+        <form id="formRecuperarSenha">
+          <div class="form-group">
+            <label for="emailRecuperacao"> E-mail </label>
+
+            <input
+              type="email"
+              id="emailRecuperacao"
+              placeholder="Digite seu e-mail"
+              required
+            />
+          </div>
+
+          <button type="submit" class="login-button">
+            Gerar senha provisória
+          </button>
+        </form>
+
+        <div id="resultadoRecuperacao" class="login-message" hidden></div>
+      </div>
     </div>
 
     <!-- JavaScript atual do sistema -->
 
-    <script
-        type="module"
-        src="js/login.js"
-    ></script>
-
-</body>
-
+    <script type="module" src="js/login.js"></script>
+  </body>
 </html>

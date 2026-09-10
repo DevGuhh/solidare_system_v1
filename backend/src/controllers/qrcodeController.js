@@ -98,10 +98,10 @@ function normalizarTipoBeneficio(valor) {
     .toUpperCase();
 }
 
-async function buscarDoacaoDoMes(beneficiarioId) {
+async function buscarDoacaoDoMes(beneficiarioId, client = prisma) {
   const { inicioMes, fimMes } = periodoMesAtual();
 
-  return prisma.doacao.findFirst({
+  return client.doacao.findFirst({
     where: {
       beneficiarioId,
       deletedAt: null,
@@ -146,9 +146,7 @@ async function montarSituacaoEntrega(beneficiario) {
   const tipoBeneficioNormalizado = normalizarTipoBeneficio(
     beneficiario.tipoBeneficio,
   );
-  const tipoPermiteCesta = ["CESTA", "AMBOS"].includes(
-    tipoBeneficioNormalizado,
-  );
+  const tipoPermiteCesta = tipoBeneficioNormalizado === "CESTA";
   const saldoDisponivel = Number(saldo?.saldoAtual ?? 0);
   const quantidadeCestas = calcularQuantidadeCestas(
     beneficiario.composicaoFamiliar,
@@ -179,6 +177,23 @@ async function montarSituacaoEntrega(beneficiario) {
     mensagemBloqueio,
     doacaoMes,
   };
+}
+
+class DoacaoMensalDuplicadaError extends Error {
+  constructor(doacao = null) {
+    super("Este beneficiário já recebeu uma doação neste mês.");
+    this.name = "DoacaoMensalDuplicadaError";
+    this.doacao = doacao;
+  }
+}
+
+async function bloquearBeneficiarioParaDoacao(tx, beneficiarioId) {
+  await tx.$queryRaw`
+    SELECT "id"
+    FROM "beneficiarios"
+    WHERE "id" = ${beneficiarioId}
+    FOR UPDATE
+  `;
 }
 
 const selectBeneficiarioValidacao = {
@@ -245,7 +260,7 @@ class QrCodeController {
             where: {
               beneficiarioId: { in: beneficiarioIds },
               deletedAt: null,
-              tipo: { in: ["CESTA", "AMBOS"] },
+              tipo: "CESTA",
             },
             _sum: { quantidade: true },
             _max: { dataDoacao: true },
@@ -254,7 +269,7 @@ class QrCodeController {
             where: {
               beneficiarioId: { in: beneficiarioIds },
               deletedAt: null,
-              tipo: { in: ["CESTA", "AMBOS"] },
+              tipo: "CESTA",
               dataDoacao: { gte: inicioHoje, lt: fimHoje },
             },
           }),
@@ -285,7 +300,7 @@ class QrCodeController {
 
         if (!item.ativo || !item.beneficiario?.ativo || item.beneficiario?.deletedAt) {
           proximaEntregaStatus = "INDISPONIVEL";
-        } else if (!["CESTA", "AMBOS"].includes(tipo)) {
+        } else if (tipo !== "CESTA") {
           proximaEntregaStatus = "NAO_APLICAVEL";
         } else if (resumo.ultimaEntrega) {
           const ultima = new Date(resumo.ultimaEntrega);
@@ -346,6 +361,7 @@ class QrCodeController {
       const whereBeneficiario = {
         id,
         deletedAt: null,
+        ativo: true,
       };
 
       if (req.user.role === "INSTITUICAO") {
@@ -363,6 +379,13 @@ class QrCodeController {
             req.user.role === "ADMIN"
               ? "Beneficiário não encontrado."
               : "Beneficiário não encontrado ou não pertence à sua instituição.",
+        });
+      }
+
+      if (normalizarTipoBeneficio(beneficiario.tipoBeneficio) !== "CESTA") {
+        return res.status(409).json({
+          ok: false,
+          message: "QR Code está disponível apenas para beneficiários com benefício Cesta.",
         });
       }
 
@@ -419,7 +442,7 @@ class QrCodeController {
 
   async gerarImagemQRCode(req, res) {
     try {
-      const codigo = String(req.params.codigo ?? "").trim();
+      const codigo = String(req.params.codigo ?? "").trim().toUpperCase();
 
       if (!codigo) {
         return res.status(400).json({
@@ -654,11 +677,7 @@ class QrCodeController {
         });
       }
 
-      if (
-        !["CESTA", "AMBOS"].includes(
-          normalizarTipoBeneficio(qrCode.beneficiario.tipoBeneficio),
-        )
-      ) {
+      if (normalizarTipoBeneficio(qrCode.beneficiario.tipoBeneficio) !== "CESTA") {
         return res.status(409).json({
           ok: false,
           message: "O benefício deste beneficiário não está configurado para cesta.",
@@ -685,6 +704,18 @@ class QrCodeController {
       const codigoDoacao = gerarCodigoDoacao();
 
       const doacao = await prisma.$transaction(async (tx) => {
+        await bloquearBeneficiarioParaDoacao(tx, qrCode.beneficiario.id);
+
+        // Revalida dentro da seção serializada. A checagem feita antes da
+        // transação melhora a resposta comum, mas sozinha não impede corrida.
+        const doacaoConcorrente = await buscarDoacaoDoMes(
+          qrCode.beneficiario.id,
+          tx,
+        );
+        if (doacaoConcorrente) {
+          throw new DoacaoMensalDuplicadaError(doacaoConcorrente);
+        }
+
         const novaDoacao = await tx.doacao.create({
           data: {
             codigo: codigoDoacao,
@@ -778,6 +809,15 @@ class QrCodeController {
         },
       });
     } catch (erro) {
+      if (erro instanceof DoacaoMensalDuplicadaError) {
+        return res.status(409).json({
+          ok: false,
+          motivo: "JA_RECEBEU_NO_MES",
+          message: erro.message,
+          data: erro.doacao ? { doacao: erro.doacao } : undefined,
+        });
+      }
+
       if (erro instanceof FotoComprovanteError) {
         return res.status(400).json({
           ok: false,

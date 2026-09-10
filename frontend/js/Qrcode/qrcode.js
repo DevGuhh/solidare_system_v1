@@ -100,8 +100,6 @@
         function rotuloBeneficioGeracao(tipo) {
             return {
                 CESTA: "Cesta",
-                GRANEL: "Granel",
-                AMBOS: "Ambos",
                 OUTROS: "Outros"
             }[String(tipo ?? "").toUpperCase()] || "Não informado";
         }
@@ -381,6 +379,7 @@
                         qr.ativo === true && Number(qr.beneficiarioId) === Number(beneficiario.id)
                     );
                     if (beneficiario.ativo === false || possuiQRCodeAtivo) return false;
+                    if (String(beneficiario.tipoBeneficio ?? "").toUpperCase() !== "CESTA") return false;
 
                     const nome = String(beneficiario.nomeCompleto ?? beneficiario.nome ?? "")
                         .normalize("NFD")
@@ -654,8 +653,6 @@
         function rotuloTipoBeneficio(tipo) {
             const rotulos = {
                 CESTA: "Cesta básica",
-                GRANEL: "Granel",
-                AMBOS: "Cesta + granel",
                 OUTROS: "Outros"
             };
 

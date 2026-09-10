@@ -67,7 +67,7 @@ class SaldoCestaController {
 
       const [beneficiarios, saldo] = await Promise.all([
         prisma.beneficiario.findMany({
-          where: { instituicaoId, ativo: true, deletedAt: null, tipoBeneficio: { in: ["CESTA", "AMBOS"] } },
+          where: { instituicaoId, ativo: true, deletedAt: null, tipoBeneficio: "CESTA" },
           select: {
             id: true,
             composicaoFamiliar: true,

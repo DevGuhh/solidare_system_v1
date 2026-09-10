@@ -403,17 +403,6 @@
 }
 
 
-.doacoes-filtro-indicador.granel,
-.legenda-doacao-indicador.granel {
-    background: #2563eb;
-}
-
-
-.doacoes-filtro-indicador.ambos,
-.legenda-doacao-indicador.ambos {
-    background: #7c3aed;
-}
-
 
 .doacoes-filtro.ativo
 .doacoes-filtro-indicador {
@@ -748,21 +737,6 @@
     color: #b45309;
 }
 
-
-.badge-doacao-granel {
-    border-color: #bfdbfe;
-
-    background: #eff6ff;
-    color: #1d4ed8;
-}
-
-
-.badge-doacao-ambos {
-    border-color: #ddd6fe;
-
-    background: #f5f3ff;
-    color: #6d28d9;
-}
 
 
 .badge-doacao-neutro {
@@ -2670,4 +2644,9 @@
     .detalhes-resumo-badges {
         justify-content: flex-start;
     }
+}
+
+.doacoes-filtro-indicador.outros,
+.legenda-doacao-indicador.outros {
+    background: #667085;
 }

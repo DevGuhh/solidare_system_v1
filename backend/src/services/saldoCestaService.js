@@ -1,6 +1,6 @@
 import { prisma } from "../config/db.js";
 
-const TIPOS_QUE_AFETAM_SALDO = ["CESTA", "AMBOS"];
+const TIPOS_QUE_AFETAM_SALDO = ["CESTA"];
 
 export function afetaSaldoCesta(tipoBeneficio) {
   return TIPOS_QUE_AFETAM_SALDO.includes(tipoBeneficio);
@@ -25,19 +25,25 @@ export async function obterOuCriarSaldo(tx, instituicaoId) {
 export async function registrarEntrada({ instituicaoId, quantidade, usuarioId, observacao }) {
   return prisma.$transaction(async (tx) => {
     const saldo = await obterOuCriarSaldo(tx, instituicaoId);
-    const saldoPosterior = saldo.saldoAtual + quantidade;
 
-    await tx.saldoCesta.update({
+    // Incremento atômico: evita perda de atualização quando duas entradas
+    // são registradas ao mesmo tempo. O UPDATE mantém lock da linha até
+    // o fim da transação, preservando também os snapshots do histórico.
+    const saldoAtualizado = await tx.saldoCesta.update({
       where: { instituicaoId },
-      data: { saldoAtual: saldoPosterior },
+      data: { saldoAtual: { increment: quantidade } },
+      select: { saldoAtual: true },
     });
+
+    const saldoPosterior = saldoAtualizado.saldoAtual;
+    const saldoAnterior = saldoPosterior - quantidade;
 
     return tx.movimentacaoSaldo.create({
       data: {
         saldoCestaId: saldo.id,
         tipo: "ENTRADA",
         quantidade,
-        saldoAnterior: saldo.saldoAtual,
+        saldoAnterior,
         saldoPosterior,
         usuarioId,
         observacao,
@@ -49,23 +55,43 @@ export async function registrarEntrada({ instituicaoId, quantidade, usuarioId, o
 export async function debitarSaldoParaDoacao(tx, { instituicaoId, quantidade, doacaoId, usuarioId, observacao }) {
   const saldo = await obterOuCriarSaldo(tx, instituicaoId);
 
-  if (saldo.saldoAtual < quantidade) {
-    throw new SaldoInsuficienteError(saldo.saldoAtual, quantidade);
+  // O filtro saldoAtual >= quantidade e o decrement acontecem no mesmo
+  // UPDATE. Assim duas entregas concorrentes não conseguem consumir o
+  // mesmo saldo nem deixar o estoque negativo.
+  const atualizado = await tx.saldoCesta.updateMany({
+    where: {
+      instituicaoId,
+      saldoAtual: { gte: quantidade },
+    },
+    data: {
+      saldoAtual: { decrement: quantidade },
+    },
+  });
+
+  if (atualizado.count !== 1) {
+    const saldoAtual = await tx.saldoCesta.findUnique({
+      where: { instituicaoId },
+      select: { saldoAtual: true },
+    });
+    throw new SaldoInsuficienteError(saldoAtual?.saldoAtual ?? 0, quantidade);
   }
 
-  const saldoPosterior = saldo.saldoAtual - quantidade;
-
-  await tx.saldoCesta.update({
+  // A linha permanece bloqueada por esta transação após o UPDATE; portanto
+  // o valor lido aqui corresponde exatamente ao saldo desta movimentação.
+  const saldoAtualizado = await tx.saldoCesta.findUnique({
     where: { instituicaoId },
-    data: { saldoAtual: saldoPosterior },
+    select: { saldoAtual: true },
   });
+
+  const saldoPosterior = saldoAtualizado.saldoAtual;
+  const saldoAnterior = saldoPosterior + quantidade;
 
   await tx.movimentacaoSaldo.create({
     data: {
       saldoCestaId: saldo.id,
       tipo: "SAIDA_DOACAO",
       quantidade,
-      saldoAnterior: saldo.saldoAtual,
+      saldoAnterior,
       saldoPosterior,
       doacaoId,
       usuarioId,
@@ -76,19 +102,22 @@ export async function debitarSaldoParaDoacao(tx, { instituicaoId, quantidade, do
 
 export async function devolverSaldoDeDoacao(tx, { instituicaoId, quantidade, doacaoId, usuarioId, observacao }) {
   const saldo = await obterOuCriarSaldo(tx, instituicaoId);
-  const saldoPosterior = saldo.saldoAtual + quantidade;
 
-  await tx.saldoCesta.update({
+  const saldoAtualizado = await tx.saldoCesta.update({
     where: { instituicaoId },
-    data: { saldoAtual: saldoPosterior },
+    data: { saldoAtual: { increment: quantidade } },
+    select: { saldoAtual: true },
   });
+
+  const saldoPosterior = saldoAtualizado.saldoAtual;
+  const saldoAnterior = saldoPosterior - quantidade;
 
   await tx.movimentacaoSaldo.create({
     data: {
       saldoCestaId: saldo.id,
       tipo: "ESTORNO_DOACAO",
       quantidade,
-      saldoAnterior: saldo.saldoAtual,
+      saldoAnterior,
       saldoPosterior,
       doacaoId,
       usuarioId,

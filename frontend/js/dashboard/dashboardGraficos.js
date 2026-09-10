@@ -409,10 +409,7 @@ function contarDoacoesPorTipo(
         CESTA:
             0,
 
-        GRANEL:
-            0,
-
-        AMBOS:
+        OUTROS:
             0
 
     };
@@ -507,9 +504,7 @@ export function renderizarGraficoTiposDoacoes({
 
                         "Cesta",
 
-                        "Granel",
-
-                        "Ambos"
+                        "Outros"
 
                     ],
 
@@ -524,9 +519,7 @@ export function renderizarGraficoTiposDoacoes({
 
                                 totais.CESTA,
 
-                                totais.GRANEL,
-
-                                totais.AMBOS
+                                totais.OUTROS
 
                             ],
 

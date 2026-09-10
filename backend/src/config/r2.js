@@ -25,14 +25,6 @@ if (
 }
 
 
-console.log("R2 CONFIG", {
-  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
-  bucket: process.env.CLOUDFLARE_BUCKET_NAME,
-  accessKey: process.env.CLOUDFLARE_ACCESS_KEY_ID?.slice(0, 8),
-  hasSecret: !!process.env.CLOUDFLARE_SECRET_ACCESS_KEY,
-});
-
-
 const s3 = new S3Client({
   region: "auto",
   endpoint: process.env.CLOUDFLARE_R2_ENDPOINT.trim(),

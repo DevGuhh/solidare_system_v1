@@ -74,7 +74,7 @@ async function main() {
   console.log(`✅ ${instituicoes.length} instituições criadas`);
 
   // 3. Beneficiários (distribuídos entre as instituições, em lote)
-  const tiposBeneficio = [TipoBeneficio.CESTA, TipoBeneficio.GRANEL, TipoBeneficio.AMBOS];
+  const tiposBeneficio = [TipoBeneficio.CESTA, TipoBeneficio.OUTROS];
   const cpfsUsados = new Set();
 
   function gerarCpfUnico() {

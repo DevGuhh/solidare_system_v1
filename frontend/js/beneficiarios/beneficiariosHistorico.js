@@ -127,8 +127,6 @@ function formatarValorAlteracao(alteracao, lado) {
     if (campo === "tipoBeneficio") {
         return {
             CESTA: "Cesta",
-            GRANEL: "Granel",
-            AMBOS: "Ambos",
             OUTROS: "Outros",
         }[texto.toUpperCase()] || texto;
     }

@@ -765,8 +765,6 @@ function selecionarFiltro({
         ![
             "TODAS",
             "CESTA",
-            "GRANEL",
-            "AMBOS",
             "OUTROS"
         ].includes(filtro)
     ) {

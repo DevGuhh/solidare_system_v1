@@ -404,9 +404,9 @@ function criarGraficoBeneficios(beneficiarios) {
     const legenda = $("legendaBeneficiosDashboard");
     if (!canvas || typeof Chart === "undefined") return;
 
-    const ordem = ["CESTA", "GRANEL", "AMBOS"];
-    const nomes = { CESTA: "Cesta", GRANEL: "Granel", AMBOS: "Ambos" };
-    const cores = ["#d99a32", "#3778bf", "#7152c8"];
+    const ordem = ["CESTA", "OUTROS"];
+    const nomes = { CESTA: "Cesta", OUTROS: "Outros" };
+    const cores = ["#d99a32", "#7a7f87"];
     const contagem = ordem.map((tipo) =>
         beneficiarios.filter((b) => normalizarTexto(b?.tipoBeneficio) === tipo).length
     );

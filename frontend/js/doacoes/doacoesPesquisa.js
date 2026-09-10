@@ -94,17 +94,10 @@ export function filtrarDoacoes(
 
             }
 
-            if (tipo === "GRANEL") {
+            if (tipo === "OUTROS") {
 
                 return doacao?.tipo ===
-                    "GRANEL";
-
-            }
-
-            if (tipo === "AMBOS") {
-
-                return doacao?.tipo ===
-                    "AMBOS";
+                    "OUTROS";
 
             }
 

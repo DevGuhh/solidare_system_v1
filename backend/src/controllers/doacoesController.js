@@ -15,8 +15,7 @@ import {
 
 const ROTULOS_TIPO_BENEFICIO = {
   CESTA: "cesta(s)",
-  GRANEL: "item(ns) a granel",
-  AMBOS: "item(ns) (cesta + granel)",
+  OUTROS: "item(ns)",
 };
 
 const atualizarDoacaoSchema = criarDoacaoSchema.partial();
@@ -31,6 +30,32 @@ const alterarComprovanteSchema = z.object({
     invalid_type_error: "O campo comprovante deve ser verdadeiro ou falso.",
   }),
 });
+
+class DoacaoJaCanceladaError extends Error {
+  constructor() {
+    super("A doação já foi cancelada.");
+    this.name = "DoacaoJaCanceladaError";
+  }
+}
+
+class DoacaoMensalDuplicadaError extends Error {
+  constructor() {
+    super("Este beneficiário já recebeu uma doação neste mês.");
+    this.name = "DoacaoMensalDuplicadaError";
+  }
+}
+
+async function bloquearBeneficiarioParaDoacao(tx, beneficiarioId) {
+  // Serializa registros de doação do mesmo beneficiário. Sem esse lock, duas
+  // requisições simultâneas podem passar pela checagem mensal antes que uma
+  // delas grave a doação. PostgreSQL mantém o lock até o fim da transação.
+  await tx.$queryRaw`
+    SELECT "id"
+    FROM "beneficiarios"
+    WHERE "id" = ${beneficiarioId}
+    FOR UPDATE
+  `;
+}
 
 function obterIdValido(valor) {
   const id = Number(valor);
@@ -135,20 +160,6 @@ class DoacoesController {
       const inicioMes = startOfMonth(new Date());
       const fimMes = endOfMonth(new Date());
 
-      const doacaoExiste = await prisma.doacao.findFirst({
-        where: {
-          beneficiarioId: beneficiario.id,
-          deletedAt: null,
-          dataDoacao: { gte: inicioMes, lte: fimMes },
-        },
-      });
-
-      if (doacaoExiste) {
-        return res.status(400).json({
-          error: "Este beneficiário já recebeu uma doação neste mês.",
-        });
-      }
-
       const quantidadeFinal = afetaSaldoCesta(data.tipo)
         ? calcularQuantidadeCestas(beneficiario.composicaoFamiliar)
         : data.quantidade;
@@ -156,6 +167,21 @@ class DoacoesController {
       const codigo = gerarCodigoDoacao();
 
       const doacao = await prisma.$transaction(async (tx) => {
+        await bloquearBeneficiarioParaDoacao(tx, beneficiario.id);
+
+        const doacaoExiste = await tx.doacao.findFirst({
+          where: {
+            beneficiarioId: beneficiario.id,
+            deletedAt: null,
+            dataDoacao: { gte: inicioMes, lte: fimMes },
+          },
+          select: { id: true },
+        });
+
+        if (doacaoExiste) {
+          throw new DoacaoMensalDuplicadaError();
+        }
+
         const novaDoacao = await tx.doacao.create({
           data: {
             codigo,
@@ -199,6 +225,10 @@ class DoacoesController {
 
       return res.status(201).json(doacao);
     } catch (error) {
+      if (error instanceof DoacaoMensalDuplicadaError) {
+        return res.status(409).json({ error: error.message });
+      }
+
       if (error instanceof SaldoInsuficienteError) {
         return res.status(422).json({ error: error.message });
       }
@@ -520,15 +550,27 @@ class DoacoesController {
       }
 
       await prisma.$transaction(async (tx) => {
-        await tx.doacao.update({
-          where: { id },
+        const agora = new Date();
+
+        // UPDATE condicional torna o cancelamento idempotente mesmo quando
+        // duas requisições chegam ao mesmo tempo. Só a primeira consegue
+        // marcar a doação como cancelada e, portanto, só ela estorna saldo.
+        const cancelamento = await tx.doacao.updateMany({
+          where: {
+            id,
+            deletedAt: null,
+          },
           data: {
-            deletedAt: new Date(),
-            canceladaEm: new Date(),
+            deletedAt: agora,
+            canceladaEm: agora,
             motivoCancelamento: motivo,
             canceladaPorId: req.user.id,
           },
         });
+
+        if (cancelamento.count !== 1) {
+          throw new DoacaoJaCanceladaError();
+        }
 
         if (afetaSaldoCesta(doacao.tipo)) {
           await devolverSaldoDeDoacao(tx, {
@@ -545,6 +587,9 @@ class DoacoesController {
         .status(200)
         .json({ mensagem: "Doação cancelada com sucesso." });
     } catch (error) {
+      if (error instanceof DoacaoJaCanceladaError) {
+        return res.status(409).json({ error: error.message });
+      }
       if (error instanceof ZodError) {
         return res.status(400).json({
           error: error.issues?.[0]?.message || "Informe o motivo do cancelamento.",

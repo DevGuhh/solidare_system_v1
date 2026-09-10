@@ -331,8 +331,6 @@ enum StatusInstituicao {
 
 enum TipoBeneficio {
   CESTA
-  GRANEL
-  AMBOS
   OUTROS
 }
 

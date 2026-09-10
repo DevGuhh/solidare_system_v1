@@ -139,8 +139,6 @@ function atualizarGraficos() {
 function atualizarGraficoBeneficios() {
     const beneficios = {
         CESTA: 0,
-        GRANEL: 0,
-        AMBOS: 0,
         OUTROS: 0
     };
 
@@ -156,11 +154,6 @@ function atualizarGraficoBeneficios() {
     $("perfilCestaResumo").textContent =
         `${formatarNumero(beneficios.CESTA)} • ${pct(beneficios.CESTA, total)}%`;
 
-    $("perfilGranelResumo").textContent =
-        `${formatarNumero(beneficios.GRANEL)} • ${pct(beneficios.GRANEL, total)}%`;
-
-    $("perfilAmbosResumo").textContent =
-        `${formatarNumero(beneficios.AMBOS)} • ${pct(beneficios.AMBOS, total)}%`;
 
     $("perfilTotalResumo").textContent =
         `${formatarNumero(total)} beneficiários`;
@@ -168,7 +161,7 @@ function atualizarGraficoBeneficios() {
     criarGrafico("graficoRelatorioBeneficios", {
         type: "doughnut",
         data: {
-            labels: ["Cesta", "Granel", "Ambos", "Outros"],
+            labels: ["Cesta", "Outros"],
             datasets: [
                 {
                     data: Object.values(beneficios),
