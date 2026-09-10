@@ -174,4 +174,3 @@ O pipeline definido em `.github/workflows/tests.yml` roda no GitHub Actions a ca
 - Não altere migrations do Prisma que já foram aplicadas em um banco compartilhado — crie uma nova migration em vez disso.
 - Arquivos de comprovantes não são públicos: o acesso ocorre apenas pela rota autenticada `/api/comprovantes/:id/arquivo`.
 - A API aplica rate limiting geral (300 requisições/15 min) e um limite mais restrito para operações de comprovantes (30 requisições/15 min).
-- CORS restrito por allowlist de origens (`FRONTEND_URL`), com liberação automática apenas para `localhost`/`127.0.0.1` em desenvolvimento.
