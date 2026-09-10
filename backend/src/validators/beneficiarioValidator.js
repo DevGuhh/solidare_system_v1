@@ -110,8 +110,6 @@ export const criarBeneficiarioSchema = z.object({
     // Tipo de benefício permitido.
     tipoBeneficio: z.enum([
         "CESTA",
-        "GRANEL",
-        "AMBOS",
         "OUTROS"
     ]),
 

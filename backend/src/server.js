@@ -34,7 +34,9 @@ config();
 // CONEXÃO COM O BANCO
 // ===============================
 
-connectDB();
+// Aguarda a conexão antes de abrir a porta HTTP. Isso evita aceitar
+// requisições durante a janela em que o Prisma ainda está conectando.
+await connectDB();
 
 // ===============================
 // EXPRESS

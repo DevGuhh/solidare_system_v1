@@ -955,14 +955,6 @@
     color: #3ca0dc;
 }
 
-.perfil-beneficio-marcador.granel {
-    color: #f35679;
-}
-
-.perfil-beneficio-marcador.ambos {
-    color: #f39a31;
-}
-
 .perfil-beneficio-total {
     grid-column: 1 / -1;
     flex-direction: column;

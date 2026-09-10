@@ -33,11 +33,11 @@ function formatarData(valor, comHora = false) {
 }
 
 function obterTextoTipo(tipo) {
-    return ({ CESTA: "Cesta", GRANEL: "Granel", AMBOS: "Ambos", OUTROS: "Outros" })[tipo] || tipo || "-";
+    return ({ CESTA: "Cesta", OUTROS: "Outros" })[tipo] || tipo || "-";
 }
 
 function obterClasseTipo(tipo) {
-    return ({ CESTA: "badge-doacao-cesta", GRANEL: "badge-doacao-granel", AMBOS: "badge-doacao-ambos" })[tipo] || "badge-doacao-neutro";
+    return ({ CESTA: "badge-doacao-cesta", OUTROS: "badge-doacao-neutro" })[tipo] || "badge-doacao-neutro";
 }
 
 function abrirModalDetalhes(elementos) {

@@ -27,8 +27,7 @@ function formatarCPF(valor) {
 function formatarBeneficio(valor) {
     const opcoes = {
         CESTA: "Cesta",
-        GRANEL: "Granel",
-        AMBOS: "Ambos"
+        OUTROS: "Outros"
     };
 
     return opcoes[valor] ?? valor ?? "Não informado";

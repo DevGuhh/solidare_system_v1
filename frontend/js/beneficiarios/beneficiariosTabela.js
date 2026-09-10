@@ -86,14 +86,9 @@ function formatarBeneficio(tipoBeneficio) {
             classe: "beneficio-cesta"
         },
 
-        GRANEL: {
-            texto: "Granel",
-            classe: "beneficio-granel"
-        },
-
-        AMBOS: {
-            texto: "Ambos",
-            classe: "beneficio-ambos"
+        OUTROS: {
+            texto: "Outros",
+            classe: "beneficio-padrao"
         }
 
     };

@@ -93,14 +93,9 @@ function obterClasseTipo(
             return "badge-doacao-cesta";
 
 
-        case "GRANEL":
+        case "OUTROS":
 
-            return "badge-doacao-granel";
-
-
-        case "AMBOS":
-
-            return "badge-doacao-ambos";
+            return "badge-doacao-neutro";
 
 
         default:
@@ -127,14 +122,9 @@ function obterTextoTipo(
             return "Cesta";
 
 
-        case "GRANEL":
+        case "OUTROS":
 
-            return "Granel";
-
-
-        case "AMBOS":
-
-            return "Ambos";
+            return "Outros";
 
 
         default:

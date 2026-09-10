@@ -287,7 +287,19 @@ class AuthController {
       });
 
       try {
-        const resetUrl = `${process.env.FRONTEND_URL}/views/redefinirSenha.html?token=${resetToken}`;
+        const frontendBase = String(process.env.FRONTEND_URL || "")
+          .split(",")
+          .map((url) => url.trim())
+          .find(Boolean);
+
+        if (!frontendBase) {
+          throw new Error("FRONTEND_URL não configurada.");
+        }
+
+        const resetUrl = new URL(
+          `views/redefinirSenha.html?token=${encodeURIComponent(resetToken)}`,
+          frontendBase.endsWith("/") ? frontendBase : `${frontendBase}/`,
+        ).toString();
         await sendMail(
           user.email,
           "Redefinição de senha",

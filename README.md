@@ -111,7 +111,7 @@ Principais entidades definidas em `backend/prisma/schema.prisma`:
 
 ## Instalação e execução
 
-1. Copie `backend/.env.example` para `backend/.env` e preencha as variáveis com suas próprias credenciais (veja a seção [Variáveis de ambiente](#variáveis-de-ambiente)).
+1. `backend/.env`, preencha as variáveis com suas próprias credenciais (veja a seção [Variáveis de ambiente](#variáveis-de-ambiente)).
 2. Instale as dependências do backend:
    ```bash
    cd backend
@@ -174,3 +174,4 @@ O pipeline definido em `.github/workflows/tests.yml` roda no GitHub Actions a ca
 - Não altere migrations do Prisma que já foram aplicadas em um banco compartilhado — crie uma nova migration em vez disso.
 - Arquivos de comprovantes não são públicos: o acesso ocorre apenas pela rota autenticada `/api/comprovantes/:id/arquivo`.
 - A API aplica rate limiting geral (300 requisições/15 min) e um limite mais restrito para operações de comprovantes (30 requisições/15 min).
+- CORS restrito por allowlist de origens (`FRONTEND_URL`), com liberação automática apenas para `localhost`/`127.0.0.1` em desenvolvimento.

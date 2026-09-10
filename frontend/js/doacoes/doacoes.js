@@ -269,14 +269,9 @@ function capturarElementosDoacoes() {
                     "contadorDoacoesCesta"
                 ),
 
-            contadorGranel:
+            contadorOutros:
                 document.getElementById(
-                    "contadorDoacoesGranel"
-                ),
-
-            contadorAmbos:
-                document.getElementById(
-                    "contadorDoacoesAmbos"
+                    "contadorDoacoesOutros"
                 ),
 
             resultadoFiltro:
@@ -494,8 +489,6 @@ function validarElementosDoacoes() {
         // Contadores.
         elementosDoacoes.contadorTodas,
         elementosDoacoes.contadorCesta,
-        elementosDoacoes.contadorGranel,
-        elementosDoacoes.contadorAmbos,
         elementosDoacoes.resultadoFiltro,
 
         // Paginação.
@@ -714,7 +707,7 @@ function atualizarResumoDoacoes(lista) {
     const concluidas = itens.filter((d) => !d?.deletedAt && !d?.canceladaEm);
     const canceladas = itens.length - concluidas.length;
     const cestas = concluidas
-        .filter((d) => ["CESTA", "AMBOS"].includes(String(d?.tipo || "")))
+        .filter((d) => d?.tipo === "CESTA")
         .reduce((total, d) => total + (Number(d?.quantidade) || 0), 0);
     const beneficiarios = new Set(concluidas.map((d) => d?.beneficiario?.id).filter(Boolean)).size;
 

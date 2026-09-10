@@ -247,16 +247,10 @@ export function atualizarContadoresDoacoes(
                 doacao?.tipo === "CESTA"
         ).length;
 
-    const totalGranel =
+    const totalOutros =
         doacoes.filter(
             (doacao) =>
-                doacao?.tipo === "GRANEL"
-        ).length;
-
-    const totalAmbos =
-        doacoes.filter(
-            (doacao) =>
-                doacao?.tipo === "AMBOS"
+                doacao?.tipo === "OUTROS"
         ).length;
 
 
@@ -275,21 +269,13 @@ export function atualizarContadoresDoacoes(
 
     }
 
+    if (elementos.contadorOutros) {
 
-    if (elementos.contadorGranel) {
-
-        elementos.contadorGranel.textContent =
-            String(totalGranel);
-
-    }
-
-
-    if (elementos.contadorAmbos) {
-
-        elementos.contadorAmbos.textContent =
-            String(totalAmbos);
+        elementos.contadorOutros.textContent =
+            String(totalOutros);
 
     }
+
 
 }
 

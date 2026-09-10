@@ -856,8 +856,7 @@ export function montarDadosFormularioDoacao(
     if (
         ![
             "CESTA",
-            "GRANEL",
-            "AMBOS"
+            "OUTROS"
         ].includes(tipo)
     ) {
 

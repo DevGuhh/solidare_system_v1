@@ -277,7 +277,7 @@ export async function obterUsuarioAutenticado() {
             if (!estaNaPaginaAlterarSenha) {
 
                 window.location.replace(
-                    "/frontend/views/alterarSenha.html"
+                    new URL("./alterarSenha.html", window.location.href).href
                 );
 
                 return null;

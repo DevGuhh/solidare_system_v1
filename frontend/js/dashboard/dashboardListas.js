@@ -76,11 +76,8 @@ function formatarTipoDoacao(
         CESTA:
             "Cesta",
 
-        GRANEL:
-            "Granel",
-
-        AMBOS:
-            "Ambos"
+        OUTROS:
+            "Outros"
 
     };
 
@@ -121,15 +118,6 @@ function obterClasseTipoDoacao(
 
             return "cesta";
 
-
-        case "GRANEL":
-
-            return "granel";
-
-
-        case "AMBOS":
-
-            return "ambos";
 
 
         default:
