@@ -16,3 +16,4 @@ Projeto unificado com frontend estático e API Node.js/Express + Prisma/PostgreS
 
 ## Segurança
 Nunca envie `.env`, `node_modules` ou credenciais ao GitHub. Não altere arquivos de migrations que já foram aplicados em um banco compartilhado.
+
